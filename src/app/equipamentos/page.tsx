@@ -1,4 +1,7 @@
 import { AppShell } from "@/components/layout/app-shell";
+import { EquipmentList } from "@/features/equipments/equipment-list";
+
+export const dynamic = "force-dynamic";
 
 export default function EquipamentosPage() {
   return (
@@ -9,6 +12,8 @@ export default function EquipamentosPage() {
         <p className="mt-2 text-slate-400">
           Aqui vamos cadastrar e listar os equipamentos da empresa.
         </p>
+
+        <EquipmentList />
       </section>
     </AppShell>
   );

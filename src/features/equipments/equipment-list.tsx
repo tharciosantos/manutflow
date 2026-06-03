@@ -1,4 +1,7 @@
-import { supabase } from "@/lib/supabase/client";
+"use client";
+
+import { useEffect, useState } from "react";
+
 import type { Equipment, EquipmentStatus } from "@/types/equipment";
 
 const equipmentStatusLabel: Record<EquipmentStatus, string> = {
@@ -7,26 +10,62 @@ const equipmentStatusLabel: Record<EquipmentStatus, string> = {
     maintenance: "Em manutenção",
 };
 
-export async function EquipmentList() {
-    const { data, error } = await supabase
-        .from("equipments")
-        .select("*")
-        .order("created_at", { ascending: false });
+type EquipmentsApiResponse = {
+    equipments: Equipment[];
+    error?: string;
+};
 
-    if (error) {
+export function EquipmentList() {
+    const [equipments, setEquipments] = useState<Equipment[]>([]);
+    const [isLoading, setIsLoading] = useState(true);
+    const [errorMessage, setErrorMessage] = useState("");
+
+    useEffect(() => {
+        async function loadEquipments() {
+            try {
+                const response = await fetch("/api/equipments");
+                const result = (await response.json()) as EquipmentsApiResponse;
+
+                if (!response.ok) {
+                    throw new Error(result.error ?? "Erro ao carregar equipamentos.");
+                }
+
+                setEquipments(result.equipments);
+            } catch (error) {
+                const message =
+                    error instanceof Error
+                        ? error.message
+                        : "Erro inesperado ao carregar equipamentos.";
+
+                setErrorMessage(message);
+            } finally {
+                setIsLoading(false);
+            }
+        }
+
+        void loadEquipments();
+    }, []);
+
+    if (isLoading) {
         return (
-            <div className="rounded-2xl border border-red-900/60 bg-red-950/40 p-6 text-red-200">
-                <h2 className="font-semibold">Erro ao carregar equipamentos</h2>
-                <p className="mt-2 text-sm">{error.message}</p>
+            <div className="mt-6 rounded-2xl border border-slate-800 bg-slate-900 p-6 text-slate-300">
+                Carregando Equipamentos...
             </div>
         );
     }
 
-    const equipments = data as Equipment[];
+    if (errorMessage) {
+        return (
+            <div className="mt-6 rounded-2xl border border-red-900/60 bg-red-950/40 p-6 text-red-200">
+                <h2 className="font-semibold">Erro ao carregar equipamentos</h2>
+                <p className="mt-2 text-sm">{errorMessage}</p>
+            </div>
+        );
+    }
 
     if (equipments.length === 0) {
         return (
-            <div className="rounded-2xl border border-slate-800 bg-slate-900 p-6 text-slate-300">
+            <div className="mt-6 rounded-2xl border border-slate-800 bg-slate-900 p-6 text-slate-300">
                 Nenhum equipamento cadastrado ainda.
             </div>
         );
@@ -48,15 +87,9 @@ export async function EquipmentList() {
                     {equipments.map((equipment) => (
                         <tr key={equipment.id}>
                             <td className="px-4 py-3 text-slate-100">{equipment.name}</td>
-                            <td className="px-4 py-3 text-slate-300">
-                                {equipment.patrimony_code}
-                            </td>
-                            <td className="px-4 py-3 text-slate-300">
-                                {equipment.location}
-                            </td>
-                            <td className="px-4 py-3 text-slate-300">
-                                {equipmentStatusLabel[equipment.status]}
-                            </td>
+                            <td className="px-4 py-3 text-slate-100">{equipment.patrimony_code}</td>
+                            <td className="px-4 py-3 text-slate-100">{equipment.location}</td>
+                            <td className="px-4 py-3 text-slate-100">{equipment.status}</td>
                         </tr>
                     ))}
                 </tbody>

@@ -15,7 +15,10 @@ type EquipmentsApiResponse = {
     error?: string;
 };
 
-export function EquipmentList() {
+type EquipmentListProps = {
+    refreshkey?: number;
+};
+export function EquipmentList({ refreshkey = 0 }: EquipmentListProps) {
     const [equipments, setEquipments] = useState<Equipment[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const [errorMessage, setErrorMessage] = useState("");
@@ -44,7 +47,7 @@ export function EquipmentList() {
         }
 
         void loadEquipments();
-    }, []);
+    }, [refreshkey]);
 
     if (isLoading) {
         return (

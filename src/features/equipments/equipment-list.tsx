@@ -92,7 +92,7 @@ export function EquipmentList({ refreshkey = 0 }: EquipmentListProps) {
                             <td className="px-4 py-3 text-slate-100">{equipment.name}</td>
                             <td className="px-4 py-3 text-slate-100">{equipment.patrimony_code}</td>
                             <td className="px-4 py-3 text-slate-100">{equipment.location}</td>
-                            <td className="px-4 py-3 text-slate-100">{equipment.status}</td>
+                            <td className="px-4 py-3 text-slate-100">{equipmentStatusLabel[equipment.status]}</td>
                         </tr>
                     ))}
                 </tbody>

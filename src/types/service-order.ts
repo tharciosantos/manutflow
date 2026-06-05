@@ -1,0 +1,22 @@
+export type ServiceOrderStatus = 'open' | 'in_progress' | 'closed';
+
+export type ServiceOrderPriority = 'low' | 'medium' | 'high' | 'critical';
+
+export type ServiceOrderEquipment = {
+    id: string;
+    name: string;
+    patrimony_code: string;
+    location: string;
+    status: string;
+};
+
+export type ServiceOrder = {
+    id: string;
+    title: string;
+    description: string | null;
+    status: ServiceOrderStatus;
+    priority: ServiceOrderPriority;
+    equipment_id: string;
+    created_at: string;
+    equipment: ServiceOrderEquipment;
+};

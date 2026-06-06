@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import type { ServiceOrder } from '@/types/service-order';
 import { ServiceOrderList } from './service-order-list';
+import { ServiceOrderForm } from './service-order-form';
 
 export function ServiceOrderPageContent() {
     const [orders, setOrders] = useState<ServiceOrder[]>([]);
@@ -36,6 +37,8 @@ export function ServiceOrderPageContent() {
 
     return (
         <div className="space-y-6">
+            <ServiceOrderForm onCreated={loadServiceOrders} />
+
             <ServiceOrderList
                 orders={orders}
                 isLoading={isLoading}

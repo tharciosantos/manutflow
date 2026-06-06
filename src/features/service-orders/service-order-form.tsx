@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, type FormEvent } from 'react';
 import type { Equipment } from '@/types/equipment';
 
 type ServiceOrderFormProps = {
@@ -41,10 +41,10 @@ export function ServiceOrderForm({ onCreated }: ServiceOrderFormProps) {
             }
         }
 
-        loadEquipments();
+        void loadEquipments();
     }, []);
 
-    async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
+    async function handleSubmit(event: FormEvent<HTMLFormElement>) {
         event.preventDefault();
 
         setErrorMessage('');
@@ -104,23 +104,29 @@ export function ServiceOrderForm({ onCreated }: ServiceOrderFormProps) {
     return (
         <form
             onSubmit={handleSubmit}
-            className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm"
+            className="rounded-2xl border border-slate-800 bg-slate-950/70 p-5 shadow-sm"
         >
-            <div className="mb-4">
-                <h2 className="text-lg font-semibold text-slate-900">
-                    Abrir nova ordem
-                </h2>
+            <div className="mb-6 flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
+                <div>
+                    <span className="rounded-full border border-blue-500/30 bg-blue-500/10 px-3 py-1 text-xs font-medium text-blue-300">
+                        Nova OS
+                    </span>
 
-                <p className="mt-1 text-sm text-slate-500">
-                    Cadastre uma solicitação de manutenção vinculada a um equipamento.
-                </p>
+                    <h2 className="mt-3 text-xl font-semibold text-white">
+                        Abrir ordem de serviço
+                    </h2>
+
+                    <p className="mt-1 text-sm text-slate-400">
+                        Registre uma solicitação de manutenção vinculada a um equipamento.
+                    </p>
+                </div>
             </div>
 
             <div className="grid gap-4">
                 <div>
                     <label
                         htmlFor="title"
-                        className="mb-1 block text-sm font-medium text-slate-700"
+                        className="mb-1.5 block text-sm font-medium text-slate-300"
                     >
                         Título
                     </label>
@@ -131,60 +137,62 @@ export function ServiceOrderForm({ onCreated }: ServiceOrderFormProps) {
                         value={title}
                         onChange={(event) => setTitle(event.target.value)}
                         placeholder="Ex: Troca de correia"
-                        className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm text-slate-900 outline-none focus:border-slate-500"
+                        className="w-full rounded-xl border border-slate-700 bg-slate-950 px-3 py-2.5 text-sm text-slate-100 outline-none transition placeholder:text-slate-600 focus:border-blue-500"
                     />
                 </div>
 
-                <div>
-                    <label
-                        htmlFor="equipment"
-                        className="mb-1 block text-sm font-medium text-slate-700"
-                    >
-                        Equipamento
-                    </label>
+                <div className="grid gap-4 md:grid-cols-2">
+                    <div>
+                        <label
+                            htmlFor="equipment"
+                            className="mb-1.5 block text-sm font-medium text-slate-300"
+                        >
+                            Equipamento
+                        </label>
 
-                    <select
-                        id="equipment"
-                        value={equipmentId}
-                        onChange={(event) => setEquipmentId(event.target.value)}
-                        className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm text-slate-900 outline-none focus:border-slate-500"
-                    >
-                        <option value="">Selecione um equipamento</option>
+                        <select
+                            id="equipment"
+                            value={equipmentId}
+                            onChange={(event) => setEquipmentId(event.target.value)}
+                            className="w-full rounded-xl border border-slate-700 bg-slate-950 px-3 py-2.5 text-sm text-slate-100 outline-none transition focus:border-blue-500"
+                        >
+                            <option value="">Selecione um equipamento</option>
 
-                        {equipments.map((equipment) => (
-                            <option key={equipment.id} value={equipment.id}>
-                                {equipment.name} - {equipment.patrimony_code}
-                            </option>
-                        ))}
-                    </select>
-                </div>
+                            {equipments.map((equipment) => (
+                                <option key={equipment.id} value={equipment.id}>
+                                    {equipment.name} - {equipment.patrimony_code}
+                                </option>
+                            ))}
+                        </select>
+                    </div>
 
-                <div>
-                    <label
-                        htmlFor="priority"
-                        className="mb-1 block text-sm font-medium text-slate-700"
-                    >
-                        Prioridade
-                    </label>
+                    <div>
+                        <label
+                            htmlFor="priority"
+                            className="mb-1.5 block text-sm font-medium text-slate-300"
+                        >
+                            Prioridade
+                        </label>
 
-                    <select
-                        id="priority"
-                        value={priority}
-                        onChange={(event) => setPriority(event.target.value)}
-                        className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm text-slate-900 outline-none focus:border-slate-500"
-                    >
-                        {priorities.map((item) => (
-                            <option key={item.value} value={item.value}>
-                                {item.label}
-                            </option>
-                        ))}
-                    </select>
+                        <select
+                            id="priority"
+                            value={priority}
+                            onChange={(event) => setPriority(event.target.value)}
+                            className="w-full rounded-xl border border-slate-700 bg-slate-950 px-3 py-2.5 text-sm text-slate-100 outline-none transition focus:border-blue-500"
+                        >
+                            {priorities.map((item) => (
+                                <option key={item.value} value={item.value}>
+                                    {item.label}
+                                </option>
+                            ))}
+                        </select>
+                    </div>
                 </div>
 
                 <div>
                     <label
                         htmlFor="description"
-                        className="mb-1 block text-sm font-medium text-slate-700"
+                        className="mb-1.5 block text-sm font-medium text-slate-300"
                     >
                         Descrição
                     </label>
@@ -195,30 +203,32 @@ export function ServiceOrderForm({ onCreated }: ServiceOrderFormProps) {
                         onChange={(event) => setDescription(event.target.value)}
                         placeholder="Descreva o problema ou serviço necessário."
                         rows={4}
-                        className="w-full resize-none rounded-lg border border-slate-300 px-3 py-2 text-sm text-slate-900 outline-none focus:border-slate-500"
+                        className="w-full resize-none rounded-xl border border-slate-700 bg-slate-950 px-3 py-2.5 text-sm text-slate-100 outline-none transition placeholder:text-slate-600 focus:border-blue-500"
                     />
                 </div>
             </div>
 
             {errorMessage && (
-                <p className="mt-4 rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-700">
+                <p className="mt-4 rounded-xl border border-red-500/30 bg-red-500/10 p-3 text-sm text-red-300">
                     {errorMessage}
                 </p>
             )}
 
             {successMessage && (
-                <p className="mt-4 rounded-lg border border-green-200 bg-green-50 p-3 text-sm text-green-700">
+                <p className="mt-4 rounded-xl border border-emerald-500/30 bg-emerald-500/10 p-3 text-sm text-emerald-300">
                     {successMessage}
                 </p>
             )}
 
-            <button
-                type="submit"
-                disabled={isSubmitting}
-                className="mt-4 rounded-lg bg-slate-900 px-4 py-2 text-sm font-medium text-white disabled:cursor-not-allowed disabled:opacity-60"
-            >
-                {isSubmitting ? 'Cadastrando...' : 'Abrir ordem'}
-            </button>
+            <div className="mt-5 flex justify-end">
+                <button
+                    type="submit"
+                    disabled={isSubmitting}
+                    className="rounded-xl bg-blue-600 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-blue-500 disabled:cursor-not-allowed disabled:opacity-60"
+                >
+                    {isSubmitting ? 'Cadastrando...' : 'Abrir ordem'}
+                </button>
+            </div>
         </form>
     );
 }

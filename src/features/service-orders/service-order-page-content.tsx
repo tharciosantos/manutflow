@@ -1,27 +1,31 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import type { ServiceOrder } from '@/types/service-order';
-import { ServiceOrderList } from './service-order-list';
 import { ServiceOrderForm } from './service-order-form';
+import { ServiceOrderList } from './service-order-list';
+
+async function fetchServiceOrders(): Promise<ServiceOrder[]> {
+    const response = await fetch('/api/service-orders');
+
+    if (!response.ok) {
+        throw new Error('Erro ao carregar ordens de serviço.');
+    }
+
+    return response.json();
+}
 
 export function ServiceOrderPageContent() {
     const [orders, setOrders] = useState<ServiceOrder[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const [errorMessage, setErrorMessage] = useState('');
 
-    async function loadServiceOrders() {
+    const loadServiceOrders = useCallback(async () => {
         try {
             setIsLoading(true);
             setErrorMessage('');
 
-            const response = await fetch('/api/service-orders');
-
-            if (!response.ok) {
-                throw new Error('Erro ao carregar ordens de serviço.');
-            }
-
-            const data = await response.json();
+            const data = await fetchServiceOrders();
 
             setOrders(data);
         } catch {
@@ -29,10 +33,37 @@ export function ServiceOrderPageContent() {
         } finally {
             setIsLoading(false);
         }
-    }
+    }, []);
 
     useEffect(() => {
-        loadServiceOrders();
+        let ignore = false;
+
+        async function loadInitialServiceOrders() {
+            try {
+                const data = await fetchServiceOrders();
+
+                if (ignore) {
+                    return;
+                }
+
+                setOrders(data);
+                setErrorMessage('');
+            } catch {
+                if (!ignore) {
+                    setErrorMessage('Não foi possível carregar as ordens de serviço.');
+                }
+            } finally {
+                if (!ignore) {
+                    setIsLoading(false);
+                }
+            }
+        }
+
+        void loadInitialServiceOrders();
+
+        return () => {
+            ignore = true;
+        };
     }, []);
 
     return (
@@ -43,6 +74,7 @@ export function ServiceOrderPageContent() {
                 orders={orders}
                 isLoading={isLoading}
                 errorMessage={errorMessage}
+                onDeleted={loadServiceOrders}
             />
         </div>
     );

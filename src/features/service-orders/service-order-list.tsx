@@ -1,9 +1,13 @@
+'use client';
+
+import { useState } from 'react';
 import type { ServiceOrder } from '@/types/service-order';
 
 type ServiceOrderListProps = {
     orders: ServiceOrder[];
     isLoading: boolean;
     errorMessage: string;
+    onDeleted: () => Promise<void>;
 };
 
 const statusLabels = {
@@ -23,7 +27,39 @@ export function ServiceOrderList({
     orders,
     isLoading,
     errorMessage,
+    onDeleted,
 }: ServiceOrderListProps) {
+
+    const [deletingOrderId, setDeletingOrderId] = useState('');
+
+    async function handleDelete(orderId: string) {
+        const confirmed = window.confirm(
+            'Tem certeza que deseja excluir esta ordem de serviço?',
+        );
+
+        if (!confirmed) {
+            return;
+        }
+
+        try {
+            setDeletingOrderId(orderId);
+
+            const response = await fetch(`/api/service-orders/${orderId}`, {
+                method: 'DELETE',
+            });
+
+            if (!response.ok) {
+                throw new Error('Erro ao excluir ordem de serviço.');
+            }
+
+            await onDeleted();
+        } catch {
+            window.alert('Não foi possível excluir a ordem de serviço.');
+        } finally {
+            setDeletingOrderId('');
+        }
+    }
+
     if (isLoading) {
         return (
             <p className="text-sm text-slate-500">
@@ -74,7 +110,7 @@ export function ServiceOrderList({
                             </p>
                         </div>
 
-                        <div className="flex gap-2">
+                        <div className="flex flex-wrap gap-2">
                             <span className="rounded-full bg-slate-100 px-3 py-1 text-xs font-medium text-slate-700">
                                 {statusLabels[order.status]}
                             </span>
@@ -82,6 +118,15 @@ export function ServiceOrderList({
                             <span className="rounded-full bg-slate-100 px-3 py-1 text-xs font-medium text-slate-700">
                                 {priorityLabels[order.priority]}
                             </span>
+
+                            <button
+                                type="button"
+                                onClick={() => handleDelete(order.id)}
+                                disabled={deletingOrderId === order.id}
+                                className="rounded-full border border-red-200 px-3 py-1 text-xs font-medium text-red-600 hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-60"
+                            >
+                                {deletingOrderId === order.id ? 'Excluindo...' : 'Excluir'}
+                            </button>
                         </div>
                     </div>
 

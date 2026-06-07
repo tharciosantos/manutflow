@@ -11,7 +11,7 @@ type ServiceOrderListProps = {
     orders: ServiceOrder[];
     isLoading: boolean;
     errorMessage: string;
-    onDeleted: () => Promise<void>;
+    onRefresh: () => Promise<void>;
 };
 
 const statusLabels: Record<ServiceOrderStatus, string> = {
@@ -44,9 +44,10 @@ export function ServiceOrderList({
     orders,
     isLoading,
     errorMessage,
-    onDeleted,
+    onRefresh,
 }: ServiceOrderListProps) {
     const [deletingOrderId, setDeletingOrderId] = useState('');
+    const [updatingStatusOrderId, setUpdatingStatusOrderId] = useState('');
 
     async function handleDelete(orderId: string) {
         const confirmed = window.confirm(
@@ -68,11 +69,38 @@ export function ServiceOrderList({
                 throw new Error('Erro ao excluir ordem de serviço.');
             }
 
-            await onDeleted();
+            await onRefresh();
         } catch {
             window.alert('Não foi possível excluir a ordem de serviço.');
         } finally {
             setDeletingOrderId('');
+        }
+    }
+
+    async function handleStatusChange(
+        orderId: string,
+        status: ServiceOrderStatus,
+    ) {
+        try {
+            setUpdatingStatusOrderId(orderId);
+
+            const response = await fetch(`/api/service-orders/${orderId}`, {
+                method: 'PATCH',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ status }),
+            });
+
+            if (!response.ok) {
+                throw new Error('Erro ao atualizar status da ordem de serviço.');
+            }
+
+            await onRefresh();
+        } catch (error) {
+            window.alert('Não foi possível atualizar o status da ordem de serviço.');
+        } finally {
+            setUpdatingStatusOrderId('');
         }
     }
 
@@ -165,11 +193,21 @@ export function ServiceOrderList({
                             </div>
 
                             <div className="flex flex-wrap gap-2 lg:justify-end">
-                                <span
-                                    className={`rounded-full border px-3 py-1 text-xs font-medium ${statusStyles[order.status]}`}
+                                <select
+                                    value={order.status}
+                                    disabled={updatingStatusOrderId === order.id}
+                                    onChange={(event) =>
+                                        handleStatusChange(
+                                            order.id,
+                                            event.target.value as ServiceOrderStatus,
+                                        )
+                                    }
+                                    className={`rounded-full border px-3 py-1 text-xs font-medium outline-none transition disabled:cursor-not-allowed disabled:opacity-60 ${statusStyles[order.status]}`}
                                 >
-                                    {statusLabels[order.status]}
-                                </span>
+                                    <option value="open">Aberta</option>
+                                    <option value="in_progress">Em andamento</option>
+                                    <option value="closed">Fechada</option>
+                                </select>
 
                                 <span
                                     className={`rounded-full border px-3 py-1 text-xs font-medium ${priorityStyles[order.priority]}`}

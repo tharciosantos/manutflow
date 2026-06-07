@@ -74,7 +74,7 @@ export function ServiceOrderPageContent() {
                 orders={orders}
                 isLoading={isLoading}
                 errorMessage={errorMessage}
-                onDeleted={loadServiceOrders}
+                onRefresh={loadServiceOrders}
             />
         </div>
     );

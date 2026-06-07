@@ -1,11 +1,60 @@
 import { NextResponse } from 'next/server';
 import { supabase } from '@/lib/supabase/client';
 
+const allowedStatuses = ['open', 'in_progress', 'closed'];
+
 type RouteParams = {
     params: Promise<{
         id: string;
     }>;
 };
+
+export async function PATCH(request: Request, { params }: RouteParams) {
+    const { id } = await params;
+
+    if (!id) {
+        return NextResponse.json(
+            { error: 'ID da ordem de serviço não informado.' },
+            { status: 400 },
+        );
+    }
+
+    const body = await request.json().catch(() => null);
+
+    const status = typeof body?.status === 'string' ? body.status : '';
+
+    if (!allowedStatuses.includes(status)) {
+        return NextResponse.json(
+            { error: 'Status inválido.' },
+            { status: 400 },
+        );
+    }
+
+    const { data, error } = await supabase
+        .from('service_orders')
+        .update({ status })
+        .eq('id', id)
+        .select()
+        .maybeSingle();
+
+    if (error) {
+        console.error('Erro ao atualizar status da ordem de serviço:', error);
+
+        return NextResponse.json(
+            { error: 'Erro ao atualizar status da ordem de serviço.' },
+            { status: 500 },
+        );
+    }
+
+    if (!data) {
+        return NextResponse.json(
+            { error: 'Ordem de serviço não encontrada.' },
+            { status: 404 },
+        );
+    }
+
+    return NextResponse.json(data);
+}
 
 export async function DELETE(_request: Request, { params }: RouteParams) {
     const { id } = await params;

@@ -4,6 +4,10 @@ import { useCallback, useEffect, useState } from 'react';
 import type { ServiceOrder } from '@/types/service-order';
 import { ServiceOrderForm } from './service-order-form';
 import { ServiceOrderList } from './service-order-list';
+import {
+    ServiceOrderStatusFilter,
+    type ServiceOrderStatusFilter as ServiceOrderStatusFilterType
+} from './service-order-status-filter';
 
 async function fetchServiceOrders(): Promise<ServiceOrder[]> {
     const response = await fetch('/api/service-orders');
@@ -19,6 +23,8 @@ export function ServiceOrderPageContent() {
     const [orders, setOrders] = useState<ServiceOrder[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const [errorMessage, setErrorMessage] = useState('');
+    const [selectedStatus, setSelectedStatus] =
+        useState<ServiceOrderStatusFilterType>('all');
 
     const loadServiceOrders = useCallback(async () => {
         try {
@@ -66,12 +72,22 @@ export function ServiceOrderPageContent() {
         };
     }, []);
 
+    const filteredOrders =
+        selectedStatus === 'all'
+            ? orders
+            : orders.filter((order) => order.status === selectedStatus);
+
     return (
         <div className="space-y-6">
             <ServiceOrderForm onCreated={loadServiceOrders} />
 
+            <ServiceOrderStatusFilter
+                selectedStatus={selectedStatus}
+                onStatusChange={setSelectedStatus}
+            />
+
             <ServiceOrderList
-                orders={orders}
+                orders={filteredOrders}
                 isLoading={isLoading}
                 errorMessage={errorMessage}
                 onRefresh={loadServiceOrders}

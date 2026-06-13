@@ -8,6 +8,7 @@ import {
     ServiceOrderStatusFilter,
     type ServiceOrderStatusFilter as ServiceOrderStatusFilterType
 } from './service-order-status-filter';
+import { ServiceOrderSearch } from './service-order-search';
 
 async function fetchServiceOrders(): Promise<ServiceOrder[]> {
     const response = await fetch('/api/service-orders');
@@ -25,6 +26,8 @@ export function ServiceOrderPageContent() {
     const [errorMessage, setErrorMessage] = useState('');
     const [selectedStatus, setSelectedStatus] =
         useState<ServiceOrderStatusFilterType>('all');
+
+    const [searchTerm, setSearchTerm] = useState('');
 
     const loadServiceOrders = useCallback(async () => {
         try {
@@ -72,14 +75,37 @@ export function ServiceOrderPageContent() {
         };
     }, []);
 
-    const filteredOrders =
-        selectedStatus === 'all'
-            ? orders
-            : orders.filter((order) => order.status === selectedStatus);
+    const normalizedSearchTerm = searchTerm.trim().toLowerCase();
+
+    const filteredOrders = orders.filter((order) => {
+        const matchesStatus =
+            selectedStatus === 'all' || order.status === selectedStatus;
+
+        const searchableText = [
+            order.title,
+            order.description,
+            order.equipment.name,
+            order.equipment.patrimony_code,
+            order.equipment.location,
+        ]
+            .filter(Boolean)
+            .join(' ')
+            .toLowerCase();
+
+        const matchesSearch =
+            !normalizedSearchTerm || searchableText.includes(normalizedSearchTerm);
+
+        return matchesStatus && matchesSearch;
+    });
 
     return (
         <div className="space-y-6">
             <ServiceOrderForm onCreated={loadServiceOrders} />
+
+            <ServiceOrderSearch
+                searchTerm={searchTerm}
+                onSearchChange={setSearchTerm}
+            />
 
             <ServiceOrderStatusFilter
                 selectedStatus={selectedStatus}

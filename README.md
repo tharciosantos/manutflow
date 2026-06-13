@@ -6,6 +6,12 @@ O projeto está sendo construído do zero como parte de um desafio prático de a
 
 ## Preview
 
+### Dashboard
+
+<p align="center">
+  <img src="./docs/preview-dashboard.png" alt="Preview do dashboard do ManutFlow" width="900" />
+</p>
+
 ### Equipamentos
 
 <p align="center">
@@ -14,8 +20,14 @@ O projeto está sendo construído do zero como parte de um desafio prático de a
 
 ### Ordens de Serviço
 
+### Ordens de Serviço
+
 <p align="center">
-  <img src="./docs/preview-ordens.png" alt="Preview da tela de ordens de serviço do ManutFlow" width="900" />
+  <img src="./docs/preview-ordens.png" alt="Preview da tela de ordens de serviço do ManutFlow com formulário, busca e filtros" width="900" />
+</p>
+
+<p align="center">
+  <img src="./docs/preview-ordens2.png" alt="Preview da listagem de ordens de serviço do ManutFlow com status, prioridades e equipamentos vinculados" width="900" />
 </p>
 
 ## Objetivo do projeto
@@ -46,6 +58,17 @@ A ideia do projeto é aprender desenvolvimento full stack construindo uma aplica
 * Criação do cabeçalho da aplicação
 * Criação de navegação entre páginas
 * Criação das rotas de Dashboard, Equipamentos e Ordens
+* Organização de funcionalidades por domínio em `features`
+
+### Dashboard
+
+* Criação de dashboard inicial
+* Criação da rota `/api/dashboard-summary`
+* Busca de indicadores reais no Supabase
+* Exibição do total de equipamentos cadastrados
+* Exibição do total de ordens de serviço
+* Exibição de ordens abertas, em andamento e fechadas
+* Substituição de valores fixos por dados reais da API
 
 ### API
 
@@ -57,10 +80,11 @@ A ideia do projeto é aprender desenvolvimento full stack construindo uma aplica
 * Implementação do método `GET` para listar ordens de serviço
 * Implementação do método `POST` para cadastrar ordens de serviço
 * Criação da rota `/api/service-orders/[id]`
+* Implementação do método `PATCH` para atualizar o status de uma ordem de serviço
 * Implementação do método `DELETE` para excluir ordens de serviço
 * Validação dos dados no servidor antes de salvar no banco
 * Tratamento de erro para código de patrimônio duplicado
-* Tratamento de erro para campos obrigatórios e prioridades inválidas
+* Tratamento de erro para campos obrigatórios, prioridades inválidas e status inválidos
 
 ### Equipamentos
 
@@ -70,6 +94,9 @@ A ideia do projeto é aprender desenvolvimento full stack construindo uma aplica
 * Exibição de mensagens de sucesso e erro
 * Atualização automática da lista após cadastrar um equipamento
 * Tradução dos status técnicos do banco para textos amigáveis na interface
+* Exibição de equipamentos em cards responsivos
+* Exibição de status dos equipamentos com badges visuais
+* Padronização visual da tela de equipamentos com tema escuro
 
 ### Ordens de Serviço
 
@@ -81,9 +108,13 @@ A ideia do projeto é aprender desenvolvimento full stack construindo uma aplica
 * Listagem de ordens cadastradas
 * Exibição do equipamento vinculado à ordem
 * Exibição de status e prioridade com textos amigáveis
+* Alteração de status da ordem de serviço pela interface
 * Exclusão de ordens de serviço
-* Atualização automática da lista após cadastrar ou excluir uma ordem
-* Estilização da tela de ordens com tema escuro e cards organizados
+* Filtro de ordens por status
+* Busca textual por título, descrição, equipamento, patrimônio e local
+* Melhoria do estado vazio para busca e filtros sem resultado
+* Atualização automática da lista após cadastrar, excluir ou alterar uma ordem
+* Estilização da tela de ordens com tema escuro, cards, filtros e busca
 
 ### Segurança e banco de dados
 
@@ -91,7 +122,7 @@ A ideia do projeto é aprender desenvolvimento full stack construindo uma aplica
 * Uso de PostgreSQL como banco de dados
 * Configuração de Row Level Security no Supabase
 * Criação de policies iniciais para leitura e cadastro de equipamentos
-* Criação de policies iniciais para leitura, cadastro e exclusão de ordens de serviço
+* Criação de policies iniciais para leitura, cadastro, atualização e exclusão de ordens de serviço
 * Uso de relacionamento entre tabelas com chave estrangeira
 
 > As permissões atuais são temporárias para desenvolvimento. Futuramente, elas serão ajustadas com autenticação e controle de acesso por usuário.
@@ -102,6 +133,7 @@ A ideia do projeto é aprender desenvolvimento full stack construindo uma aplica
 src/
 ├─ app/
 │  ├─ api/
+│  │  ├─ dashboard-summary/
 │  │  ├─ equipments/
 │  │  ├─ health/
 │  │  └─ service-orders/
@@ -126,7 +158,7 @@ src/
 
 ### `/`
 
-Página inicial do sistema, funcionando como dashboard inicial.
+Página inicial do sistema, funcionando como dashboard com indicadores reais de equipamentos e ordens de serviço.
 
 ### `/equipamentos`
 
@@ -134,15 +166,41 @@ Página responsável por cadastrar e listar os equipamentos da empresa.
 
 ### `/ordens`
 
-Página responsável por criar, listar e excluir ordens de serviço vinculadas aos equipamentos cadastrados.
+Página responsável por criar, listar, buscar, filtrar, atualizar status e excluir ordens de serviço vinculadas aos equipamentos cadastrados.
+
+## Rotas de API
 
 ### `/api/health`
 
-Rota de API criada para verificar se o back-end da aplicação está respondendo corretamente.
+Rota criada para verificar se o back-end da aplicação está respondendo corretamente.
+
+Método disponível:
+
+```text
+GET /api/health
+```
+
+### `/api/dashboard-summary`
+
+Rota responsável por retornar os indicadores do dashboard.
+
+Método disponível:
+
+```text
+GET /api/dashboard-summary
+```
+
+Retorna informações como:
+
+* total de equipamentos;
+* total de ordens de serviço;
+* ordens abertas;
+* ordens em andamento;
+* ordens fechadas.
 
 ### `/api/equipments`
 
-Rota de API responsável por listar e cadastrar equipamentos.
+Rota responsável por listar e cadastrar equipamentos.
 
 Métodos disponíveis:
 
@@ -153,7 +211,7 @@ POST /api/equipments
 
 ### `/api/service-orders`
 
-Rota de API responsável por listar e cadastrar ordens de serviço.
+Rota responsável por listar e cadastrar ordens de serviço.
 
 Métodos disponíveis:
 
@@ -164,11 +222,12 @@ POST /api/service-orders
 
 ### `/api/service-orders/[id]`
 
-Rota de API responsável por excluir uma ordem de serviço específica.
+Rota responsável por atualizar ou excluir uma ordem de serviço específica.
 
-Método disponível:
+Métodos disponíveis:
 
 ```text
+PATCH  /api/service-orders/[id]
 DELETE /api/service-orders/[id]
 ```
 
@@ -294,6 +353,22 @@ Interface exibe a mensagem correta
 Lista de ordens é atualizada automaticamente
 ```
 
+## Fluxo atual de alteração de status da ordem
+
+```text
+Usuário altera o status da ordem na interface
+        ↓
+Front-end envia uma requisição PATCH para /api/service-orders/[id]
+        ↓
+API valida se o status é permitido
+        ↓
+API atualiza a ordem no Supabase
+        ↓
+Interface recarrega a lista de ordens
+        ↓
+Status atualizado aparece na tela
+```
+
 ## Validações atuais
 
 A API valida os seguintes campos antes de cadastrar um equipamento:
@@ -308,6 +383,11 @@ A API valida os seguintes campos antes de cadastrar uma ordem de serviço:
 * título obrigatório;
 * equipamento obrigatório;
 * prioridade válida.
+
+A API valida os seguintes campos antes de atualizar uma ordem de serviço:
+
+* ID da ordem obrigatório;
+* status válido.
 
 O banco também possui regras importantes:
 
@@ -380,21 +460,29 @@ Atualmente, o sistema já possui:
 * conexão com Supabase;
 * API interna para equipamentos;
 * API interna para ordens de serviço;
+* API interna para resumo do dashboard;
+* dashboard com indicadores reais;
 * listagem de equipamentos;
 * cadastro de equipamentos;
 * listagem de ordens de serviço;
 * cadastro de ordens de serviço;
+* alteração de status de ordens;
 * exclusão de ordens de serviço;
+* busca textual em ordens;
+* filtro de ordens por status;
 * relacionamento entre ordens e equipamentos;
 * validação no servidor;
 * tratamento de erros básicos;
-* Row Level Security configurado de forma inicial.
+* Row Level Security configurado de forma inicial;
+* interface padronizada com tema escuro.
 
 ## Próximos passos
 
-* Implementar alteração de status da ordem de serviço
-* Criar histórico de alterações
-* Melhorar o dashboard inicial com indicadores reais
+* Refatorar a tela de equipamentos para centralizar o carregamento de dados no componente de página
+* Adicionar busca de equipamentos por texto
+* Criar página de detalhes da ordem de serviço
+* Criar histórico de alterações da ordem
+* Melhorar o dashboard com indicadores adicionais
 * Implementar autenticação
 * Melhorar regras de permissão no Supabase
 * Criar testes automatizados
@@ -411,7 +499,7 @@ Até o momento, o projeto já passou por conceitos como:
 * Client Components;
 * Server/API Routes;
 * consumo de API com `fetch`;
-* métodos HTTP `GET`, `POST` e `DELETE`;
+* métodos HTTP `GET`, `POST`, `PATCH` e `DELETE`;
 * validação no servidor;
 * integração com Supabase;
 * uso de variáveis de ambiente;
@@ -421,5 +509,9 @@ Até o momento, o projeto já passou por conceitos como:
 * Row Level Security;
 * policies no Supabase;
 * tratamento de erro;
+* estado de carregamento;
+* estado vazio;
+* busca e filtro no front-end;
 * atualização automática da interface após ações do usuário;
+* fluxo de branch, commit, Pull Request, merge e limpeza de branches;
 * versionamento com Git e GitHub.

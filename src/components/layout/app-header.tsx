@@ -16,7 +16,7 @@ export function AppHeader() {
 
         <nav className="flex items-center gap-4 text-sm text-slate-300">
           <Link href="/" className="transition hover:text-slate-100">
-            Dashboard
+            Painel
           </Link>
 
           <Link

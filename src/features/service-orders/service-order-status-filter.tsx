@@ -24,7 +24,7 @@ export function ServiceOrderStatusFilter({
     return (
         <div className="rounded-2xl border border-slate-800 bg-slate-950/70 p-4">
             <div className="mb-3">
-                <h2 className="text-sm font-semibold text-white">Filter ordens</h2>
+                <h2 className="text-sm font-semibold text-white">Filtro por status</h2>
                 <p className="text-xs text-slate-400">
                     Visualize as ordens de acordo com o status atual.
                 </p>

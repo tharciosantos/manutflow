@@ -70,10 +70,14 @@ export function EquipmentForm({ onEquipmentCreated }: EquipmentFormProps) {
   return (
     <form
       onSubmit={handleSubmit}
-      className="mt-8 rounded-2xl border border-slate-800 bg-slate-900 p-6"
+      className="mt-8 rounded-2xl border border-slate-800 bg-slate-950/70 p-5 shadow-sm"
     >
       <div>
-        <h2 className="text-xl font-semibold text-slate-100">
+        <span className="rounded-full border border-blue-500/30 bg-blue-500/10 px-3 py-1 text-xs font-medium text-blue-300">
+          Novo equipamento
+        </span>
+
+        <h2 className="mt-3 text-xl font-semibold text-white">
           Cadastrar equipamento
         </h2>
 
@@ -97,7 +101,7 @@ export function EquipmentForm({ onEquipmentCreated }: EquipmentFormProps) {
             value={name}
             onChange={(event) => setName(event.target.value)}
             placeholder="Ex: Motor Elétrico"
-            className="w-full rounded-xl border border-slate-700 bg-slate-950 px-4 py-3 text-slate-100 outline-none transition placeholder:text-slate-500 focus:border-slate-400"
+            className="w-full rounded-xl border border-slate-700 bg-slate-950 px-4 py-3 text-slate-100 outline-none transition placeholder:text-slate-500 focus:border-blue-500"
           />
         </div>
 
@@ -115,7 +119,7 @@ export function EquipmentForm({ onEquipmentCreated }: EquipmentFormProps) {
             value={patrimonyCode}
             onChange={(event) => setPatrimonyCode(event.target.value)}
             placeholder="Ex: MOTOR-001"
-            className="w-full rounded-xl border border-slate-700 bg-slate-950 px-4 py-3 text-slate-100 outline-none transition placeholder:text-slate-500 focus:border-slate-400"
+            className="w-full rounded-xl border border-slate-700 bg-slate-950 px-4 py-3 text-slate-100 outline-none transition placeholder:text-slate-500 focus:border-blue-500"
           />
         </div>
 
@@ -133,7 +137,7 @@ export function EquipmentForm({ onEquipmentCreated }: EquipmentFormProps) {
             value={location}
             onChange={(event) => setLocation(event.target.value)}
             placeholder="Ex: Setor C"
-            className="w-full rounded-xl border border-slate-700 bg-slate-950 px-4 py-3 text-slate-100 outline-none transition placeholder:text-slate-500 focus:border-slate-400"
+            className="w-full rounded-xl border border-slate-700 bg-slate-950 px-4 py-3 text-slate-100 outline-none transition placeholder:text-slate-500 focus:border-blue-500"
           />
         </div>
 
@@ -149,7 +153,7 @@ export function EquipmentForm({ onEquipmentCreated }: EquipmentFormProps) {
             id="status"
             value={status}
             onChange={(event) => setStatus(event.target.value)}
-            className="w-full rounded-xl border border-slate-700 bg-slate-950 px-4 py-3 text-slate-100 outline-none transition focus:border-slate-400"
+            className="w-full rounded-xl border border-slate-700 bg-slate-950 px-4 py-3 text-slate-100 outline-none transition focus:border-blue-500"
           >
             <option value="active">Ativo</option>
             <option value="inactive">Inativo</option>
@@ -159,24 +163,26 @@ export function EquipmentForm({ onEquipmentCreated }: EquipmentFormProps) {
       </div>
 
       {successMessage && (
-        <p className="mt-4 rounded-xl border border-emerald-900/60 bg-emerald-950/40 px-4 py-3 text-sm text-emerald-200">
+        <p className="mt-4 rounded-xl border border-emerald-500/30 bg-emerald-500/10 p-3 text-sm text-emerald-300">
           {successMessage}
         </p>
       )}
 
       {errorMessage && (
-        <p className="mt-4 rounded-xl border border-red-900/60 bg-red-950/40 px-4 py-3 text-sm text-red-200">
+        <p className="mt-4 rounded-xl border border-red-500/30 bg-red-500/10 p-3 text-sm text-red-300">
           {errorMessage}
         </p>
       )}
 
-      <button
-        type="submit"
-        disabled={isSubmitting}
-        className="mt-6 rounded-xl bg-slate-100 px-5 py-3 text-sm font-semibold text-slate-950 transition hover:bg-white disabled:cursor-not-allowed disabled:opacity-60"
-      >
-        {isSubmitting ? "Cadastrando..." : "Cadastrar equipamento"}
-      </button>
+      <div className="mt-5 flex justify-end">
+        <button
+          type="submit"
+          disabled={isSubmitting}
+          className="rounded-xl bg-blue-600 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-blue-500 disabled:cursor-not-allowed disabled:opacity-60"
+        >
+          {isSubmitting ? 'Cadastrando...' : 'Cadastrar equipamento'}
+        </button>
+      </div>
     </form>
   );
 }

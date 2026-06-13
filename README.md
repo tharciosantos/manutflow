@@ -20,8 +20,6 @@ O projeto está sendo construído do zero como parte de um desafio prático de a
 
 ### Ordens de Serviço
 
-### Ordens de Serviço
-
 <p align="center">
   <img src="./docs/preview-ordens.png" alt="Preview da tela de ordens de serviço do ManutFlow com formulário, busca e filtros" width="900" />
 </p>

@@ -9,6 +9,8 @@ import type {
 
 type ServiceOrderListProps = {
     orders: ServiceOrder[];
+    totalOrders: number;
+    searchTerm: string;
     isLoading: boolean;
     errorMessage: string;
     onRefresh: () => Promise<void>;
@@ -42,6 +44,8 @@ const priorityStyles: Record<ServiceOrderPriority, string> = {
 
 export function ServiceOrderList({
     orders,
+    totalOrders,
+    searchTerm,
     isLoading,
     errorMessage,
     onRefresh,
@@ -123,11 +127,29 @@ export function ServiceOrderList({
     }
 
     if (orders.length === 0) {
+        const hasOrders = totalOrders > 0;
+        const hasSearch = searchTerm.trim().length > 0;
+
         return (
-            <div className="rounded-2xl border border-dashed border-slate-700 bg-slate-950/50 p-6">
-                <p className="text-sm text-slate-400">
-                    Nenhuma ordem de serviço cadastrada ainda.
+            <div className='rounded-2xl border border-dashed border-slate-700 bg-slate-950/50 p-6'>
+                <p className='text-sm font-medium text-slate-300'>
+                    {
+                        hasOrders
+                            ? 'Nenhuma ordem encontrada para os filtros atuais.'
+                            : 'Nenhuma ordem de serviço cadastrada ainda.'}
                 </p>
+
+                {hasOrders && hasSearch && (
+                    <p className='mt-2 text-sm text-slate-500'>
+                        Busca ativa: {searchTerm.trim()}
+                    </p>
+                )}
+
+                {hasOrders && (
+                    <p className='mt-2 text-xs text-slate-500'>
+                        Tente alterar o status selecionado ou buscar por outro termo.
+                    </p>
+                )}
             </div>
         );
     }

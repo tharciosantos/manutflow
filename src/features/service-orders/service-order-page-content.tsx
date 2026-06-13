@@ -114,6 +114,8 @@ export function ServiceOrderPageContent() {
 
             <ServiceOrderList
                 orders={filteredOrders}
+                totalOrders={orders.length}
+                searchTerm={searchTerm}
                 isLoading={isLoading}
                 errorMessage={errorMessage}
                 onRefresh={loadServiceOrders}

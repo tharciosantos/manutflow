@@ -101,7 +101,7 @@ export function ServiceOrderList({
             }
 
             await onRefresh();
-        } catch (error) {
+        } catch {
             window.alert('Não foi possível atualizar o status da ordem de serviço.');
         } finally {
             setUpdatingStatusOrderId('');
@@ -226,9 +226,9 @@ export function ServiceOrderList({
                                     }
                                     className={`rounded-full border px-3 py-1 text-xs font-medium outline-none transition disabled:cursor-not-allowed disabled:opacity-60 ${statusStyles[order.status]}`}
                                 >
-                                    <option value="open">Aberta</option>
-                                    <option value="in_progress">Em andamento</option>
-                                    <option value="closed">Fechada</option>
+                                    <option value="open">{statusLabels.open}</option>
+                                    <option value="in_progress">{statusLabels.in_progress}</option>
+                                    <option value="closed">{statusLabels.closed}</option>
                                 </select>
 
                                 <span

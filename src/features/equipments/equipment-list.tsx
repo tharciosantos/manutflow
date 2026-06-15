@@ -1,6 +1,3 @@
-'use client';
-
-import { useEffect, useState } from 'react';
 import type { Equipment, EquipmentStatus } from '@/types/equipment';
 
 const equipmentStatusLabel: Record<EquipmentStatus, string> = {
@@ -15,62 +12,17 @@ const equipmentStatusStyles: Record<EquipmentStatus, string> = {
     maintenance: 'border-amber-500/30 bg-amber-500/10 text-amber-300',
 };
 
-type EquipmentsApiResponse = {
-    equipments: Equipment[];
-    error?: string;
-};
-
 type EquipmentListProps = {
-    refreshkey?: number;
+    equipments: Equipment[];
+    isLoading: boolean;
+    errorMessage: string;
 };
 
-export function EquipmentList({ refreshkey = 0 }: EquipmentListProps) {
-    const [equipments, setEquipments] = useState<Equipment[]>([]);
-    const [isLoading, setIsLoading] = useState(true);
-    const [errorMessage, setErrorMessage] = useState('');
-
-    useEffect(() => {
-        let ignore = false;
-
-        async function loadEquipments() {
-            try {
-                const response = await fetch('/api/equipments');
-                const result = (await response.json()) as EquipmentsApiResponse;
-
-                if (!response.ok) {
-                    throw new Error(result.error ?? 'Erro ao carregar equipamentos.');
-                }
-
-                if (ignore) {
-                    return;
-                }
-
-                setEquipments(result.equipments);
-                setErrorMessage('');
-            } catch (error) {
-                if (ignore) {
-                    return;
-                }
-
-                const message =
-                    error instanceof Error
-                        ? error.message
-                        : 'Erro inesperado ao carregar equipamentos.';
-
-                setErrorMessage(message);
-            } finally {
-                if (!ignore) {
-                    setIsLoading(false);
-                }
-            }
-        }
-
-        void loadEquipments();
-
-        return () => {
-            ignore = true;
-        };
-    }, [refreshkey]);
+export function EquipmentList({
+    equipments,
+    isLoading,
+    errorMessage,
+}: EquipmentListProps) {
 
     if (isLoading) {
         return (

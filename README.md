@@ -45,87 +45,48 @@ A ideia do projeto é aprender desenvolvimento full stack construindo uma aplica
 * Git
 * GitHub
 
-## Funcionalidades implementadas
+## Status atual & Funcionalidades
 
-### Estrutura inicial
-
-* Criação do projeto com Next.js, TypeScript e Tailwind CSS
-* Configuração inicial da estrutura de pastas
-* Criação da página inicial do sistema
-* Criação de componentes reutilizáveis
-* Criação do cabeçalho da aplicação
-* Criação de navegação entre páginas
-* Criação das rotas de Dashboard, Equipamentos e Ordens
-* Organização de funcionalidades por domínio em `features`
+O projeto está em desenvolvimento e atualmente possui:
 
 ### Dashboard
 
-* Criação de dashboard inicial
-* Criação da rota `/api/dashboard-summary`
-* Busca de indicadores reais no Supabase
-* Exibição do total de equipamentos cadastrados
-* Exibição do total de ordens de serviço
-* Exibição de ordens abertas, em andamento e fechadas
-* Substituição de valores fixos por dados reais da API
-
-### API
-
-* Criação da rota `/api/health` para verificar se a API está funcionando
-* Criação da rota `/api/equipments`
-* Implementação do método `GET` para listar equipamentos
-* Implementação do método `POST` para cadastrar equipamentos
-* Criação da rota `/api/service-orders`
-* Implementação do método `GET` para listar ordens de serviço
-* Implementação do método `POST` para cadastrar ordens de serviço
-* Criação da rota `/api/service-orders/[id]`
-* Implementação do método `PATCH` para atualizar o status de uma ordem de serviço
-* Implementação do método `DELETE` para excluir ordens de serviço
-* Validação dos dados no servidor antes de salvar no banco
-* Tratamento de erro para código de patrimônio duplicado
-* Tratamento de erro para campos obrigatórios, prioridades inválidas e status inválidos
+* Indicadores reais consumidos do Supabase
+* Total de equipamentos cadastrados
+* Total de ordens de serviço
+* Contagem de ordens abertas, em andamento e fechadas
 
 ### Equipamentos
 
-* Criação da tabela `equipments` no Supabase
-* Listagem de equipamentos cadastrados no banco de dados
-* Cadastro de novos equipamentos pela interface
-* Exibição de mensagens de sucesso e erro
-* Atualização automática da lista após cadastrar um equipamento
-* Tradução dos status técnicos do banco para textos amigáveis na interface
-* Exibição de equipamentos em cards responsivos
-* Exibição de status dos equipamentos com badges visuais
-* Padronização visual da tela de equipamentos com tema escuro
+* Cadastro e listagem de equipamentos
+* Validação de campos obrigatórios
+* Tratamento para código de patrimônio duplicado
+* Status exibidos com textos amigáveis e badges visuais
+* Atualização automática da lista após cadastro
 
 ### Ordens de Serviço
 
-* Criação da tabela `service_orders` no Supabase
-* Relacionamento entre ordens de serviço e equipamentos
-* Cadastro de ordens de serviço pela interface
-* Seleção de equipamento ao abrir uma nova ordem
-* Definição de prioridade da ordem de serviço
-* Listagem de ordens cadastradas
-* Exibição do equipamento vinculado à ordem
-* Exibição de status e prioridade com textos amigáveis
-* Alteração de status da ordem de serviço pela interface
+* Cadastro de ordens vinculadas a equipamentos
+* Listagem de ordens com dados do equipamento relacionado
+* Alteração de status pela interface
 * Exclusão de ordens de serviço
-* Filtro de ordens por status
 * Busca textual por título, descrição, equipamento, patrimônio e local
-* Melhoria do estado vazio para busca e filtros sem resultado
-* Atualização automática da lista após cadastrar, excluir ou alterar uma ordem
-* Estilização da tela de ordens com tema escuro, cards, filtros e busca
+* Filtro por status
+* Estados vazios para busca e filtros sem resultado
+* Atualização automática da lista após cadastro, exclusão ou alteração de status
 
-### Segurança e banco de dados
+### Back-end e Banco de Dados
 
-* Configuração do Supabase no projeto
-* Uso de PostgreSQL como banco de dados
-* Configuração de Row Level Security no Supabase
-* Criação de policies iniciais para leitura e cadastro de equipamentos
-* Criação de policies iniciais para leitura, cadastro, atualização e exclusão de ordens de serviço
-* Uso de relacionamento entre tabelas com chave estrangeira
+* API interna para dashboard, equipamentos e ordens de serviço
+* Validação dos dados no servidor antes de salvar no banco
+* Integração com Supabase e PostgreSQL
+* Relacionamento entre `equipments` e `service_orders`
+* Row Level Security configurado inicialmente
+* Policies provisórias para ambiente de desenvolvimento
 
 > As permissões atuais são temporárias para desenvolvimento. Futuramente, elas serão ajustadas com autenticação e controle de acesso por usuário.
 
-## Estrutura inicial do projeto
+## Estrutura do projeto
 
 ```text
 src/
@@ -172,8 +133,6 @@ Página responsável por criar, listar, buscar, filtrar, atualizar status e excl
 
 Rota criada para verificar se o back-end da aplicação está respondendo corretamente.
 
-Método disponível:
-
 ```text
 GET /api/health
 ```
@@ -182,25 +141,15 @@ GET /api/health
 
 Rota responsável por retornar os indicadores do dashboard.
 
-Método disponível:
-
 ```text
 GET /api/dashboard-summary
 ```
 
-Retorna informações como:
-
-* total de equipamentos;
-* total de ordens de serviço;
-* ordens abertas;
-* ordens em andamento;
-* ordens fechadas.
+Retorna informações como total de equipamentos, total de ordens de serviço e contagem de ordens por status.
 
 ### `/api/equipments`
 
 Rota responsável por listar e cadastrar equipamentos.
-
-Métodos disponíveis:
 
 ```text
 GET  /api/equipments
@@ -211,8 +160,6 @@ POST /api/equipments
 
 Rota responsável por listar e cadastrar ordens de serviço.
 
-Métodos disponíveis:
-
 ```text
 GET  /api/service-orders
 POST /api/service-orders
@@ -221,8 +168,6 @@ POST /api/service-orders
 ### `/api/service-orders/[id]`
 
 Rota responsável por atualizar ou excluir uma ordem de serviço específica.
-
-Métodos disponíveis:
 
 ```text
 PATCH  /api/service-orders/[id]
@@ -233,7 +178,7 @@ DELETE /api/service-orders/[id]
 
 Até o momento, foram criadas as tabelas `equipments` e `service_orders`.
 
-### Tabela `equipments`
+### `equipments`
 
 Campos principais:
 
@@ -245,19 +190,13 @@ Campos principais:
 * `created_at`
 * `updated_at`
 
-Status possíveis no banco:
-
-* `active`
-* `inactive`
-* `maintenance`
-
-Na interface, esses status são exibidos em português:
+Status possíveis:
 
 * `active` → Ativo
 * `inactive` → Inativo
 * `maintenance` → Em manutenção
 
-### Tabela `service_orders`
+### `service_orders`
 
 Campos principais:
 
@@ -269,26 +208,13 @@ Campos principais:
 * `equipment_id`
 * `created_at`
 
-Status possíveis no banco:
-
-* `open`
-* `in_progress`
-* `closed`
-
-Na interface, esses status são exibidos em português:
+Status possíveis:
 
 * `open` → Aberta
 * `in_progress` → Em andamento
 * `closed` → Fechada
 
-Prioridades possíveis no banco:
-
-* `low`
-* `medium`
-* `high`
-* `critical`
-
-Na interface, essas prioridades são exibidas em português:
+Prioridades possíveis:
 
 * `low` → Baixa
 * `medium` → Média
@@ -307,104 +233,98 @@ service_orders.equipment_id
 
 Esse relacionamento permite listar uma ordem de serviço junto com os dados do equipamento vinculado, como nome, código de patrimônio e localização.
 
-## Fluxo atual de cadastro de equipamento
+## Fluxos principais
+
+### Cadastro de equipamento
 
 ```text
 Usuário preenche o formulário
         ↓
-Front-end envia uma requisição POST para /api/equipments
+Front-end envia POST para /api/equipments
         ↓
-API valida os dados recebidos
+API valida os dados
         ↓
-API salva o equipamento no Supabase
+API salva no Supabase
         ↓
 Banco aplica regras como unique e check
         ↓
-API retorna sucesso ou erro
+Interface exibe sucesso ou erro
         ↓
-Interface exibe a mensagem correta
-        ↓
-Lista de equipamentos é atualizada automaticamente
+Lista de equipamentos é atualizada
 ```
 
-## Fluxo atual de abertura de ordem de serviço
+### Abertura de ordem de serviço
 
 ```text
-Usuário preenche o formulário de nova ordem
+Usuário preenche o formulário
         ↓
 Seleciona um equipamento cadastrado
         ↓
 Define a prioridade
         ↓
-Front-end envia uma requisição POST para /api/service-orders
+Front-end envia POST para /api/service-orders
         ↓
-API valida os dados recebidos
+API valida os dados
         ↓
 API salva a ordem no Supabase
         ↓
 Ordem é vinculada ao equipamento pelo equipment_id
         ↓
-API retorna sucesso ou erro
+Interface exibe sucesso ou erro
         ↓
-Interface exibe a mensagem correta
-        ↓
-Lista de ordens é atualizada automaticamente
+Lista de ordens é atualizada
 ```
 
-## Fluxo atual de alteração de status da ordem
+### Alteração de status da ordem
 
 ```text
-Usuário altera o status da ordem na interface
+Usuário altera o status na interface
         ↓
-Front-end envia uma requisição PATCH para /api/service-orders/[id]
+Front-end envia PATCH para /api/service-orders/[id]
         ↓
 API valida se o status é permitido
         ↓
 API atualiza a ordem no Supabase
         ↓
-Interface recarrega a lista de ordens
+Interface recarrega a lista
         ↓
 Status atualizado aparece na tela
 ```
 
 ## Validações atuais
 
-A API valida os seguintes campos antes de cadastrar um equipamento:
+A API valida os dados antes de salvar ou atualizar registros.
 
-* nome do equipamento obrigatório;
+### Equipamentos
+
+* nome obrigatório;
 * código de patrimônio obrigatório;
 * localização obrigatória;
-* status válido.
+* status válido;
+* código de patrimônio único.
 
-A API valida os seguintes campos antes de cadastrar uma ordem de serviço:
+### Ordens de serviço
 
 * título obrigatório;
 * equipamento obrigatório;
-* prioridade válida.
+* prioridade válida;
+* status válido ao atualizar;
+* vínculo obrigatório com um equipamento existente.
 
-A API valida os seguintes campos antes de atualizar uma ordem de serviço:
-
-* ID da ordem obrigatório;
-* status válido.
-
-O banco também possui regras importantes:
-
-* `patrimony_code` deve ser único;
-* `status` de equipamento aceita apenas valores permitidos;
-* `status` da ordem aceita apenas valores permitidos;
-* `priority` da ordem aceita apenas valores permitidos;
-* toda ordem de serviço precisa estar vinculada a um equipamento existente.
+Além das validações da API, o banco também possui regras para limitar valores aceitos em campos como `status` e `priority`.
 
 ## Variáveis de ambiente
 
 O projeto utiliza variáveis de ambiente para conectar com o Supabase.
 
-Exemplo:
+As variáveis necessárias estão documentadas no arquivo `.env.example`:
 
 ```env
 NEXT_PUBLIC_SUPABASE_URL=
 NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=
 ```
+
+Para rodar o projeto localmente, copie o arquivo `.env.example` para `.env.local` e preencha com os dados do seu projeto no Supabase.
 
 O arquivo `.env.local` não deve ser enviado para o GitHub.
 
@@ -428,12 +348,19 @@ Instale as dependências:
 npm install
 ```
 
-Crie o arquivo `.env.local` na raiz do projeto e configure as variáveis do Supabase:
+Copie o arquivo de exemplo das variáveis de ambiente:
 
-```env
-NEXT_PUBLIC_SUPABASE_URL=
-NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=
+```bash
+cp .env.example .env.local
 ```
+
+No Windows PowerShell, você também pode usar:
+
+```powershell
+Copy-Item .env.example .env.local
+```
+
+Depois, preencha o arquivo `.env.local` com os dados do seu projeto no Supabase.
 
 Rode o servidor de desenvolvimento:
 
@@ -446,33 +373,6 @@ Acesse no navegador:
 ```text
 http://localhost:3000
 ```
-
-## Status atual
-
-O projeto está em desenvolvimento.
-
-Atualmente, o sistema já possui:
-
-* base visual criada;
-* navegação entre páginas;
-* conexão com Supabase;
-* API interna para equipamentos;
-* API interna para ordens de serviço;
-* API interna para resumo do dashboard;
-* dashboard com indicadores reais;
-* listagem de equipamentos;
-* cadastro de equipamentos;
-* listagem de ordens de serviço;
-* cadastro de ordens de serviço;
-* alteração de status de ordens;
-* exclusão de ordens de serviço;
-* busca textual em ordens;
-* filtro de ordens por status;
-* relacionamento entre ordens e equipamentos;
-* validação no servidor;
-* tratamento de erros básicos;
-* Row Level Security configurado de forma inicial;
-* interface padronizada com tema escuro.
 
 ## Próximos passos
 
@@ -489,27 +389,40 @@ Atualmente, o sistema já possui:
 
 ## Aprendizados aplicados
 
-Até o momento, o projeto já passou por conceitos como:
+Até o momento, o projeto já passou por conceitos importantes de desenvolvimento full stack.
+
+### Front-end
 
 * estrutura de rotas no Next.js;
 * componentes reutilizáveis;
 * organização por features;
 * Client Components;
-* Server/API Routes;
 * consumo de API com `fetch`;
+* estado de carregamento, erro e lista vazia;
+* busca e filtro no front-end;
+* atualização automática da interface após ações do usuário.
+
+### Back-end e API
+
+* Server/API Routes;
 * métodos HTTP `GET`, `POST`, `PATCH` e `DELETE`;
 * validação no servidor;
+* tratamento de erro;
+* separação entre interface, API e banco de dados.
+
+### Banco de dados e segurança
+
 * integração com Supabase;
 * uso de variáveis de ambiente;
 * modelagem de tabelas no PostgreSQL;
 * relacionamento entre tabelas;
 * chaves estrangeiras;
 * Row Level Security;
-* policies no Supabase;
-* tratamento de erro;
-* estado de carregamento;
-* estado vazio;
-* busca e filtro no front-end;
-* atualização automática da interface após ações do usuário;
+* policies no Supabase.
+
+### Processo de desenvolvimento
+
+* versionamento com Git e GitHub;
 * fluxo de branch, commit, Pull Request, merge e limpeza de branches;
-* versionamento com Git e GitHub.
+* evolução incremental por pequenas tarefas;
+* documentação técnica do projeto.

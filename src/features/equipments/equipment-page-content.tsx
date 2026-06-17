@@ -1,10 +1,10 @@
 "use client";
 
 import { useEffect, useState } from "react";
-
 import { EquipmentForm } from "@/features/equipments/equipment-form";
 import { EquipmentList } from "@/features/equipments/equipment-list";
 import type { Equipment } from "@/types/equipment";
+import { EquipmentSearch } from "@/features/equipments/equipment-search";
 
 type EquipmentsApiResponse = {
     equipments: Equipment[];
@@ -15,6 +15,7 @@ export function EquipmentPageContent() {
     const [equipments, setEquipments] = useState<Equipment[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const [errorMessage, setErrorMessage] = useState("");
+    const [searchTerm, setSearchTerm] = useState("");
 
     async function loadEquipments() {
         setIsLoading(true);
@@ -86,12 +87,41 @@ export function EquipmentPageContent() {
         };
     }, []);
 
+    const normalizedSearchTerm = searchTerm.trim().toLowerCase();
+
+    const filteredEquipments = equipments.filter((equipment) => {
+        const statusLabelByStatus = {
+            active: "ativo",
+            inactive: "inativo",
+            maintenance: "em manutenção",
+        };
+
+        const searchableContent = [
+            equipment.name,
+            equipment.patrimony_code,
+            equipment.location,
+            equipment.status,
+            statusLabelByStatus[equipment.status],
+        ]
+            .join(" ")
+            .toLowerCase();
+
+        return searchableContent.includes(normalizedSearchTerm);
+    });
+
     return (
         <>
             <EquipmentForm onEquipmentCreated={loadEquipments} />
 
+            <EquipmentSearch
+                searchTerm={searchTerm}
+                onSearchTermChange={setSearchTerm}
+            />
+
             <EquipmentList
-                equipments={equipments}
+                equipments={filteredEquipments}
+                totalEquipments={equipments.length}
+                searchTerm={searchTerm}
                 isLoading={isLoading}
                 errorMessage={errorMessage}
             />

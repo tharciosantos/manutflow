@@ -14,12 +14,16 @@ const equipmentStatusStyles: Record<EquipmentStatus, string> = {
 
 type EquipmentListProps = {
     equipments: Equipment[];
+    totalEquipments: number;
+    searchTerm: string;
     isLoading: boolean;
     errorMessage: string;
 };
 
 export function EquipmentList({
     equipments,
+    totalEquipments,
+    searchTerm,
     isLoading,
     errorMessage,
 }: EquipmentListProps) {
@@ -47,11 +51,28 @@ export function EquipmentList({
     }
 
     if (equipments.length === 0) {
+        const hasEquipments = totalEquipments > 0;
+        const hasSearch = searchTerm.trim().length > 0;
+
         return (
             <div className="mt-6 rounded-2xl border border-dashed border-slate-700 bg-slate-950/50 p-6">
-                <p className="text-sm text-slate-400">
-                    Nenhum equipamento cadastrado ainda.
+                <p className="text-sm font-medium text-slate-300">
+                    {hasEquipments
+                        ? "Nenhum equipamento encontrado para a busca atual."
+                        : "Nenhum equipamento cadastrado ainda."}
                 </p>
+
+                {hasEquipments && hasSearch && (
+                    <p className="mt-2 text-sm text-slate-500">
+                        Busca ativa: {searchTerm.trim()}
+                    </p>
+                )}
+
+                {hasEquipments && (
+                    <p className="mt-2 text-xs text-slate-500">
+                        Tente buscar por outro nome, patrimônio, localização ou status.
+                    </p>
+                )}
             </div>
         );
     }
@@ -70,8 +91,8 @@ export function EquipmentList({
                 </div>
 
                 <span className="text-sm text-slate-500">
-                    {equipments.length}{' '}
-                    {equipments.length === 1 ? 'equipamento' : 'equipamentos'}
+                    {equipments.length}{" "}
+                    {equipments.length === 1 ? "equipamento encontrado" : "equipamentos encontrados"}
                 </span>
             </div>
 

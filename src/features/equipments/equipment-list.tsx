@@ -1,4 +1,5 @@
-import type { Equipment, EquipmentStatus } from '@/types/equipment';
+import type { EquipmentStatusFilterValue } from "@/features/equipments/equipment-status-filter";
+import type { Equipment, EquipmentStatus } from "@/types/equipment";
 
 const equipmentStatusLabel: Record<EquipmentStatus, string> = {
     active: 'Ativo',
@@ -16,6 +17,7 @@ type EquipmentListProps = {
     equipments: Equipment[];
     totalEquipments: number;
     searchTerm: string;
+    selectedStatus: EquipmentStatusFilterValue;
     isLoading: boolean;
     errorMessage: string;
 };
@@ -24,6 +26,7 @@ export function EquipmentList({
     equipments,
     totalEquipments,
     searchTerm,
+    selectedStatus,
     isLoading,
     errorMessage,
 }: EquipmentListProps) {
@@ -53,18 +56,25 @@ export function EquipmentList({
     if (equipments.length === 0) {
         const hasEquipments = totalEquipments > 0;
         const hasSearch = searchTerm.trim().length > 0;
+        const hasStatusFilter = selectedStatus !== "all";
 
         return (
             <div className="mt-6 rounded-2xl border border-dashed border-slate-700 bg-slate-950/50 p-6">
                 <p className="text-sm font-medium text-slate-300">
                     {hasEquipments
-                        ? "Nenhum equipamento encontrado para a busca atual."
+                        ? "Nenhum equipamento encontrado para os filtros atuais."
                         : "Nenhum equipamento cadastrado ainda."}
                 </p>
 
                 {hasEquipments && hasSearch && (
                     <p className="mt-2 text-sm text-slate-500">
                         Busca ativa: {searchTerm.trim()}
+                    </p>
+                )}
+
+                {hasEquipments && hasStatusFilter && (
+                    <p className="mt-2 text-sm text-slate-500">
+                        Filtro ativo: {equipmentStatusLabel[selectedStatus]}
                     </p>
                 )}
 

@@ -5,6 +5,10 @@ import { EquipmentForm } from "@/features/equipments/equipment-form";
 import { EquipmentList } from "@/features/equipments/equipment-list";
 import type { Equipment } from "@/types/equipment";
 import { EquipmentSearch } from "@/features/equipments/equipment-search";
+import {
+    EquipmentStatusFilter,
+    type EquipmentStatusFilterValue,
+} from "@/features/equipments/equipment-status-filter";
 
 type EquipmentsApiResponse = {
     equipments: Equipment[];
@@ -16,6 +20,8 @@ export function EquipmentPageContent() {
     const [isLoading, setIsLoading] = useState(true);
     const [errorMessage, setErrorMessage] = useState("");
     const [searchTerm, setSearchTerm] = useState("");
+    const [selectedStatus, setSelectedStatus] =
+        useState<EquipmentStatusFilterValue>("all");
 
     async function loadEquipments() {
         setIsLoading(true);
@@ -106,7 +112,11 @@ export function EquipmentPageContent() {
             .join(" ")
             .toLowerCase();
 
-        return searchableContent.includes(normalizedSearchTerm);
+        const matchesSearch = searchableContent.includes(normalizedSearchTerm);
+        const matchesStatus =
+            selectedStatus === "all" || equipment.status === selectedStatus;
+
+        return matchesSearch && matchesStatus;
     });
 
     return (
@@ -118,10 +128,16 @@ export function EquipmentPageContent() {
                 onSearchTermChange={setSearchTerm}
             />
 
+            <EquipmentStatusFilter
+                selectedStatus={selectedStatus}
+                onSelectedStatusChange={setSelectedStatus}
+            />
+
             <EquipmentList
                 equipments={filteredEquipments}
                 totalEquipments={equipments.length}
                 searchTerm={searchTerm}
+                selectedStatus={selectedStatus}
                 isLoading={isLoading}
                 errorMessage={errorMessage}
             />

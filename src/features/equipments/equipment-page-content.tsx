@@ -5,10 +5,11 @@ import { EquipmentForm } from "@/features/equipments/equipment-form";
 import { EquipmentList } from "@/features/equipments/equipment-list";
 import type { Equipment } from "@/types/equipment";
 import { EquipmentSearch } from "@/features/equipments/equipment-search";
+import { EquipmentStatusFilter } from "@/features/equipments/equipment-status-filter";
 import {
-    EquipmentStatusFilter,
+    equipmentStatusSearchLabels,
     type EquipmentStatusFilterValue,
-} from "@/features/equipments/equipment-status-filter";
+} from "@/features/equipments/equipment-status-config";
 
 type EquipmentsApiResponse = {
     equipments: Equipment[];
@@ -96,18 +97,12 @@ export function EquipmentPageContent() {
     const normalizedSearchTerm = searchTerm.trim().toLowerCase();
 
     const filteredEquipments = equipments.filter((equipment) => {
-        const statusLabelByStatus = {
-            active: "ativo",
-            inactive: "inativo",
-            maintenance: "em manutenção",
-        };
-
         const searchableContent = [
             equipment.name,
             equipment.patrimony_code,
             equipment.location,
             equipment.status,
-            statusLabelByStatus[equipment.status],
+            equipmentStatusSearchLabels[equipment.status],
         ]
             .join(" ")
             .toLowerCase();

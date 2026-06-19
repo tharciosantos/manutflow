@@ -1,10 +1,12 @@
+"use client";
+
+import { useState } from "react";
 import {
     equipmentStatusLabels,
     equipmentStatusStyles,
     type EquipmentStatusFilterValue,
 } from "@/features/equipments/equipment-status-config";
 import type { Equipment } from "@/types/equipment";
-
 
 type EquipmentListProps = {
     equipments: Equipment[];
@@ -13,6 +15,7 @@ type EquipmentListProps = {
     selectedStatus: EquipmentStatusFilterValue;
     isLoading: boolean;
     errorMessage: string;
+    onRefresh: () => Promise<void>;
 };
 
 export function EquipmentList({
@@ -22,7 +25,45 @@ export function EquipmentList({
     selectedStatus,
     isLoading,
     errorMessage,
+    onRefresh,
 }: EquipmentListProps) {
+
+    const [deletingEquipmentId, setDeletingEquipmentId] = useState("");
+
+    async function handleDelete(equipmentId: string) {
+        const confirmed = window.confirm(
+            "Tem certeza que deseja excluir este equipamento?",
+        );
+
+        if (!confirmed) {
+            return;
+        }
+
+        try {
+            setDeletingEquipmentId(equipmentId);
+
+            const response = await fetch(`/api/equipments/${equipmentId}`, {
+                method: "DELETE",
+            });
+
+            const result = (await response.json()) as { error?: string };
+
+            if (!response.ok) {
+                throw new Error(result.error ?? "Erro ao excluir equipamento.");
+            }
+
+            await onRefresh();
+        } catch (error) {
+            const message =
+                error instanceof Error
+                    ? error.message
+                    : "Não foi possível excluir o equipamento.";
+
+            window.alert(message);
+        } finally {
+            setDeletingEquipmentId("");
+        }
+    }
 
     if (isLoading) {
         return (
@@ -128,11 +169,22 @@ export function EquipmentList({
                                 </div>
                             </div>
 
-                            <span
-                                className={`w-fit rounded-full border px-3 py-1 text-xs font-medium ${equipmentStatusStyles[equipment.status]}`}
-                            >
-                                {equipmentStatusLabels[equipment.status]}
-                            </span>
+                            <div className="flex flex-wrap gap-2 sm:justify-end">
+                                <span
+                                    className={`w-fit rounded-full border px-3 py-1 text-xs font-medium ${equipmentStatusStyles[equipment.status]}`}
+                                >
+                                    {equipmentStatusLabels[equipment.status]}
+                                </span>
+
+                                <button
+                                    type="button"
+                                    onClick={() => handleDelete(equipment.id)}
+                                    disabled={deletingEquipmentId === equipment.id}
+                                    className="w-fit rounded-full border border-red-500/30 px-3 py-1 text-xs font-medium text-red-300 transition hover:bg-red-500/10 disabled:cursor-not-allowed disabled:opacity-60"
+                                >
+                                    {deletingEquipmentId === equipment.id ? "Excluindo..." : "Excluir"}
+                                </button>
+                            </div>
                         </div>
                     </article>
                 ))}

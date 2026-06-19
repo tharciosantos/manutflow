@@ -135,6 +135,7 @@ export function EquipmentPageContent() {
                 selectedStatus={selectedStatus}
                 isLoading={isLoading}
                 errorMessage={errorMessage}
+                onRefresh={loadEquipments}
             />
         </>
     );

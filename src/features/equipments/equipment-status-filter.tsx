@@ -1,21 +1,12 @@
-import type { EquipmentStatus } from "@/types/equipment";
-
-export type EquipmentStatusFilterValue = "all" | EquipmentStatus;
+import {
+    equipmentStatusFilterOptions,
+    type EquipmentStatusFilterValue,
+} from "@/features/equipments/equipment-status-config";
 
 type EquipmentStatusFilterProps = {
     selectedStatus: EquipmentStatusFilterValue;
     onSelectedStatusChange: (status: EquipmentStatusFilterValue) => void;
 };
-
-const statusOptions: Array<{
-    value: EquipmentStatusFilterValue;
-    label: string;
-}> = [
-        { value: "all", label: "Todos" },
-        { value: "active", label: "Ativos" },
-        { value: "inactive", label: "Inativos" },
-        { value: "maintenance", label: "Em manutenção" },
-    ];
 
 export function EquipmentStatusFilter({
     selectedStatus,
@@ -38,7 +29,7 @@ export function EquipmentStatusFilter({
             </div>
 
             <div className="mt-5 flex flex-wrap gap-2">
-                {statusOptions.map((option) => {
+                {equipmentStatusFilterOptions.map((option) => {
                     const isActive = selectedStatus === option.value;
 
                     return (
@@ -47,8 +38,8 @@ export function EquipmentStatusFilter({
                             type="button"
                             onClick={() => onSelectedStatusChange(option.value)}
                             className={`rounded-full border px-4 py-2 text-sm font-medium transition ${isActive
-                                    ? "border-blue-500 bg-blue-500/10 text-blue-300"
-                                    : "border-slate-700 text-slate-300 hover:bg-slate-900"
+                                ? "border-blue-500 bg-blue-500/10 text-blue-300"
+                                : "border-slate-700 text-slate-300 hover:bg-slate-900"
                                 }`}
                         >
                             {option.label}

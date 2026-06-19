@@ -1,17 +1,10 @@
-import type { EquipmentStatusFilterValue } from "@/features/equipments/equipment-status-filter";
-import type { Equipment, EquipmentStatus } from "@/types/equipment";
+import {
+    equipmentStatusLabels,
+    equipmentStatusStyles,
+    type EquipmentStatusFilterValue,
+} from "@/features/equipments/equipment-status-config";
+import type { Equipment } from "@/types/equipment";
 
-const equipmentStatusLabel: Record<EquipmentStatus, string> = {
-    active: 'Ativo',
-    inactive: 'Inativo',
-    maintenance: 'Em manutenção',
-};
-
-const equipmentStatusStyles: Record<EquipmentStatus, string> = {
-    active: 'border-emerald-500/30 bg-emerald-500/10 text-emerald-300',
-    inactive: 'border-slate-500/30 bg-slate-500/10 text-slate-300',
-    maintenance: 'border-amber-500/30 bg-amber-500/10 text-amber-300',
-};
 
 type EquipmentListProps = {
     equipments: Equipment[];
@@ -74,7 +67,7 @@ export function EquipmentList({
 
                 {hasEquipments && hasStatusFilter && (
                     <p className="mt-2 text-sm text-slate-500">
-                        Filtro ativo: {equipmentStatusLabel[selectedStatus]}
+                        Filtro ativo: {equipmentStatusLabels[selectedStatus]}
                     </p>
                 )}
 
@@ -138,7 +131,7 @@ export function EquipmentList({
                             <span
                                 className={`w-fit rounded-full border px-3 py-1 text-xs font-medium ${equipmentStatusStyles[equipment.status]}`}
                             >
-                                {equipmentStatusLabel[equipment.status]}
+                                {equipmentStatusLabels[equipment.status]}
                             </span>
                         </div>
                     </article>

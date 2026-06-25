@@ -1,3 +1,5 @@
+import type { EquipmentStatus } from '@/types/equipment';
+
 export type ServiceOrderStatus = 'open' | 'in_progress' | 'closed';
 
 export type ServiceOrderPriority = 'low' | 'medium' | 'high' | 'critical';
@@ -7,7 +9,7 @@ export type ServiceOrderEquipment = {
     name: string;
     patrimony_code: string;
     location: string;
-    status: string;
+    status: EquipmentStatus;
 };
 
 export type ServiceOrder = {

@@ -118,10 +118,12 @@ export async function DELETE(_request: Request, { params }: RouteParams) {
         );
     }
 
-    const { error } = await supabase
+    const { data: deletedServiceOrder, error } = await supabase
         .from('service_orders')
         .delete()
-        .eq('id', id);
+        .eq('id', id)
+        .select('id')
+        .maybeSingle();
 
     if (error) {
         console.error('Erro ao excluir ordem de serviço:', error);
@@ -129,6 +131,16 @@ export async function DELETE(_request: Request, { params }: RouteParams) {
         return NextResponse.json(
             { error: 'Erro ao excluir ordem de serviço.' },
             { status: 500 },
+        );
+    }
+
+    if (!deletedServiceOrder) {
+        return NextResponse.json(
+            {
+                error:
+                    'Ordem de serviço não foi excluída. Verifique se ela existe ou se há permissão para exclusão.',
+            },
+            { status: 404 },
         );
     }
 

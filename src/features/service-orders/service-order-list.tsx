@@ -2,9 +2,14 @@
 
 import Link from 'next/link';
 import { useState } from 'react';
+import {
+    serviceOrderPriorityLabels,
+    serviceOrderPriorityStyles,
+    serviceOrderStatusLabels,
+    serviceOrderStatusStyles,
+} from '@/features/service-orders/service-order-config';
 import type {
     ServiceOrder,
-    ServiceOrderPriority,
     ServiceOrderStatus,
 } from '@/types/service-order';
 
@@ -17,31 +22,7 @@ type ServiceOrderListProps = {
     onRefresh: () => Promise<void>;
 };
 
-const statusLabels: Record<ServiceOrderStatus, string> = {
-    open: 'Aberta',
-    in_progress: 'Em andamento',
-    closed: 'Fechada',
-};
 
-const priorityLabels: Record<ServiceOrderPriority, string> = {
-    low: 'Baixa',
-    medium: 'Média',
-    high: 'Alta',
-    critical: 'Crítica',
-};
-
-const statusStyles: Record<ServiceOrderStatus, string> = {
-    open: 'border-teal-500/30 bg-teal-500/10 text-teal-300',
-    in_progress: 'border-amber-500/30 bg-amber-500/10 text-amber-300',
-    closed: 'border-slate-500/30 bg-slate-500/10 text-slate-300',
-};
-
-const priorityStyles: Record<ServiceOrderPriority, string> = {
-    low: 'border-slate-500/30 bg-slate-500/10 text-slate-300',
-    medium: 'border-yellow-500/30 bg-yellow-500/10 text-yellow-300',
-    high: 'border-orange-500/30 bg-orange-500/10 text-orange-300',
-    critical: 'border-red-500/30 bg-red-500/10 text-red-300',
-};
 
 export function ServiceOrderList({
     orders,
@@ -225,23 +206,23 @@ export function ServiceOrderList({
                                             event.target.value as ServiceOrderStatus,
                                         )
                                     }
-                                    className={`rounded-full border px-3 py-1 text-xs font-medium outline-none transition disabled:cursor-not-allowed disabled:opacity-60 ${statusStyles[order.status]}`}
+                                    className={`rounded-full border px-3 py-1 text-xs font-medium outline-none transition disabled:cursor-not-allowed disabled:opacity-60 ${serviceOrderStatusStyles[order.status]}`}
                                 >
                                     <option value="open" className="bg-slate-950 text-slate-100">
-                                        {statusLabels.open}
+                                        {serviceOrderStatusLabels.open}
                                     </option>
                                     <option value="in_progress" className="bg-slate-950 text-slate-100">
-                                        {statusLabels.in_progress}
+                                        {serviceOrderStatusLabels.in_progress}
                                     </option>
                                     <option value="closed" className="bg-slate-950 text-slate-100">
-                                        {statusLabels.closed}
+                                        {serviceOrderStatusLabels.closed}
                                     </option>
                                 </select>
 
                                 <span
-                                    className={`rounded-full border px-3 py-1 text-xs font-medium ${priorityStyles[order.priority]}`}
+                                    className={`rounded-full border px-3 py-1 text-xs font-medium ${serviceOrderPriorityStyles[order.priority]}`}
                                 >
-                                    {priorityLabels[order.priority]}
+                                    {serviceOrderPriorityLabels[order.priority]}
                                 </span>
                                 <Link
                                     href={`/ordens/${order.id}`}

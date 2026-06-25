@@ -3,11 +3,13 @@
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
 import { AppShell } from '@/components/layout/app-shell';
-import type {
-    ServiceOrder,
-    ServiceOrderPriority,
-    ServiceOrderStatus,
-} from '@/types/service-order';
+import {
+    serviceOrderPriorityLabels,
+    serviceOrderPriorityStyles,
+    serviceOrderStatusLabels,
+    serviceOrderStatusStyles,
+} from '@/features/service-orders/service-order-config';
+import type { ServiceOrder } from '@/types/service-order';
 import {
     equipmentStatusLabels,
     equipmentStatusStyles,
@@ -22,32 +24,6 @@ type ServiceOrderDetailsPageProps = {
 type ServiceOrderDetailsResponse = {
     serviceOrder?: ServiceOrder;
     error?: string;
-};
-
-const statusLabels: Record<ServiceOrderStatus, string> = {
-    open: 'Aberta',
-    in_progress: 'Em andamento',
-    closed: 'Fechada',
-};
-
-const priorityLabels: Record<ServiceOrderPriority, string> = {
-    low: 'Baixa',
-    medium: 'Média',
-    high: 'Alta',
-    critical: 'Crítica',
-};
-
-const statusStyles: Record<ServiceOrderStatus, string> = {
-    open: 'border-teal-500/30 bg-teal-500/10 text-teal-300',
-    in_progress: 'border-amber-500/30 bg-amber-500/10 text-amber-300',
-    closed: 'border-slate-500/30 bg-slate-500/10 text-slate-300',
-};
-
-const priorityStyles: Record<ServiceOrderPriority, string> = {
-    low: 'border-slate-500/30 bg-slate-500/10 text-slate-300',
-    medium: 'border-yellow-500/30 bg-yellow-500/10 text-yellow-300',
-    high: 'border-orange-500/30 bg-orange-500/10 text-orange-300',
-    critical: 'border-red-500/30 bg-red-500/10 text-red-300',
 };
 
 export default function ServiceOrderDetailsPage({
@@ -175,15 +151,15 @@ export default function ServiceOrderDetailsPage({
 
                                 <div className="flex flex-wrap gap-2 sm:justify-end">
                                     <span
-                                        className={`w-fit rounded-full border px-3 py-1 text-xs font-medium ${statusStyles[serviceOrder.status]}`}
+                                        className={`w-fit rounded-full border px-3 py-1 text-xs font-medium ${serviceOrderStatusStyles[serviceOrder.status]}`}
                                     >
-                                        {statusLabels[serviceOrder.status]}
+                                        {serviceOrderStatusLabels[serviceOrder.status]}
                                     </span>
 
                                     <span
-                                        className={`w-fit rounded-full border px-3 py-1 text-xs font-medium ${priorityStyles[serviceOrder.priority]}`}
+                                        className={`w-fit rounded-full border px-3 py-1 text-xs font-medium ${serviceOrderPriorityStyles[serviceOrder.priority]}`}
                                     >
-                                        {priorityLabels[serviceOrder.priority]}
+                                        {serviceOrderPriorityLabels[serviceOrder.priority]}
                                     </span>
                                 </div>
                             </div>
@@ -194,7 +170,7 @@ export default function ServiceOrderDetailsPage({
                                         Status
                                     </p>
                                     <p className="mt-1 text-sm font-medium text-slate-200">
-                                        {statusLabels[serviceOrder.status]}
+                                        {serviceOrderStatusLabels[serviceOrder.status]}
                                     </p>
                                 </div>
 
@@ -203,7 +179,7 @@ export default function ServiceOrderDetailsPage({
                                         Prioridade
                                     </p>
                                     <p className="mt-1 text-sm font-medium text-slate-200">
-                                        {priorityLabels[serviceOrder.priority]}
+                                        {serviceOrderPriorityLabels[serviceOrder.priority]}
                                     </p>
                                 </div>
 

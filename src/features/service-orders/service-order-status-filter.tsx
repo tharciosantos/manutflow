@@ -1,21 +1,14 @@
-import type { ServiceOrderStatus } from "@/types/service-order";
+import {
+    serviceOrderStatusFilterOptions,
+    type ServiceOrderStatusFilterValue,
+} from '@/features/service-orders/service-order-config';
 
-export type ServiceOrderStatusFilter = ServiceOrderStatus | 'all';
+export type ServiceOrderStatusFilter = ServiceOrderStatusFilterValue;
 
 type ServiceOrderStatusFilterProps = {
     selectedStatus: ServiceOrderStatusFilter;
     onStatusChange: (status: ServiceOrderStatusFilter) => void;
 };
-
-const filters: {
-    value: ServiceOrderStatusFilter;
-    label: string;
-}[] = [
-        { value: 'all', label: 'Todas' },
-        { value: 'open', label: 'Abertas' },
-        { value: 'in_progress', label: 'Em andamento' },
-        { value: 'closed', label: 'Fechadas' },
-    ];
 
 export function ServiceOrderStatusFilter({
     selectedStatus,
@@ -31,7 +24,7 @@ export function ServiceOrderStatusFilter({
             </div>
 
             <div className="flex flex-wrap gap-2">
-                {filters.map((filter) => {
+                {serviceOrderStatusFilterOptions.map((filter) => {
                     const isActive = selectedStatus === filter.value;
 
                     return (

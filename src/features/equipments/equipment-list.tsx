@@ -178,7 +178,7 @@ export function EquipmentList({
                                 </span>
                                 <Link
                                     href={`/equipamentos/${equipment.id}`}
-                                    className="w-fit rounded-full border border-blue-500/30 px-3 py-1 text-xs font-medium text-blue-300 transition hover:bg-blue-500/10"
+                                    className="w-fit rounded-full border border-teal-500/30 px-3 py-1 text-xs font-medium text-teal-300 transition hover:bg-teal-500/10"
                                 >
                                     Ver detalhes
                                 </Link>

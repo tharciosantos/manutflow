@@ -7,7 +7,7 @@ type AppShellProps = {
 
 export function AppShell({ children }: AppShellProps) {
     return (
-        <main className="min-h-screen bg-slate-950 text-slate-100">
+        <main className="relative min-h-screen bg-slate-950 text-slate-100 bg-gradient-theme">
             <AppHeader />
             {children}
         </main>

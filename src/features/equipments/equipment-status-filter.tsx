@@ -38,7 +38,7 @@ export function EquipmentStatusFilter({
                             type="button"
                             onClick={() => onSelectedStatusChange(option.value)}
                             className={`rounded-full border px-4 py-2 text-sm font-medium transition ${isActive
-                                ? "border-blue-500 bg-blue-500/10 text-blue-300"
+                                ? "border-teal-500 bg-teal-500/10 text-teal-300"
                                 : "border-slate-700 text-slate-300 hover:bg-slate-900"
                                 }`}
                         >

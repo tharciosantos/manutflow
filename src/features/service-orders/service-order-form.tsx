@@ -108,7 +108,7 @@ export function ServiceOrderForm({ onCreated }: ServiceOrderFormProps) {
         >
             <div className="mb-6 flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
                 <div>
-                    <span className="rounded-full border border-blue-500/30 bg-blue-500/10 px-3 py-1 text-xs font-medium text-blue-300">
+                    <span className="rounded-full border border-teal-500/30 bg-teal-500/10 px-3 py-1 text-xs font-medium text-teal-300">
                         Nova OS
                     </span>
 
@@ -137,7 +137,7 @@ export function ServiceOrderForm({ onCreated }: ServiceOrderFormProps) {
                         value={title}
                         onChange={(event) => setTitle(event.target.value)}
                         placeholder="Ex: Troca de correia"
-                        className="w-full rounded-xl border border-slate-700 bg-slate-950 px-3 py-2.5 text-sm text-slate-100 outline-none transition placeholder:text-slate-600 focus:border-blue-500"
+                        className="w-full rounded-xl border border-slate-700 bg-slate-950 px-3 py-2.5 text-sm text-slate-100 outline-none transition placeholder:text-slate-600 focus:border-teal-500"
                     />
                 </div>
 
@@ -154,7 +154,7 @@ export function ServiceOrderForm({ onCreated }: ServiceOrderFormProps) {
                             id="equipment"
                             value={equipmentId}
                             onChange={(event) => setEquipmentId(event.target.value)}
-                            className="w-full rounded-xl border border-slate-700 bg-slate-950 px-3 py-2.5 text-sm text-slate-100 outline-none transition focus:border-blue-500"
+                            className="w-full rounded-xl border border-slate-700 bg-slate-950 px-3 py-2.5 text-sm text-slate-100 outline-none transition focus:border-teal-500"
                         >
                             <option value="">Selecione um equipamento</option>
 
@@ -178,7 +178,7 @@ export function ServiceOrderForm({ onCreated }: ServiceOrderFormProps) {
                             id="priority"
                             value={priority}
                             onChange={(event) => setPriority(event.target.value)}
-                            className="w-full rounded-xl border border-slate-700 bg-slate-950 px-3 py-2.5 text-sm text-slate-100 outline-none transition focus:border-blue-500"
+                            className="w-full rounded-xl border border-slate-700 bg-slate-950 px-3 py-2.5 text-sm text-slate-100 outline-none transition focus:border-teal-500"
                         >
                             {priorities.map((item) => (
                                 <option key={item.value} value={item.value}>
@@ -203,7 +203,7 @@ export function ServiceOrderForm({ onCreated }: ServiceOrderFormProps) {
                         onChange={(event) => setDescription(event.target.value)}
                         placeholder="Descreva o problema ou serviço necessário."
                         rows={4}
-                        className="w-full resize-none rounded-xl border border-slate-700 bg-slate-950 px-3 py-2.5 text-sm text-slate-100 outline-none transition placeholder:text-slate-600 focus:border-blue-500"
+                        className="w-full resize-none rounded-xl border border-slate-700 bg-slate-950 px-3 py-2.5 text-sm text-slate-100 outline-none transition placeholder:text-slate-600 focus:border-teal-500"
                     />
                 </div>
             </div>
@@ -224,7 +224,7 @@ export function ServiceOrderForm({ onCreated }: ServiceOrderFormProps) {
                 <button
                     type="submit"
                     disabled={isSubmitting}
-                    className="rounded-xl bg-blue-600 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-blue-500 disabled:cursor-not-allowed disabled:opacity-60"
+                    className="rounded-xl bg-teal-600 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-teal-500 disabled:cursor-not-allowed disabled:opacity-60"
                 >
                     {isSubmitting ? 'Cadastrando...' : 'Abrir ordem'}
                 </button>

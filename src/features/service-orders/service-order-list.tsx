@@ -30,7 +30,7 @@ const priorityLabels: Record<ServiceOrderPriority, string> = {
 };
 
 const statusStyles: Record<ServiceOrderStatus, string> = {
-    open: 'border-blue-500/30 bg-blue-500/10 text-blue-300',
+    open: 'border-teal-500/30 bg-teal-500/10 text-teal-300',
     in_progress: 'border-amber-500/30 bg-amber-500/10 text-amber-300',
     closed: 'border-emerald-500/30 bg-emerald-500/10 text-emerald-300',
 };

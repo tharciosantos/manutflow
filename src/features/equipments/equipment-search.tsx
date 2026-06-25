@@ -37,7 +37,7 @@ export function EquipmentSearch({
                     value={searchTerm}
                     onChange={(event) => onSearchTermChange(event.target.value)}
                     placeholder="Ex: motor, MOTOR-001, setor c, ativo"
-                    className="w-full rounded-xl border border-slate-700 bg-slate-950 px-4 py-3 text-slate-100 outline-none transition placeholder:text-slate-500 focus:border-blue-500"
+                    className="w-full rounded-xl border border-slate-700 bg-slate-950 px-4 py-3 text-slate-100 outline-none transition placeholder:text-slate-500 focus:border-teal-500"
                 />
             </div>
         </section>

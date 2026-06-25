@@ -26,7 +26,7 @@ export function ServiceOrderSearch({
                 value={searchTerm}
                 onChange={(event) => onSearchChange(event.target.value)}
                 placeholder="Ex: esteira, COMP-001, rolamento..."
-                className="mt-3 w-full rounded-xl border border-slate-700 bg-slate-950 px-3 py-2.5 text-sm text-slate-100 outline-none transition placeholder:text-slate-600 focus:border-blue-500"
+                className="mt-3 w-full rounded-xl border border-slate-700 bg-slate-950 px-3 py-2.5 text-sm text-slate-100 outline-none transition placeholder:text-slate-600 focus:border-teal-500"
             />
         </div>
     );

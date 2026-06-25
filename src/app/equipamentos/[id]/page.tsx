@@ -117,7 +117,7 @@ export default function EquipmentDetailsPage({
             <section className="mx-auto max-w-5xl px-6 py-10">
                 <Link
                     href="/equipamentos"
-                    className="text-sm font-medium text-blue-300 transition hover:text-blue-200"
+                    className="text-sm font-medium text-teal-300 transition hover:text-teal-200"
                 >
                     ← Voltar para equipamentos
                 </Link>
@@ -145,7 +145,7 @@ export default function EquipmentDetailsPage({
                         <div className="mt-6 rounded-2xl border border-slate-800 bg-slate-950/70 p-6">
                             <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
                                 <div>
-                                    <span className="rounded-full border border-blue-500/30 bg-blue-500/10 px-3 py-1 text-xs font-medium text-blue-300">
+                                    <span className="rounded-full border border-teal-500/30 bg-teal-500/10 px-3 py-1 text-xs font-medium text-teal-300">
                                         Detalhes do equipamento
                                     </span>
 
@@ -251,7 +251,7 @@ export default function EquipmentDetailsPage({
                                                 </div>
 
                                                 <div className="flex flex-wrap gap-2 sm:justify-end">
-                                                    <span className="rounded-full border border-blue-500/30 bg-blue-500/10 px-3 py-1 text-xs font-medium text-blue-300">
+                                                    <span className="rounded-full border border-teal-500/30 bg-teal-500/10 px-3 py-1 text-xs font-medium text-teal-300">
                                                         {serviceOrderStatusLabels[order.status]}
                                                     </span>
 

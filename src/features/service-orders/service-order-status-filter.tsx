@@ -40,7 +40,7 @@ export function ServiceOrderStatusFilter({
                             type="button"
                             onClick={() => onStatusChange(filter.value)}
                             className={`rounded-full border px-3 py-1.5 text-xs font-medium transition ${isActive
-                                ? 'border-blue-500/40 bg-blue-500/15 text-blue-300'
+                                ? 'border-teal-500/40 bg-teal-500/15 text-teal-300'
                                 : 'border-slate-700 bg-slate-900 text-slate-400 hover:border-slate-600 hover:text-slate-200'
                                 }`}
                         >

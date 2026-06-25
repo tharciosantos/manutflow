@@ -1,21 +1,27 @@
 # ManutFlow
 
-Sistema de Controle de Manutenção e Ordens de Serviço desenvolvido como projeto full stack de estudo, com foco em organização de código, banco de dados, boas práticas e evolução incremental.
+Sistema de Controle de Manutenção e Ordens de Serviço desenvolvido como projeto full stack de estudo, com foco em organização de código, banco de dados, boas práticas, documentação técnica e evolução incremental.
 
-O projeto está sendo construído do zero como parte de um desafio prático de aprendizado, evoluindo etapa por etapa com foco em entendimento real dos conceitos aplicados.
+O projeto está sendo construído do zero como parte de um desafio prático de aprendizado, evoluindo etapa por etapa com foco em entendimento real dos conceitos aplicados em uma aplicação full stack.
 
 ## Preview
 
 ### Dashboard
 
 <p align="center">
-  <img src="./docs/preview-dashboard.png" alt="Preview do dashboard do ManutFlow" width="900" />
+  <img src="./docs/preview-dashboard.png" alt="Preview do dashboard do ManutFlow com indicadores de equipamentos e ordens de serviço" width="900" />
 </p>
 
 ### Equipamentos
 
 <p align="center">
-  <img src="./docs/preview-equipamentos.png" alt="Preview da tela de equipamentos do ManutFlow" width="900" />
+  <img src="./docs/preview-equipamentos.png" alt="Preview da tela de equipamentos do ManutFlow com cadastro, busca, filtros e listagem" width="900" />
+</p>
+
+### Detalhes do equipamento
+
+<p align="center">
+  <img src="./docs/preview-equipamento-detalhes.png" alt="Preview da página de detalhes de equipamento do ManutFlow com informações gerais e ordens vinculadas" width="900" />
 </p>
 
 ### Ordens de Serviço
@@ -32,7 +38,7 @@ O projeto está sendo construído do zero como parte de um desafio prático de a
 
 O ManutFlow tem como objetivo simular um sistema usado por empresas para controlar equipamentos, ordens de manutenção, prioridades, status e histórico de atendimento.
 
-A ideia do projeto é aprender desenvolvimento full stack construindo uma aplicação real, passando por front-end, back-end, banco de dados, autenticação, testes, logs e deploy.
+A ideia do projeto é aprender desenvolvimento full stack construindo uma aplicação real, passando por front-end, back-end, banco de dados, validações, regras de negócio, documentação, autenticação futura, testes, logs e deploy.
 
 ## Tecnologias utilizadas até o momento
 
@@ -55,14 +61,21 @@ O projeto está em desenvolvimento e atualmente possui:
 * Total de equipamentos cadastrados
 * Total de ordens de serviço
 * Contagem de ordens abertas, em andamento e fechadas
+* Interface em tema dark com identidade visual em teal
 
 ### Equipamentos
 
-* Cadastro e listagem de equipamentos
+* Cadastro, listagem e exclusão de equipamentos
 * Validação de campos obrigatórios
 * Tratamento para código de patrimônio duplicado
+* Busca textual por nome, código de patrimônio, localização e status
+* Filtro por status: ativo, inativo e em manutenção
 * Status exibidos com textos amigáveis e badges visuais
-* Atualização automática da lista após cadastro
+* Página de detalhes do equipamento
+* Exibição de ordens de serviço vinculadas ao equipamento
+* Bloqueio de exclusão para equipamentos com ordens de serviço vinculadas
+* Atualização automática da lista após cadastro ou exclusão
+* Estado vazio para busca e filtros sem resultado
 
 ### Ordens de Serviço
 
@@ -71,7 +84,7 @@ O projeto está em desenvolvimento e atualmente possui:
 * Alteração de status pela interface
 * Exclusão de ordens de serviço
 * Busca textual por título, descrição, equipamento, patrimônio e local
-* Filtro por status
+* Filtro por status: abertas, em andamento e fechadas
 * Estados vazios para busca e filtros sem resultado
 * Atualização automática da lista após cadastro, exclusão ou alteração de status
 
@@ -81,6 +94,9 @@ O projeto está em desenvolvimento e atualmente possui:
 * Validação dos dados no servidor antes de salvar no banco
 * Integração com Supabase e PostgreSQL
 * Relacionamento entre `equipments` e `service_orders`
+* Rota dinâmica para buscar detalhes de um equipamento
+* Rota dinâmica para excluir equipamentos com validação de vínculo
+* Bloqueio de exclusão de equipamentos com ordens vinculadas
 * Row Level Security configurado inicialmente
 * Policies provisórias para ambiente de desenvolvimento
 
@@ -94,11 +110,15 @@ src/
 │  ├─ api/
 │  │  ├─ dashboard-summary/
 │  │  ├─ equipments/
+│  │  │  ├─ [id]/
+│  │  │  └─ route.ts
 │  │  ├─ health/
 │  │  └─ service-orders/
 │  │     ├─ [id]/
 │  │     └─ route.ts
 │  ├─ equipamentos/
+│  │  ├─ [id]/
+│  │  └─ page.tsx
 │  ├─ ordens/
 │  ├─ layout.tsx
 │  └─ page.tsx
@@ -121,7 +141,11 @@ Página inicial do sistema, funcionando como dashboard com indicadores reais de 
 
 ### `/equipamentos`
 
-Página responsável por cadastrar e listar os equipamentos da empresa.
+Página responsável por cadastrar, listar, buscar, filtrar e excluir equipamentos da empresa.
+
+### `/equipamentos/[id]`
+
+Página responsável por exibir os detalhes de um equipamento específico, incluindo dados gerais e ordens de serviço vinculadas.
 
 ### `/ordens`
 
@@ -155,6 +179,17 @@ Rota responsável por listar e cadastrar equipamentos.
 GET  /api/equipments
 POST /api/equipments
 ```
+
+### `/api/equipments/[id]`
+
+Rota responsável por buscar detalhes ou excluir um equipamento específico.
+
+```text
+GET    /api/equipments/[id]
+DELETE /api/equipments/[id]
+```
+
+A exclusão de equipamentos valida se existem ordens de serviço vinculadas. Caso existam vínculos, a exclusão é bloqueada para preservar a integridade dos dados.
 
 ### `/api/service-orders`
 
@@ -233,6 +268,8 @@ service_orders.equipment_id
 
 Esse relacionamento permite listar uma ordem de serviço junto com os dados do equipamento vinculado, como nome, código de patrimônio e localização.
 
+Também permite exibir, na página de detalhes do equipamento, as ordens de serviço vinculadas a ele.
+
 ## Fluxos principais
 
 ### Cadastro de equipamento
@@ -249,6 +286,50 @@ API salva no Supabase
 Banco aplica regras como unique e check
         ↓
 Interface exibe sucesso ou erro
+        ↓
+Lista de equipamentos é atualizada
+```
+
+### Busca e filtro de equipamentos
+
+```text
+Usuário digita um termo de busca ou seleciona um status
+        ↓
+Front-end filtra os equipamentos já carregados
+        ↓
+Lista exibe apenas os equipamentos compatíveis
+        ↓
+Caso não existam resultados, a interface exibe um estado vazio específico
+```
+
+### Detalhes do equipamento
+
+```text
+Usuário acessa os detalhes de um equipamento
+        ↓
+Front-end requisita GET /api/equipments/[id]
+        ↓
+API busca os dados do equipamento
+        ↓
+API busca as ordens de serviço vinculadas ao equipamento
+        ↓
+Interface exibe informações gerais e histórico vinculado
+```
+
+### Exclusão de equipamento
+
+```text
+Usuário solicita a exclusão de um equipamento
+        ↓
+Interface pede confirmação
+        ↓
+Front-end envia DELETE para /api/equipments/[id]
+        ↓
+API verifica se existem ordens de serviço vinculadas
+        ↓
+Se houver vínculo, a exclusão é bloqueada
+        ↓
+Se não houver vínculo, o equipamento é removido
         ↓
 Lista de equipamentos é atualizada
 ```
@@ -293,7 +374,7 @@ Status atualizado aparece na tela
 
 ## Validações atuais
 
-A API valida os dados antes de salvar ou atualizar registros.
+A API valida os dados antes de salvar, atualizar ou excluir registros.
 
 ### Equipamentos
 
@@ -301,7 +382,8 @@ A API valida os dados antes de salvar ou atualizar registros.
 * código de patrimônio obrigatório;
 * localização obrigatória;
 * status válido;
-* código de patrimônio único.
+* código de patrimônio único;
+* bloqueio de exclusão quando existem ordens vinculadas.
 
 ### Ordens de serviço
 
@@ -312,6 +394,21 @@ A API valida os dados antes de salvar ou atualizar registros.
 * vínculo obrigatório com um equipamento existente.
 
 Além das validações da API, o banco também possui regras para limitar valores aceitos em campos como `status` e `priority`.
+
+## Interface e identidade visual
+
+A interface utiliza tema dark com base em tons de slate e destaques em teal.
+
+A paleta visual segue uma separação entre cores de identidade e cores semânticas:
+
+* `teal` para ações principais, links, filtros ativos e badges informativos;
+* `emerald` para estados positivos, como ativo ou fechado;
+* `amber` para manutenção ou andamento;
+* `yellow`, `orange` e `red` para níveis de prioridade;
+* `red` para erros e ações destrutivas;
+* `slate` e `white` para base visual, textos e superfícies.
+
+O objetivo é manter uma aparência consistente, discreta e próxima de um sistema real de uso interno.
 
 ## Variáveis de ambiente
 
@@ -376,8 +473,6 @@ http://localhost:3000
 
 ## Próximos passos
 
-* Refatorar a tela de equipamentos para centralizar o carregamento de dados no componente de página
-* Adicionar busca de equipamentos por texto
 * Criar página de detalhes da ordem de serviço
 * Criar histórico de alterações da ordem
 * Melhorar o dashboard com indicadores adicionais
@@ -400,14 +495,19 @@ Até o momento, o projeto já passou por conceitos importantes de desenvolviment
 * consumo de API com `fetch`;
 * estado de carregamento, erro e lista vazia;
 * busca e filtro no front-end;
-* atualização automática da interface após ações do usuário.
+* rotas dinâmicas;
+* páginas de detalhes;
+* atualização automática da interface após ações do usuário;
+* identidade visual consistente com Tailwind CSS.
 
 ### Back-end e API
 
 * Server/API Routes;
 * métodos HTTP `GET`, `POST`, `PATCH` e `DELETE`;
+* rotas dinâmicas de API;
 * validação no servidor;
 * tratamento de erro;
+* bloqueio de ações com base em relacionamento entre tabelas;
 * separação entre interface, API e banco de dados.
 
 ### Banco de dados e segurança
@@ -418,11 +518,14 @@ Até o momento, o projeto já passou por conceitos importantes de desenvolviment
 * relacionamento entre tabelas;
 * chaves estrangeiras;
 * Row Level Security;
-* policies no Supabase.
+* policies no Supabase;
+* preservação de integridade ao impedir exclusão de equipamentos vinculados a ordens.
 
 ### Processo de desenvolvimento
 
 * versionamento com Git e GitHub;
 * fluxo de branch, commit, Pull Request, merge e limpeza de branches;
 * evolução incremental por pequenas tarefas;
+* auditoria visual com apoio de agente de código;
+* revisão de alterações antes do commit;
 * documentação técnica do projeto.

@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useState } from "react";
 import {
     equipmentStatusLabels,
@@ -175,7 +176,12 @@ export function EquipmentList({
                                 >
                                     {equipmentStatusLabels[equipment.status]}
                                 </span>
-
+                                <Link
+                                    href={`/equipamentos/${equipment.id}`}
+                                    className="w-fit rounded-full border border-blue-500/30 px-3 py-1 text-xs font-medium text-blue-300 transition hover:bg-blue-500/10"
+                                >
+                                    Ver detalhes
+                                </Link>
                                 <button
                                     type="button"
                                     onClick={() => handleDelete(equipment.id)}

@@ -8,6 +8,73 @@ type RouteParams = {
     }>;
 };
 
+export async function GET(_request: Request, { params }: RouteParams) {
+    const { id } = await params;
+
+    if (!id) {
+        return Response.json(
+            {
+                error: "ID do equipamento é obrigatório.",
+            },
+            {
+                status: 400,
+            },
+        );
+    }
+
+    const { data: equipment, error: equipmentError } = await supabase
+        .from("equipments")
+        .select("*")
+        .eq("id", id)
+        .maybeSingle();
+
+    if (equipmentError) {
+        return Response.json(
+            {
+                error: "Erro ao buscar equipamento.",
+                details: equipmentError.message,
+            },
+            {
+                status: 500,
+            },
+        );
+    }
+
+    if (!equipment) {
+        return Response.json(
+            {
+                error: "Equipamento não encontrado.",
+            },
+            {
+                status: 400,
+            },
+        );
+    }
+
+    const { data: serviceOrders, error: serviceOrdersError } = await supabase
+        .from("service_orders")
+        .select("id, title, description, status, priority, equipment_id, created_at")
+        .eq("equipment_id", id)
+        .order("created_at", { ascending: false });
+
+    if (serviceOrdersError) {
+        return Response.json(
+            {
+                error: "Erro ao buscar ordens vinculadas ao equipamento.",
+                details: serviceOrdersError.message,
+            },
+            {
+                status: 500,
+            },
+        );
+    }
+
+    return Response.json({
+        equipment,
+        serviceOrders: serviceOrders ?? [],
+    });
+}
+
 export async function DELETE(_request: Request, { params }: RouteParams) {
     const { id } = await params;
 
@@ -88,3 +155,4 @@ export async function DELETE(_request: Request, { params }: RouteParams) {
         message: "Equipamento excluído com sucesso.",
     });
 }
+

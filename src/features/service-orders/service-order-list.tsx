@@ -1,5 +1,6 @@
 'use client';
 
+import Link from 'next/link';
 import { useState } from 'react';
 import type {
     ServiceOrder,
@@ -32,7 +33,7 @@ const priorityLabels: Record<ServiceOrderPriority, string> = {
 const statusStyles: Record<ServiceOrderStatus, string> = {
     open: 'border-teal-500/30 bg-teal-500/10 text-teal-300',
     in_progress: 'border-amber-500/30 bg-amber-500/10 text-amber-300',
-    closed: 'border-emerald-500/30 bg-emerald-500/10 text-emerald-300',
+    closed: 'border-slate-500/30 bg-slate-500/10 text-slate-300',
 };
 
 const priorityStyles: Record<ServiceOrderPriority, string> = {
@@ -226,9 +227,15 @@ export function ServiceOrderList({
                                     }
                                     className={`rounded-full border px-3 py-1 text-xs font-medium outline-none transition disabled:cursor-not-allowed disabled:opacity-60 ${statusStyles[order.status]}`}
                                 >
-                                    <option value="open">{statusLabels.open}</option>
-                                    <option value="in_progress">{statusLabels.in_progress}</option>
-                                    <option value="closed">{statusLabels.closed}</option>
+                                    <option value="open" className="bg-slate-950 text-slate-100">
+                                        {statusLabels.open}
+                                    </option>
+                                    <option value="in_progress" className="bg-slate-950 text-slate-100">
+                                        {statusLabels.in_progress}
+                                    </option>
+                                    <option value="closed" className="bg-slate-950 text-slate-100">
+                                        {statusLabels.closed}
+                                    </option>
                                 </select>
 
                                 <span
@@ -236,7 +243,12 @@ export function ServiceOrderList({
                                 >
                                     {priorityLabels[order.priority]}
                                 </span>
-
+                                <Link
+                                    href={`/ordens/${order.id}`}
+                                    className="rounded-full border border-teal-500/30 px-3 py-1 text-xs font-medium text-teal-300 transition hover:bg-teal-500/10"
+                                >
+                                    Ver detalhes
+                                </Link>
                                 <button
                                     type="button"
                                     onClick={() => handleDelete(order.id)}

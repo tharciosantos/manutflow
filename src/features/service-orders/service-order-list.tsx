@@ -129,7 +129,7 @@ export function ServiceOrderList({
 
                 {hasOrders && (
                     <p className='mt-2 text-xs text-slate-500'>
-                        Tente alterar o status selecionado ou buscar por outro termo.
+                        Tente alterar os filtros selecionados ou buscar por outro termo.
                     </p>
                 )}
             </div>

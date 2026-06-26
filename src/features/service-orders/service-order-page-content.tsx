@@ -5,6 +5,10 @@ import type { ServiceOrder } from '@/types/service-order';
 import { ServiceOrderForm } from './service-order-form';
 import { ServiceOrderList } from './service-order-list';
 import {
+    ServiceOrderPriorityFilter,
+    type ServiceOrderPriorityFilter as ServiceOrderPriorityFilterType,
+} from './service-order-priority-filter';
+import {
     ServiceOrderStatusFilter,
     type ServiceOrderStatusFilter as ServiceOrderStatusFilterType
 } from './service-order-status-filter';
@@ -26,6 +30,8 @@ export function ServiceOrderPageContent() {
     const [errorMessage, setErrorMessage] = useState('');
     const [selectedStatus, setSelectedStatus] =
         useState<ServiceOrderStatusFilterType>('all');
+    const [selectedPriority, setSelectedPriority] =
+        useState<ServiceOrderPriorityFilterType>('all');
 
     const [searchTerm, setSearchTerm] = useState('');
 
@@ -80,6 +86,8 @@ export function ServiceOrderPageContent() {
     const filteredOrders = orders.filter((order) => {
         const matchesStatus =
             selectedStatus === 'all' || order.status === selectedStatus;
+        const matchesPriority =
+            selectedPriority === 'all' || order.priority === selectedPriority;
 
         const searchableText = [
             order.title,
@@ -95,7 +103,7 @@ export function ServiceOrderPageContent() {
         const matchesSearch =
             !normalizedSearchTerm || searchableText.includes(normalizedSearchTerm);
 
-        return matchesStatus && matchesSearch;
+        return matchesStatus && matchesPriority && matchesSearch;
     });
 
     return (
@@ -110,6 +118,11 @@ export function ServiceOrderPageContent() {
             <ServiceOrderStatusFilter
                 selectedStatus={selectedStatus}
                 onStatusChange={setSelectedStatus}
+            />
+
+            <ServiceOrderPriorityFilter
+                selectedPriority={selectedPriority}
+                onPriorityChange={setSelectedPriority}
             />
 
             <ServiceOrderList

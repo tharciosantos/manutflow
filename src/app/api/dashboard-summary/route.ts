@@ -8,6 +8,10 @@ export async function GET() {
         openOrdersResult,
         inProgressOrdersResult,
         closedOrdersResult,
+        lowPriorityOrdersResult,
+        mediumPriorityOrdersResult,
+        highPriorityOrdersResult,
+        criticalPriorityOrdersResult,
     ] = await Promise.all([
         supabase
             .from('equipments')
@@ -31,6 +35,26 @@ export async function GET() {
             .from('service_orders')
             .select('*', { count: 'exact', head: true })
             .eq('status', 'closed'),
+
+        supabase
+            .from('service_orders')
+            .select('*', { count: 'exact', head: true })
+            .eq('priority', 'low'),
+
+        supabase
+            .from('service_orders')
+            .select('*', { count: 'exact', head: true })
+            .eq('priority', 'medium'),
+
+        supabase
+            .from('service_orders')
+            .select('*', { count: 'exact', head: true })
+            .eq('priority', 'high'),
+
+        supabase
+            .from('service_orders')
+            .select('*', { count: 'exact', head: true })
+            .eq('priority', 'critical'),
     ]);
 
     const hasError =
@@ -38,7 +62,11 @@ export async function GET() {
         serviceOrdersResult.error ||
         openOrdersResult.error ||
         inProgressOrdersResult.error ||
-        closedOrdersResult.error;
+        closedOrdersResult.error ||
+        lowPriorityOrdersResult.error ||
+        mediumPriorityOrdersResult.error ||
+        highPriorityOrdersResult.error ||
+        criticalPriorityOrdersResult.error;
 
     if (hasError) {
         console.error('Erro ao buscar resumo do dashboard:', {
@@ -47,12 +75,23 @@ export async function GET() {
             openOrdersError: openOrdersResult.error,
             inProgressOrdersError: inProgressOrdersResult.error,
             closedOrdersError: closedOrdersResult.error,
+            lowPriorityOrdersError: lowPriorityOrdersResult.error,
+            mediumPriorityOrdersError: mediumPriorityOrdersResult.error,
+            highPriorityOrdersError: highPriorityOrdersResult.error,
+            criticalPriorityOrdersError: criticalPriorityOrdersResult.error,
         });
 
-        return NextResponse.json(
-            { error: 'Erro ao buscar resumo do dashboard.' },
-            { status: 500 },
-        );
+        return NextResponse.json({
+            totalEquipments: equipmentsResult.count ?? 0,
+            totalServiceOrders: serviceOrdersResult.count ?? 0,
+            openServiceOrders: openOrdersResult.count ?? 0,
+            inProgressServiceOrders: inProgressOrdersResult.count ?? 0,
+            closedServiceOrders: closedOrdersResult.count ?? 0,
+            lowPriorityServiceOrders: lowPriorityOrdersResult.count ?? 0,
+            mediumPriorityServiceOrders: mediumPriorityOrdersResult.count ?? 0,
+            highPriorityServiceOrders: highPriorityOrdersResult.count ?? 0,
+            criticalPriorityServiceOrders: criticalPriorityOrdersResult.count ?? 0,
+        });
     }
 
     return NextResponse.json({

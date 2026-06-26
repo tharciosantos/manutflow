@@ -1,8 +1,8 @@
 # ManutFlow
 
-Sistema de Controle de Manutenção e Ordens de Serviço desenvolvido como projeto full stack de estudo, com foco em organização de código, banco de dados, boas práticas, documentação técnica e evolução incremental.
+Sistema de Controle de Manutenção e Ordens de Serviço desenvolvido como projeto full stack de estudo, com foco em organização de código, banco de dados, regras de negócio e evolução incremental.
 
-O projeto está sendo construído do zero como parte de um desafio prático de aprendizado, evoluindo etapa por etapa com foco em entendimento real dos conceitos aplicados em uma aplicação full stack.
+O projeto simula um sistema interno usado por empresas para cadastrar equipamentos, abrir ordens de serviço, acompanhar status, definir prioridades e registrar histórico de alterações.
 
 ## Preview
 
@@ -37,16 +37,10 @@ O projeto está sendo construído do zero como parte de um desafio prático de a
 ### Detalhes da ordem de serviço
 
 <p align="center">
-  <img src="./docs/preview-ordem-detalhes.png" alt="Preview da página de detalhes de ordem de serviço do ManutFlow com status, prioridade e equipamento vinculado" width="900" />
+  <img src="./docs/preview-ordem-detalhes.png" alt="Preview da página de detalhes de ordem de serviço do ManutFlow com status, prioridade, histórico e equipamento vinculado" width="900" />
 </p>
 
-## Objetivo do projeto
-
-O ManutFlow tem como objetivo simular um sistema usado por empresas para controlar equipamentos, ordens de manutenção, prioridades, status e histórico de atendimento.
-
-A ideia do projeto é aprender desenvolvimento full stack construindo uma aplicação real, passando por front-end, back-end, banco de dados, validações, regras de negócio, documentação, autenticação futura, testes, logs e deploy.
-
-## Tecnologias utilizadas até o momento
+## Tecnologias
 
 * Next.js
 * React
@@ -57,9 +51,7 @@ A ideia do projeto é aprender desenvolvimento full stack construindo uma aplica
 * Git
 * GitHub
 
-## Status atual & Funcionalidades
-
-O projeto está em desenvolvimento e atualmente possui:
+## Funcionalidades
 
 ### Dashboard
 
@@ -67,54 +59,33 @@ O projeto está em desenvolvimento e atualmente possui:
 * Total de equipamentos cadastrados
 * Total de ordens de serviço
 * Contagem de ordens abertas, em andamento e fechadas
-* Interface em tema dark com identidade visual em teal
 
 ### Equipamentos
 
 * Cadastro, listagem e exclusão de equipamentos
-* Validação de campos obrigatórios
-* Tratamento para código de patrimônio duplicado
-* Busca textual por nome, código de patrimônio, localização e status
+* Busca por nome, patrimônio, localização e status
 * Filtro por status: ativo, inativo e em manutenção
-* Status exibidos com textos amigáveis e badges visuais
 * Página de detalhes do equipamento
-* Exibição de ordens de serviço vinculadas ao equipamento
-* Bloqueio de exclusão para equipamentos com ordens de serviço vinculadas
-* Atualização automática da lista após cadastro ou exclusão
-* Estado vazio para busca e filtros sem resultado
+* Exibição das ordens vinculadas ao equipamento
+* Bloqueio de exclusão quando existem ordens vinculadas
+* Tratamento para código de patrimônio duplicado
+* Estados de carregamento, erro e lista vazia
 
 ### Ordens de Serviço
 
 * Cadastro de ordens vinculadas a equipamentos
-* Listagem de ordens com dados do equipamento relacionado
-* Página de detalhes da ordem de serviço
-* Exibição de status, prioridade, descrição, data de criação e ID da ordem
-* Exibição do equipamento vinculado à ordem
-* Link direto entre a ordem e a página de detalhes do equipamento
-* Alteração de status pela interface
-* Exclusão de ordens de serviço com validação de remoção real na API
-* Busca textual por título, descrição, equipamento, patrimônio e local
+* Listagem com status, prioridade e dados do equipamento relacionado
+* Busca por título, descrição, equipamento, patrimônio e local
 * Filtro por status: abertas, em andamento e fechadas
-* Estados vazios para busca e filtros sem resultado
-* Atualização automática da lista após cadastro, exclusão ou alteração de status
+* Alteração de status pela interface
+* Exclusão com validação de remoção real na API
+* Página de detalhes da ordem
+* Exibição do equipamento vinculado
+* Histórico de alterações de status
 
-### Back-end e Banco de Dados
+## Arquitetura
 
-* API interna para dashboard, equipamentos e ordens de serviço
-* Validação dos dados no servidor antes de salvar no banco
-* Integração com Supabase e PostgreSQL
-* Relacionamento entre `equipments` e `service_orders`
-* Rota dinâmica para buscar detalhes de um equipamento
-* Rota dinâmica para buscar detalhes de uma ordem de serviço
-* Rota dinâmica para excluir equipamentos com validação de vínculo
-* Bloqueio de exclusão de equipamentos com ordens vinculadas
-* Validação de exclusão real para equipamentos e ordens de serviço
-* Row Level Security configurado inicialmente
-* Policies provisórias para ambiente de desenvolvimento
-
-> As permissões atuais são temporárias para desenvolvimento. Futuramente, elas serão ajustadas com autenticação e controle de acesso por usuário.
-
-## Estrutura do projeto
+O projeto usa uma organização por responsabilidade, separando rotas, componentes, features, tipos e integração com serviços externos.
 
 ```text
 src/
@@ -122,18 +93,10 @@ src/
 │  ├─ api/
 │  │  ├─ dashboard-summary/
 │  │  ├─ equipments/
-│  │  │  ├─ [id]/
-│  │  │  └─ route.ts
 │  │  ├─ health/
 │  │  └─ service-orders/
-│  │     ├─ [id]/
-│  │     └─ route.ts
 │  ├─ equipamentos/
-│  │  ├─ [id]/
-│  │  └─ page.tsx
 │  ├─ ordens/
-│  │  ├─ [id]/
-│  │  └─ page.tsx
 │  ├─ layout.tsx
 │  └─ page.tsx
 ├─ components/
@@ -149,96 +112,37 @@ src/
 
 ## Principais páginas
 
-### `/`
-
-Página inicial do sistema, funcionando como dashboard com indicadores reais de equipamentos e ordens de serviço.
-
-### `/equipamentos`
-
-Página responsável por cadastrar, listar, buscar, filtrar e excluir equipamentos da empresa.
-
-### `/equipamentos/[id]`
-
-Página responsável por exibir os detalhes de um equipamento específico, incluindo dados gerais e ordens de serviço vinculadas.
-
-### `/ordens`
-
-Página responsável por criar, listar, buscar, filtrar, atualizar status e excluir ordens de serviço vinculadas aos equipamentos cadastrados.
-
-### `/ordens/[id]`
-
-Página responsável por exibir os detalhes de uma ordem de serviço específica, incluindo status, prioridade, descrição, data de criação e equipamento vinculado.
-
-Também permite navegar diretamente da ordem para a página de detalhes do equipamento relacionado.
+| Rota                 | Descrição                                                          |
+| -------------------- | ------------------------------------------------------------------ |
+| `/`                  | Dashboard com indicadores de equipamentos e ordens                 |
+| `/equipamentos`      | Cadastro, listagem, busca, filtro e exclusão de equipamentos       |
+| `/equipamentos/[id]` | Detalhes do equipamento e ordens vinculadas                        |
+| `/ordens`            | Cadastro, listagem, busca, filtro, status e exclusão de ordens     |
+| `/ordens/[id]`       | Detalhes da ordem, equipamento vinculado e histórico de alterações |
 
 ## Rotas de API
 
-### `/api/health`
-
-Rota criada para verificar se o back-end da aplicação está respondendo corretamente.
-
-```text
-GET /api/health
-```
-
-### `/api/dashboard-summary`
-
-Rota responsável por retornar os indicadores do dashboard.
-
-```text
-GET /api/dashboard-summary
-```
-
-Retorna informações como total de equipamentos, total de ordens de serviço e contagem de ordens por status.
-
-### `/api/equipments`
-
-Rota responsável por listar e cadastrar equipamentos.
-
-```text
-GET  /api/equipments
-POST /api/equipments
-```
-
-### `/api/equipments/[id]`
-
-Rota responsável por buscar detalhes ou excluir um equipamento específico.
-
-```text
-GET    /api/equipments/[id]
-DELETE /api/equipments/[id]
-```
-
-A exclusão de equipamentos valida se existem ordens de serviço vinculadas. Caso existam vínculos, a exclusão é bloqueada para preservar a integridade dos dados.
-
-### `/api/service-orders`
-
-Rota responsável por listar e cadastrar ordens de serviço.
-
-```text
-GET  /api/service-orders
-POST /api/service-orders
-```
-
-### `/api/service-orders/[id]`
-
-Rota responsável por buscar detalhes, atualizar status ou excluir uma ordem de serviço específica.
-
-```text
-GET    /api/service-orders/[id]
-PATCH  /api/service-orders/[id]
-DELETE /api/service-orders/[id]
-```
-
-A busca de detalhes retorna a ordem de serviço junto com os dados do equipamento vinculado.
-
-A exclusão de ordens valida se uma linha foi realmente removida antes de retornar sucesso.
+| Método   | Rota                       | Descrição                                        |
+| -------- | -------------------------- | ------------------------------------------------ |
+| `GET`    | `/api/health`              | Verifica se a API está respondendo               |
+| `GET`    | `/api/dashboard-summary`   | Retorna os indicadores do dashboard              |
+| `GET`    | `/api/equipments`          | Lista equipamentos                               |
+| `POST`   | `/api/equipments`          | Cadastra equipamento                             |
+| `GET`    | `/api/equipments/[id]`     | Busca detalhes de um equipamento                 |
+| `DELETE` | `/api/equipments/[id]`     | Exclui equipamento com validação de vínculo      |
+| `GET`    | `/api/service-orders`      | Lista ordens de serviço                          |
+| `POST`   | `/api/service-orders`      | Cadastra ordem de serviço                        |
+| `GET`    | `/api/service-orders/[id]` | Busca detalhes da ordem, equipamento e histórico |
+| `PATCH`  | `/api/service-orders/[id]` | Atualiza status da ordem                         |
+| `DELETE` | `/api/service-orders/[id]` | Exclui ordem com validação de remoção real       |
 
 ## Banco de dados
 
-Até o momento, foram criadas as tabelas `equipments` e `service_orders`.
+O banco utiliza PostgreSQL no Supabase.
 
 ### `equipments`
+
+Tabela responsável pelos equipamentos cadastrados no sistema.
 
 Campos principais:
 
@@ -250,13 +154,15 @@ Campos principais:
 * `created_at`
 * `updated_at`
 
-Status possíveis:
+Status:
 
 * `active` → Ativo
 * `inactive` → Inativo
 * `maintenance` → Em manutenção
 
 ### `service_orders`
+
+Tabela responsável pelas ordens de serviço.
 
 Campos principais:
 
@@ -268,22 +174,36 @@ Campos principais:
 * `equipment_id`
 * `created_at`
 
-Status possíveis:
+Status:
 
 * `open` → Aberta
 * `in_progress` → Em andamento
 * `closed` → Fechada
 
-Prioridades possíveis:
+Prioridades:
 
 * `low` → Baixa
 * `medium` → Média
 * `high` → Alta
 * `critical` → Crítica
 
-## Relacionamento entre tabelas
+### `service_order_history`
 
-Uma ordem de serviço pertence a um equipamento.
+Tabela responsável por registrar alterações de status das ordens.
+
+Campos principais:
+
+* `id`
+* `service_order_id`
+* `event_type`
+* `previous_status`
+* `new_status`
+* `description`
+* `created_at`
+
+## Relacionamentos e regras
+
+Uma ordem de serviço pertence a um equipamento:
 
 ```text
 equipments.id
@@ -291,191 +211,48 @@ equipments.id
 service_orders.equipment_id
 ```
 
-Esse relacionamento permite listar uma ordem de serviço junto com os dados do equipamento vinculado, como nome, código de patrimônio e localização.
+Esse relacionamento permite:
 
-Também permite exibir, na página de detalhes do equipamento, as ordens de serviço vinculadas a ele.
+* listar ordens com os dados do equipamento vinculado;
+* exibir ordens vinculadas na página de detalhes do equipamento;
+* exibir o equipamento relacionado na página de detalhes da ordem;
+* impedir a exclusão de equipamentos que possuem ordens vinculadas.
 
-Na página de detalhes da ordem, esse relacionamento também permite exibir os dados do equipamento vinculado e navegar diretamente para seus detalhes.
+A tabela `service_order_history` registra eventos vinculados a uma ordem específica. Atualmente, ela é usada para salvar mudanças de status.
 
-## Fluxos principais
-
-### Cadastro de equipamento
-
-```text
-Usuário preenche o formulário
-        ↓
-Front-end envia POST para /api/equipments
-        ↓
-API valida os dados
-        ↓
-API salva no Supabase
-        ↓
-Banco aplica regras como unique e check
-        ↓
-Interface exibe sucesso ou erro
-        ↓
-Lista de equipamentos é atualizada
-```
-
-### Busca e filtro de equipamentos
-
-```text
-Usuário digita um termo de busca ou seleciona um status
-        ↓
-Front-end filtra os equipamentos já carregados
-        ↓
-Lista exibe apenas os equipamentos compatíveis
-        ↓
-Caso não existam resultados, a interface exibe um estado vazio específico
-```
-
-### Detalhes do equipamento
-
-```text
-Usuário acessa os detalhes de um equipamento
-        ↓
-Front-end requisita GET /api/equipments/[id]
-        ↓
-API busca os dados do equipamento
-        ↓
-API busca as ordens de serviço vinculadas ao equipamento
-        ↓
-Interface exibe informações gerais e histórico vinculado
-```
-
-### Exclusão de equipamento
-
-```text
-Usuário solicita a exclusão de um equipamento
-        ↓
-Interface pede confirmação
-        ↓
-Front-end envia DELETE para /api/equipments/[id]
-        ↓
-API verifica se existem ordens de serviço vinculadas
-        ↓
-Se houver vínculo, a exclusão é bloqueada
-        ↓
-Se não houver vínculo, o equipamento é removido
-        ↓
-Lista de equipamentos é atualizada
-```
-
-### Abertura de ordem de serviço
-
-```text
-Usuário preenche o formulário
-        ↓
-Seleciona um equipamento cadastrado
-        ↓
-Define a prioridade
-        ↓
-Front-end envia POST para /api/service-orders
-        ↓
-API valida os dados
-        ↓
-API salva a ordem no Supabase
-        ↓
-Ordem é vinculada ao equipamento pelo equipment_id
-        ↓
-Interface exibe sucesso ou erro
-        ↓
-Lista de ordens é atualizada
-```
-
-### Detalhes da ordem de serviço
-
-```text
-Usuário acessa os detalhes de uma ordem
-        ↓
-Front-end requisita GET /api/service-orders/[id]
-        ↓
-API busca a ordem de serviço
-        ↓
-API retorna a ordem junto com o equipamento vinculado
-        ↓
-Interface exibe status, prioridade, descrição e dados do equipamento
-        ↓
-Usuário pode navegar para a página de detalhes do equipamento vinculado
-```
-
-### Alteração de status da ordem
-
-```text
-Usuário altera o status na interface
-        ↓
-Front-end envia PATCH para /api/service-orders/[id]
-        ↓
-API valida se o status é permitido
-        ↓
-API atualiza a ordem no Supabase
-        ↓
-Interface recarrega a lista
-        ↓
-Status atualizado aparece na tela
-```
-
-### Exclusão de ordem de serviço
-
-```text
-Usuário solicita a exclusão de uma ordem
-        ↓
-Interface pede confirmação
-        ↓
-Front-end envia DELETE para /api/service-orders/[id]
-        ↓
-API tenta remover a ordem no Supabase
-        ↓
-API valida se uma linha foi realmente excluída
-        ↓
-Se a ordem não existir ou não for removida, retorna erro controlado
-        ↓
-Se a exclusão for confirmada, a lista de ordens é atualizada
-```
-
-## Validações atuais
+## Validações e regras de negócio
 
 A API valida os dados antes de salvar, atualizar ou excluir registros.
 
-### Equipamentos
+Principais validações implementadas:
 
-* nome obrigatório;
-* código de patrimônio obrigatório;
-* localização obrigatória;
-* status válido;
+* campos obrigatórios no cadastro de equipamentos;
 * código de patrimônio único;
-* bloqueio de exclusão quando existem ordens vinculadas.
-
-### Ordens de serviço
-
-* título obrigatório;
-* equipamento obrigatório;
+* status válido para equipamentos;
+* título obrigatório na abertura de ordem;
 * prioridade válida;
-* status válido ao atualizar;
-* vínculo obrigatório com um equipamento existente;
-* validação de remoção real ao excluir uma ordem.
-
-Além das validações da API, o banco também possui regras para limitar valores aceitos em campos como `status` e `priority`.
+* status válido ao atualizar uma ordem;
+* vínculo obrigatório entre ordem e equipamento;
+* bloqueio de exclusão de equipamentos com ordens vinculadas;
+* validação de remoção real ao excluir equipamentos e ordens;
+* registro de histórico quando o status da ordem é alterado.
 
 ## Interface e identidade visual
 
 A interface utiliza tema dark com base em tons de slate e destaques em teal.
 
-A paleta visual segue uma separação entre cores de identidade e cores semânticas:
+A paleta visual separa identidade e semântica:
 
-* `teal` para ações principais, links, filtros ativos e badges informativos;
+* `teal` para ações principais, links e elementos de destaque;
 * `emerald` para estados positivos, como equipamento ativo;
 * `slate` para estados neutros ou encerrados, como ordem fechada;
 * `amber` para manutenção ou andamento;
 * `yellow`, `orange` e `red` para níveis de prioridade;
-* `red` para erros e ações destrutivas;
-* `slate` e `white` para base visual, textos e superfícies.
+* `red` para erros e ações destrutivas.
 
 O objetivo é manter uma aparência consistente, discreta e próxima de um sistema real de uso interno.
 
 ## Variáveis de ambiente
-
-O projeto utiliza variáveis de ambiente para conectar com o Supabase.
 
 As variáveis necessárias estão documentadas no arquivo `.env.example`:
 
@@ -484,11 +261,11 @@ NEXT_PUBLIC_SUPABASE_URL=
 NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=
 ```
 
-Para rodar o projeto localmente, copie o arquivo `.env.example` para `.env.local` e preencha com os dados do seu projeto no Supabase.
+Para rodar localmente, copie `.env.example` para `.env.local` e preencha com as credenciais do Supabase.
 
 O arquivo `.env.local` não deve ser enviado para o GitHub.
 
-## Como rodar o projeto localmente
+## Como rodar localmente
 
 Clone o repositório:
 
@@ -496,7 +273,7 @@ Clone o repositório:
 git clone https://github.com/tharciosantos/manutflow.git
 ```
 
-Entre na pasta do projeto:
+Entre na pasta:
 
 ```bash
 cd manutflow
@@ -508,27 +285,25 @@ Instale as dependências:
 npm install
 ```
 
-Copie o arquivo de exemplo das variáveis de ambiente:
+Copie o arquivo de variáveis de ambiente:
 
 ```bash
 cp .env.example .env.local
 ```
 
-No Windows PowerShell, você também pode usar:
+No Windows PowerShell:
 
 ```powershell
 Copy-Item .env.example .env.local
 ```
 
-Depois, preencha o arquivo `.env.local` com os dados do seu projeto no Supabase.
-
-Rode o servidor de desenvolvimento:
+Rode o servidor:
 
 ```bash
 npm run dev
 ```
 
-Acesse no navegador:
+Acesse:
 
 ```text
 http://localhost:3000
@@ -536,7 +311,6 @@ http://localhost:3000
 
 ## Próximos passos
 
-* Criar histórico de alterações da ordem
 * Melhorar o dashboard com indicadores adicionais
 * Implementar autenticação
 * Melhorar regras de permissão no Supabase
@@ -546,52 +320,19 @@ http://localhost:3000
 
 ## Aprendizados aplicados
 
-Até o momento, o projeto já passou por conceitos importantes de desenvolvimento full stack.
+Este projeto reúne práticas importantes de desenvolvimento full stack:
 
-### Front-end
-
-* estrutura de rotas no Next.js;
-* componentes reutilizáveis;
 * organização por features;
-* Client Components;
+* rotas dinâmicas no Next.js;
 * consumo de API com `fetch`;
-* estado de carregamento, erro e lista vazia;
-* busca e filtro no front-end;
-* rotas dinâmicas;
-* páginas de detalhes;
-* navegação entre entidades relacionadas;
-* atualização automática da interface após ações do usuário;
-* identidade visual consistente com Tailwind CSS.
+* estados de carregamento, erro e lista vazia;
+* Server/API Routes com métodos `GET`, `POST`, `PATCH` e `DELETE`;
+* integração com Supabase e PostgreSQL;
+* modelagem de relacionamentos entre tabelas;
+* validação de dados no servidor;
+* regras de negócio baseadas em relacionamento;
+* histórico de alterações;
+* Row Level Security e policies provisórias no Supabase;
+* fluxo de branch, commit, Pull Request, merge e limpeza.
 
-### Back-end e API
-
-* Server/API Routes;
-* métodos HTTP `GET`, `POST`, `PATCH` e `DELETE`;
-* rotas dinâmicas de API;
-* busca de registros relacionados em rotas de detalhes;
-* validação no servidor;
-* tratamento de erro;
-* bloqueio de ações com base em relacionamento entre tabelas;
-* validação de exclusão real antes de retornar sucesso;
-* separação entre interface, API e banco de dados.
-
-### Banco de dados e segurança
-
-* integração com Supabase;
-* uso de variáveis de ambiente;
-* modelagem de tabelas no PostgreSQL;
-* relacionamento entre tabelas;
-* chaves estrangeiras;
-* Row Level Security;
-* policies no Supabase;
-* preservação de integridade ao impedir exclusão de equipamentos vinculados a ordens;
-* validação de consistência em operações de exclusão.
-
-### Processo de desenvolvimento
-
-* versionamento com Git e GitHub;
-* fluxo de branch, commit, Pull Request, merge e limpeza de branches;
-* evolução incremental por pequenas tarefas;
-* auditoria visual com apoio de agente de código;
-* revisão de alterações antes do commit;
-* documentação técnica do projeto.
+> As permissões atuais do Supabase são provisórias para desenvolvimento. Futuramente, elas serão ajustadas com autenticação e controle de acesso por usuário.

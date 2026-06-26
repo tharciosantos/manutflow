@@ -7,7 +7,7 @@ export default function Home() {
       <section className="mx-auto flex max-w-5xl flex-col justify-center px-6 py-20">
         <div className="text-center">
           <p className="mb-4 inline-flex rounded-full border border-slate-700 px-4 py-2 text-sm text-slate-300">
-            Projeto Full Stack • 14 dias
+            Sistema Full Stack
           </p>
 
           <h1 className="text-4xl font-bold tracking-tight sm:text-6xl">

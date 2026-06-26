@@ -4,6 +4,7 @@ import type {
 } from '@/types/service-order';
 
 export type ServiceOrderStatusFilterValue = ServiceOrderStatus | 'all';
+export type ServiceOrderPriorityFilterValue = ServiceOrderPriority | 'all';
 
 export const serviceOrderStatusLabels: Record<ServiceOrderStatus, string> = {
     open: 'Aberta',
@@ -39,4 +40,15 @@ export const serviceOrderStatusFilterOptions: Array<{
         { value: 'open', label: 'Abertas' },
         { value: 'in_progress', label: 'Em andamento' },
         { value: 'closed', label: 'Fechadas' },
+    ];
+
+export const serviceOrderPriorityFilterOptions: Array<{
+    value: ServiceOrderPriorityFilterValue;
+    label: string;
+}> = [
+        { value: 'all', label: 'Todas' },
+        { value: 'low', label: serviceOrderPriorityLabels.low },
+        { value: 'medium', label: serviceOrderPriorityLabels.medium },
+        { value: 'high', label: serviceOrderPriorityLabels.high },
+        { value: 'critical', label: serviceOrderPriorityLabels.critical },
     ];

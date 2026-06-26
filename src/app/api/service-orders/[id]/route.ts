@@ -56,8 +56,34 @@ export async function GET(_request: Request, { params }: RouteParams) {
         );
     }
 
+    const { data: history, error: historyError } = await supabase
+        .from('service_order_history')
+        .select(`
+        id,
+        service_order_id,
+        event_type,
+        previous_status,
+        new_status,
+        description,
+        created_at
+    `)
+        .eq('service_order_id', id)
+        .order('created_at', { ascending: false });
+
+    if (historyError) {
+        console.error('Erro ao buscar histórico da ordem:', historyError);
+
+        return NextResponse.json(
+            { error: 'Erro ao buscar histórico da ordem.' },
+            { status: 500 },
+        );
+    }
+
     return NextResponse.json({
-        serviceOrder: data,
+        serviceOrder: {
+            ...data,
+            history: history ?? [],
+        },
     });
 }
 

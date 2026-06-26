@@ -58,7 +58,8 @@ O projeto simula um sistema interno usado por empresas para cadastrar equipament
 * Indicadores reais consumidos do Supabase
 * Total de equipamentos cadastrados
 * Total de ordens de serviço
-* Contagem de ordens abertas, em andamento e fechadas
+* Contagem de ordens por status: abertas, em andamento e fechadas
+* Contagem de ordens por prioridade: baixa, média, alta e crítica
 
 ### Equipamentos
 
@@ -122,19 +123,19 @@ src/
 
 ## Rotas de API
 
-| Método   | Rota                       | Descrição                                        |
-| -------- | -------------------------- | ------------------------------------------------ |
-| `GET`    | `/api/health`              | Verifica se a API está respondendo               |
-| `GET`    | `/api/dashboard-summary`   | Retorna os indicadores do dashboard              |
-| `GET`    | `/api/equipments`          | Lista equipamentos                               |
-| `POST`   | `/api/equipments`          | Cadastra equipamento                             |
-| `GET`    | `/api/equipments/[id]`     | Busca detalhes de um equipamento                 |
-| `DELETE` | `/api/equipments/[id]`     | Exclui equipamento com validação de vínculo      |
-| `GET`    | `/api/service-orders`      | Lista ordens de serviço                          |
-| `POST`   | `/api/service-orders`      | Cadastra ordem de serviço                        |
-| `GET`    | `/api/service-orders/[id]` | Busca detalhes da ordem, equipamento e histórico |
-| `PATCH`  | `/api/service-orders/[id]` | Atualiza status da ordem                         |
-| `DELETE` | `/api/service-orders/[id]` | Exclui ordem com validação de remoção real       |
+| Método   | Rota                       | Descrição                                                         |
+| -------- | -------------------------- | ----------------------------------------------------------------- |
+| `GET`    | `/api/health`              | Verifica se a API está respondendo                                |
+| `GET`    | `/api/dashboard-summary`   | Retorna indicadores de equipamentos, ordens, status e prioridades |
+| `GET`    | `/api/equipments`          | Lista equipamentos                                                |
+| `POST`   | `/api/equipments`          | Cadastra equipamento                                              |
+| `GET`    | `/api/equipments/[id]`     | Busca detalhes de um equipamento                                  |
+| `DELETE` | `/api/equipments/[id]`     | Exclui equipamento com validação de vínculo                       |
+| `GET`    | `/api/service-orders`      | Lista ordens de serviço                                           |
+| `POST`   | `/api/service-orders`      | Cadastra ordem de serviço                                         |
+| `GET`    | `/api/service-orders/[id]` | Busca detalhes da ordem, equipamento e histórico                  |
+| `PATCH`  | `/api/service-orders/[id]` | Atualiza status da ordem                                          |
+| `DELETE` | `/api/service-orders/[id]` | Exclui ordem com validação de remoção real                        |
 
 ## Banco de dados
 
@@ -311,7 +312,7 @@ http://localhost:3000
 
 ## Próximos passos
 
-* Melhorar o dashboard com indicadores adicionais
+* Evoluir o dashboard com métricas por período, equipamentos críticos e ordens em atraso
 * Implementar autenticação
 * Melhorar regras de permissão no Supabase
 * Criar testes automatizados

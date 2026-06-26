@@ -21,4 +21,15 @@ export type ServiceOrder = {
     equipment_id: string;
     created_at: string;
     equipment: ServiceOrderEquipment;
+    history: ServiceOrderHistory[];
+};
+
+export type ServiceOrderHistory = {
+    id: string;
+    service_order_id: string;
+    event_type: string;
+    previous_status: ServiceOrderStatus | null;
+    new_status: ServiceOrderStatus | null;
+    description: string | null;
+    created_at: string;
 };

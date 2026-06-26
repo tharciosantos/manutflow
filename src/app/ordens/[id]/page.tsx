@@ -26,6 +26,14 @@ type ServiceOrderDetailsResponse = {
     error?: string;
 };
 
+function getHistoryDescription(item: ServiceOrder['history'][number]) {
+    if (item.previous_status && item.new_status) {
+        return `Status alterado de ${serviceOrderStatusLabels[item.previous_status]} para ${serviceOrderStatusLabels[item.new_status]}.`;
+    }
+
+    return item.description ?? 'Alteração de status registrada.';
+}
+
 export default function ServiceOrderDetailsPage({
     params,
 }: ServiceOrderDetailsPageProps) {
@@ -204,6 +212,72 @@ export default function ServiceOrderDetailsPage({
                                 </div>
                             </div>
                         </div>
+                        <section className="mt-8 rounded-2xl border border-slate-800 bg-slate-950/70 p-6">
+                            <div>
+                                <span className="rounded-full border border-teal-500/30 bg-teal-500/10 px-3 py-1 text-xs font-medium text-teal-300">
+                                    Histórico da ordem
+                                </span>
+
+                                <h2 className="mt-3 text-xl font-semibold text-white">
+                                    Alterações registradas
+                                </h2>
+
+                                <p className="mt-1 text-sm text-slate-400">
+                                    Registro das mudanças de status realizadas nesta ordem de serviço.
+                                </p>
+                            </div>
+
+                            {serviceOrder.history.length === 0 ? (
+                                <div className="mt-6 rounded-xl border border-slate-800 bg-slate-950 p-4">
+                                    <p className="text-sm text-slate-400">
+                                        Nenhuma alteração de status registrada até o momento.
+                                    </p>
+                                </div>
+                            ) : (
+                                <div className="mt-6 space-y-3">
+                                    {serviceOrder.history.map((item) => (
+                                        <article
+                                            key={item.id}
+                                            className="rounded-xl border border-slate-800 bg-slate-950 p-4"
+                                        >
+                                            <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+                                                <div>
+                                                    <p className="text-sm font-medium text-slate-200">
+                                                        {getHistoryDescription(item)}
+                                                    </p>
+
+                                                    <p className="mt-1 text-xs text-slate-500">
+                                                        {new Date(item.created_at).toLocaleString(
+                                                            'pt-BR',
+                                                        )}
+                                                    </p>
+                                                </div>
+
+                                                <div className="flex flex-wrap items-center gap-2">
+                                                    {item.previous_status && (
+                                                        <span
+                                                            className={`rounded-full border px-3 py-1 text-xs font-medium ${serviceOrderStatusStyles[item.previous_status]}`}
+                                                        >
+                                                            {serviceOrderStatusLabels[item.previous_status]}
+                                                        </span>
+                                                    )}
+
+                                                    <span className="text-xs text-slate-500">→</span>
+
+                                                    {item.new_status && (
+                                                        <span
+                                                            className={`rounded-full border px-3 py-1 text-xs font-medium ${serviceOrderStatusStyles[item.new_status]}`}
+                                                        >
+                                                            {serviceOrderStatusLabels[item.new_status]}
+                                                        </span>
+                                                    )}
+                                                </div>
+                                            </div>
+                                        </article>
+                                    ))}
+                                </div>
+                            )}
+                        </section>
 
                         <section className="mt-8 rounded-2xl border border-slate-800 bg-slate-950/70 p-6">
                             <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">

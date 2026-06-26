@@ -34,6 +34,12 @@ O projeto está sendo construído do zero como parte de um desafio prático de a
   <img src="./docs/preview-ordens2.png" alt="Preview da listagem de ordens de serviço do ManutFlow com status, prioridades e equipamentos vinculados" width="900" />
 </p>
 
+### Detalhes da ordem de serviço
+
+<p align="center">
+  <img src="./docs/preview-ordem-detalhes.png" alt="Preview da página de detalhes de ordem de serviço do ManutFlow com status, prioridade e equipamento vinculado" width="900" />
+</p>
+
 ## Objetivo do projeto
 
 O ManutFlow tem como objetivo simular um sistema usado por empresas para controlar equipamentos, ordens de manutenção, prioridades, status e histórico de atendimento.
@@ -81,8 +87,12 @@ O projeto está em desenvolvimento e atualmente possui:
 
 * Cadastro de ordens vinculadas a equipamentos
 * Listagem de ordens com dados do equipamento relacionado
+* Página de detalhes da ordem de serviço
+* Exibição de status, prioridade, descrição, data de criação e ID da ordem
+* Exibição do equipamento vinculado à ordem
+* Link direto entre a ordem e a página de detalhes do equipamento
 * Alteração de status pela interface
-* Exclusão de ordens de serviço
+* Exclusão de ordens de serviço com validação de remoção real na API
 * Busca textual por título, descrição, equipamento, patrimônio e local
 * Filtro por status: abertas, em andamento e fechadas
 * Estados vazios para busca e filtros sem resultado
@@ -95,8 +105,10 @@ O projeto está em desenvolvimento e atualmente possui:
 * Integração com Supabase e PostgreSQL
 * Relacionamento entre `equipments` e `service_orders`
 * Rota dinâmica para buscar detalhes de um equipamento
+* Rota dinâmica para buscar detalhes de uma ordem de serviço
 * Rota dinâmica para excluir equipamentos com validação de vínculo
 * Bloqueio de exclusão de equipamentos com ordens vinculadas
+* Validação de exclusão real para equipamentos e ordens de serviço
 * Row Level Security configurado inicialmente
 * Policies provisórias para ambiente de desenvolvimento
 
@@ -120,6 +132,8 @@ src/
 │  │  ├─ [id]/
 │  │  └─ page.tsx
 │  ├─ ordens/
+│  │  ├─ [id]/
+│  │  └─ page.tsx
 │  ├─ layout.tsx
 │  └─ page.tsx
 ├─ components/
@@ -150,6 +164,12 @@ Página responsável por exibir os detalhes de um equipamento específico, inclu
 ### `/ordens`
 
 Página responsável por criar, listar, buscar, filtrar, atualizar status e excluir ordens de serviço vinculadas aos equipamentos cadastrados.
+
+### `/ordens/[id]`
+
+Página responsável por exibir os detalhes de uma ordem de serviço específica, incluindo status, prioridade, descrição, data de criação e equipamento vinculado.
+
+Também permite navegar diretamente da ordem para a página de detalhes do equipamento relacionado.
 
 ## Rotas de API
 
@@ -202,12 +222,17 @@ POST /api/service-orders
 
 ### `/api/service-orders/[id]`
 
-Rota responsável por atualizar ou excluir uma ordem de serviço específica.
+Rota responsável por buscar detalhes, atualizar status ou excluir uma ordem de serviço específica.
 
 ```text
+GET    /api/service-orders/[id]
 PATCH  /api/service-orders/[id]
 DELETE /api/service-orders/[id]
 ```
+
+A busca de detalhes retorna a ordem de serviço junto com os dados do equipamento vinculado.
+
+A exclusão de ordens valida se uma linha foi realmente removida antes de retornar sucesso.
 
 ## Banco de dados
 
@@ -269,6 +294,8 @@ service_orders.equipment_id
 Esse relacionamento permite listar uma ordem de serviço junto com os dados do equipamento vinculado, como nome, código de patrimônio e localização.
 
 Também permite exibir, na página de detalhes do equipamento, as ordens de serviço vinculadas a ele.
+
+Na página de detalhes da ordem, esse relacionamento também permite exibir os dados do equipamento vinculado e navegar diretamente para seus detalhes.
 
 ## Fluxos principais
 
@@ -356,6 +383,22 @@ Interface exibe sucesso ou erro
 Lista de ordens é atualizada
 ```
 
+### Detalhes da ordem de serviço
+
+```text
+Usuário acessa os detalhes de uma ordem
+        ↓
+Front-end requisita GET /api/service-orders/[id]
+        ↓
+API busca a ordem de serviço
+        ↓
+API retorna a ordem junto com o equipamento vinculado
+        ↓
+Interface exibe status, prioridade, descrição e dados do equipamento
+        ↓
+Usuário pode navegar para a página de detalhes do equipamento vinculado
+```
+
 ### Alteração de status da ordem
 
 ```text
@@ -370,6 +413,24 @@ API atualiza a ordem no Supabase
 Interface recarrega a lista
         ↓
 Status atualizado aparece na tela
+```
+
+### Exclusão de ordem de serviço
+
+```text
+Usuário solicita a exclusão de uma ordem
+        ↓
+Interface pede confirmação
+        ↓
+Front-end envia DELETE para /api/service-orders/[id]
+        ↓
+API tenta remover a ordem no Supabase
+        ↓
+API valida se uma linha foi realmente excluída
+        ↓
+Se a ordem não existir ou não for removida, retorna erro controlado
+        ↓
+Se a exclusão for confirmada, a lista de ordens é atualizada
 ```
 
 ## Validações atuais
@@ -391,7 +452,8 @@ A API valida os dados antes de salvar, atualizar ou excluir registros.
 * equipamento obrigatório;
 * prioridade válida;
 * status válido ao atualizar;
-* vínculo obrigatório com um equipamento existente.
+* vínculo obrigatório com um equipamento existente;
+* validação de remoção real ao excluir uma ordem.
 
 Além das validações da API, o banco também possui regras para limitar valores aceitos em campos como `status` e `priority`.
 
@@ -402,7 +464,8 @@ A interface utiliza tema dark com base em tons de slate e destaques em teal.
 A paleta visual segue uma separação entre cores de identidade e cores semânticas:
 
 * `teal` para ações principais, links, filtros ativos e badges informativos;
-* `emerald` para estados positivos, como ativo ou fechado;
+* `emerald` para estados positivos, como equipamento ativo;
+* `slate` para estados neutros ou encerrados, como ordem fechada;
 * `amber` para manutenção ou andamento;
 * `yellow`, `orange` e `red` para níveis de prioridade;
 * `red` para erros e ações destrutivas;
@@ -473,7 +536,6 @@ http://localhost:3000
 
 ## Próximos passos
 
-* Criar página de detalhes da ordem de serviço
 * Criar histórico de alterações da ordem
 * Melhorar o dashboard com indicadores adicionais
 * Implementar autenticação
@@ -497,6 +559,7 @@ Até o momento, o projeto já passou por conceitos importantes de desenvolviment
 * busca e filtro no front-end;
 * rotas dinâmicas;
 * páginas de detalhes;
+* navegação entre entidades relacionadas;
 * atualização automática da interface após ações do usuário;
 * identidade visual consistente com Tailwind CSS.
 
@@ -505,9 +568,11 @@ Até o momento, o projeto já passou por conceitos importantes de desenvolviment
 * Server/API Routes;
 * métodos HTTP `GET`, `POST`, `PATCH` e `DELETE`;
 * rotas dinâmicas de API;
+* busca de registros relacionados em rotas de detalhes;
 * validação no servidor;
 * tratamento de erro;
 * bloqueio de ações com base em relacionamento entre tabelas;
+* validação de exclusão real antes de retornar sucesso;
 * separação entre interface, API e banco de dados.
 
 ### Banco de dados e segurança
@@ -519,7 +584,8 @@ Até o momento, o projeto já passou por conceitos importantes de desenvolviment
 * chaves estrangeiras;
 * Row Level Security;
 * policies no Supabase;
-* preservação de integridade ao impedir exclusão de equipamentos vinculados a ordens.
+* preservação de integridade ao impedir exclusão de equipamentos vinculados a ordens;
+* validação de consistência em operações de exclusão.
 
 ### Processo de desenvolvimento
 

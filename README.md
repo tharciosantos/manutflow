@@ -78,6 +78,8 @@ O projeto simula um sistema interno usado por empresas para cadastrar equipament
 * Listagem com status, prioridade e dados do equipamento relacionado
 * Busca por título, descrição, equipamento, patrimônio e local
 * Filtro por status: abertas, em andamento e fechadas
+* Filtro por prioridade: baixa, média, alta e crítica
+* Combinação de busca textual, status e prioridade na listagem
 * Alteração de status pela interface
 * Exclusão com validação de remoção real na API
 * Página de detalhes da ordem

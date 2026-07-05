@@ -1,7 +1,8 @@
+import { createClient } from "@/lib/supabase/server";
 import { NextResponse } from 'next/server';
-import { supabase } from '@/lib/supabase/client';
 
 export async function GET() {
+    const supabase = await createClient();
     const { data, error } = await supabase
         .from('service_orders')
         .select(`
@@ -38,6 +39,8 @@ export async function GET() {
 const allowedPriorities = ['low', 'medium', 'high', 'critical'];
 
 export async function POST(request: Request) {
+    const supabase = await createClient();
+
     const body = await request.json().catch(() => null);
 
     const title = typeof body?.title === 'string' ? body.title.trim() : '';

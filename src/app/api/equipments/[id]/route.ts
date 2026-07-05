@@ -1,4 +1,5 @@
-import { supabase } from "@/lib/supabase/client";
+import { createClient } from "@/lib/supabase/server";
+
 
 export const dynamic = "force-dynamic";
 
@@ -9,6 +10,8 @@ type RouteParams = {
 };
 
 export async function GET(_request: Request, { params }: RouteParams) {
+    const supabase = await createClient();
+
     const { id } = await params;
 
     if (!id) {
@@ -76,6 +79,8 @@ export async function GET(_request: Request, { params }: RouteParams) {
 }
 
 export async function DELETE(_request: Request, { params }: RouteParams) {
+    const supabase = await createClient();
+
     const { id } = await params;
 
     if (!id) {

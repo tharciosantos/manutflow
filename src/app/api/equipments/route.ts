@@ -1,4 +1,5 @@
-import { supabase } from "@/lib/supabase/client";
+import { createClient } from "@/lib/supabase/server";
+
 
 export const dynamic = "force-dynamic";
 
@@ -21,6 +22,8 @@ function isEquipmentStatus(value: unknown): value is EquipmentStatus {
 }
 
 export async function GET() {
+  const supabase = await createClient();
+
   const { data, error } = await supabase
     .from("equipments")
     .select("*")
@@ -44,6 +47,8 @@ export async function GET() {
 }
 
 export async function POST(request: Request) {
+
+  const supabase = await createClient();
   let body: CreateEquipmentBody;
 
   try {

@@ -1,5 +1,7 @@
 import { NextResponse } from 'next/server';
-import { supabase } from '@/lib/supabase/client';
+import { createClient } from "@/lib/supabase/server";
+import { SupabaseClient } from '@supabase/supabase-js';
+
 
 const allowedStatuses = ['open', 'in_progress', 'closed'];
 
@@ -10,6 +12,8 @@ type RouteParams = {
 };
 
 export async function GET(_request: Request, { params }: RouteParams) {
+    const supabase = await createClient();
+
     const { id } = await params;
 
     if (!id) {
@@ -88,6 +92,8 @@ export async function GET(_request: Request, { params }: RouteParams) {
 }
 
 export async function PATCH(request: Request, { params }: RouteParams) {
+    const supabase = await createClient();
+
     const { id } = await params;
 
     if (!id) {
@@ -179,6 +185,8 @@ export async function PATCH(request: Request, { params }: RouteParams) {
 }
 
 export async function DELETE(_request: Request, { params }: RouteParams) {
+    const supabase = await createClient();
+
     const { id } = await params;
 
     if (!id) {

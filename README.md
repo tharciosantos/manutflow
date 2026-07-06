@@ -40,6 +40,16 @@ O projeto simula um sistema interno usado por empresas para cadastrar equipament
   <img src="./docs/preview-ordem-detalhes.png" alt="Preview da página de detalhes de ordem de serviço do ManutFlow com status, prioridade, histórico e equipamento vinculado" width="900" />
 </p>
 
+### Login e Cadastro
+
+<p align="center">
+  <img src="./docs/preview-login.png" alt="Preview da tela de login do ManutFlow com formulário de email e senha, tema dark e gradiente teal" width="900" />
+</p>
+
+<p align="center">
+  <img src="./docs/preview-register.png" alt="Preview da tela de cadastro do ManutFlow com formulário de nome, email e senha" width="900" />
+</p>
+
 ## Tecnologias
 
 * Next.js
@@ -47,6 +57,7 @@ O projeto simula um sistema interno usado por empresas para cadastrar equipament
 * TypeScript
 * Tailwind CSS
 * Supabase
+* @supabase/ssr
 * PostgreSQL
 * Git
 * GitHub
@@ -92,25 +103,35 @@ O projeto usa uma organização por responsabilidade, separando rotas, component
 
 ```text
 src/
-├─ app/
-│  ├─ api/
-│  │  ├─ dashboard-summary/
-│  │  ├─ equipments/
-│  │  ├─ health/
-│  │  └─ service-orders/
-│  ├─ equipamentos/
-│  ├─ ordens/
-│  ├─ layout.tsx
-│  └─ page.tsx
-├─ components/
-│  ├─ layout/
-│  └─ ui/
-├─ features/
-│  ├─ dashboard/
-│  ├─ equipments/
-│  └─ service-orders/
-├─ lib/
-└─ types/
+├── app/
+│  ├── api/
+│  │  ├── dashboard-summary/
+│  │  ├── equipments/
+│  │  ├── health/
+│  │  └── service-orders/
+│  ├── auth/
+│  │  └── callback/
+│  ├── equipamentos/
+│  ├── login/
+│  ├── ordens/
+│  ├── register/
+│  ├── layout.tsx
+│  └── page.tsx
+├── components/
+│  ├── layout/
+│  └── ui/
+├── features/
+│  ├── dashboard/
+│  ├── equipments/
+│  └── service-orders/
+├── lib/
+│  └── supabase/
+│     ├── client.ts
+│     ├── server.ts
+│     └── middleware.ts
+├── middleware.ts
+└── types/
+   └── profile.ts
 ```
 
 ## Principais páginas
@@ -204,6 +225,28 @@ Campos principais:
 * `description`
 * `created_at`
 
+### `profiles`
+
+Tabela vinculada ao `auth.users` do Supabase para armazenar dados adicionais do usuário.
+
+Criada automaticamente via trigger quando um novo usuário se cadastra.
+
+Campos principais:
+
+* `id` (vinculado a `auth.users.id`)
+* `email`
+* `full_name`
+* `avatar_url`
+* `created_at`
+* `updated_at`
+
+Políticas RLS:
+
+* SELECT — usuário só vê seu próprio perfil
+* UPDATE — usuário só edita seu próprio perfil
+* INSERT — gerenciado pelo trigger automático
+* DELETE — não permitido (cascade com auth.users)
+
 ## Relacionamentos e regras
 
 Uma ordem de serviço pertence a um equipamento:
@@ -261,7 +304,7 @@ As variáveis necessárias estão documentadas no arquivo `.env.example`:
 
 ```env
 NEXT_PUBLIC_SUPABASE_URL=
-NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=
+NEXT_PUBLIC_SUPABASE_ANON_KEY=
 ```
 
 Para rodar localmente, copie `.env.example` para `.env.local` e preencha com as credenciais do Supabase.
@@ -315,8 +358,10 @@ http://localhost:3000
 ## Próximos passos
 
 * Evoluir o dashboard com métricas por período, equipamentos críticos e ordens em atraso
-* Implementar autenticação
-* Melhorar regras de permissão no Supabase
+* Criar middleware de proteção de rotas (redirecionar não autenticados para /login)
+* Isolar dados por usuário com coluna `user_id` nas tabelas
+* Implementar Row Level Security (RLS) em todas as tabelas
+* Adaptar APIs e frontend para filtrar por usuário logado
 * Criar testes automatizados
 * Adicionar logs básicos
 * Fazer deploy em produção
@@ -338,4 +383,4 @@ Este projeto reúne práticas importantes de desenvolvimento full stack:
 * Row Level Security e policies provisórias no Supabase;
 * fluxo de branch, commit, Pull Request, merge e limpeza.
 
-> As permissões atuais do Supabase são provisórias para desenvolvimento. Futuramente, elas serão ajustadas com autenticação e controle de acesso por usuário.
+> A autenticação foi implementada com Supabase Auth (email/senha), incluindo tabela `profiles` com trigger automático, três clientes Supabase (browser, server, middleware) e páginas de login/cadastro. As próximas etapas incluem middleware de proteção, isolamento de dados por usuário, RLS e adaptação de APIs e frontend.

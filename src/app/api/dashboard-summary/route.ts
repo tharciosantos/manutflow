@@ -35,37 +35,44 @@ export async function GET() {
         supabase
             .from('service_orders')
             .select('*', { count: 'exact', head: true })
-            .eq("user_id", user.id),
+            .eq("user_id", user.id)
+            .eq('status', 'open'),
 
         supabase
             .from('service_orders')
             .select('*', { count: 'exact', head: true })
-            .eq("user_id", user.id),
+            .eq("user_id", user.id)
+            .eq('status', 'in_progress'),
 
         supabase
             .from('service_orders')
             .select('*', { count: 'exact', head: true })
-            .eq("user_id", user.id),
+            .eq("user_id", user.id)
+            .eq('status', 'closed'),
 
         supabase
             .from('service_orders')
             .select('*', { count: 'exact', head: true })
-            .eq("user_id", user.id),
+            .eq("user_id", user.id)
+            .eq('priority', 'low'),
 
         supabase
             .from('service_orders')
             .select('*', { count: 'exact', head: true })
-            .eq("user_id", user.id),
+            .eq("user_id", user.id)
+            .eq('priority', 'medium'),
 
         supabase
             .from('service_orders')
             .select('*', { count: 'exact', head: true })
-            .eq("user_id", user.id),
+            .eq("user_id", user.id)
+            .eq('priority', 'high'),
 
         supabase
             .from('service_orders')
             .select('*', { count: 'exact', head: true })
-            .eq("user_id", user.id),
+            .eq("user_id", user.id)
+            .eq('priority', 'critical'),
     ]);
 
     const hasError =
@@ -111,5 +118,9 @@ export async function GET() {
         openServiceOrders: openOrdersResult.count ?? 0,
         inProgressServiceOrders: inProgressOrdersResult.count ?? 0,
         closedServiceOrders: closedOrdersResult.count ?? 0,
+        lowPriorityServiceOrders: lowPriorityOrdersResult.count ?? 0,
+        mediumPriorityServiceOrders: mediumPriorityOrdersResult.count ?? 0,
+        highPriorityServiceOrders: highPriorityOrdersResult.count ?? 0,
+        criticalPriorityServiceOrders: criticalPriorityOrdersResult.count ?? 0,
     });
 }

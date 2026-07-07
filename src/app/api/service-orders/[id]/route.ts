@@ -172,6 +172,7 @@ export async function PATCH(request: Request, { params }: RouteParams) {
             .from('service_order_history')
             .insert({
                 service_order_id: id,
+                user_id: user.id,
                 event_type: 'status_changed',
                 previous_status: currentServiceOrder.status,
                 new_status: status,

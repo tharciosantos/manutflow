@@ -119,19 +119,25 @@ src/
 │  └── page.tsx
 ├── components/
 │  ├── layout/
+│  │  ├── app-header.tsx
+│  │  └── app-shell.tsx
 │  └── ui/
+│     └── status-card.tsx
 ├── features/
 │  ├── dashboard/
 │  ├── equipments/
 │  └── service-orders/
 ├── lib/
+│  ├── auth.ts
 │  └── supabase/
 │     ├── client.ts
 │     ├── server.ts
 │     └── middleware.ts
-├── middleware.ts
+├── proxy.ts
 └── types/
-   └── profile.ts
+   ├── equipment.ts
+   ├── profile.ts
+   └── service-order.ts
 ```
 
 ## Principais páginas
@@ -143,6 +149,38 @@ src/
 | `/equipamentos/[id]` | Detalhes do equipamento e ordens vinculadas                        |
 | `/ordens`            | Cadastro, listagem, busca, filtro, status e exclusão de ordens     |
 | `/ordens/[id]`       | Detalhes da ordem, equipamento vinculado e histórico de alterações |
+
+## Autenticação
+
+O sistema utiliza Supabase Auth com email/senha e implementa segurança em camadas:
+
+### Fluxo de autenticação
+
+```
+Usuário → [Login/Registro] → Supabase Auth → JWT Token
+     ↓
+[proxy.ts] → Verifica sessão e redireciona não autenticados
+     ↓
+[API Route] → Extrai user_id com getUser() e filtra dados
+     ↓
+[Supabase] → RLS bloqueia acesso a dados de outros usuários
+```
+
+### Camadas de segurança
+
+| Camada | Onde | O que faz |
+|--------|------|-----------|
+| 1. Proxy (`proxy.ts`) | Edge | Redireciona não logados para /login |
+| 2. API (`auth.ts`) | Servidor | Verifica JWT e filtra por user_id |
+| 3. RLS (banco) | PostgreSQL | Bloqueia acesso direto ao banco |
+
+### Páginas
+
+| Rota | Descrição |
+|------|-----------|
+| `/login` | Login com email e senha |
+| `/register` | Cadastro com nome, email e senha |
+| `/auth/callback` | Callback do Supabase OAuth |
 
 ## Rotas de API
 
@@ -358,10 +396,6 @@ http://localhost:3000
 ## Próximos passos
 
 * Evoluir o dashboard com métricas por período, equipamentos críticos e ordens em atraso
-* Criar middleware de proteção de rotas (redirecionar não autenticados para /login)
-* Isolar dados por usuário com coluna `user_id` nas tabelas
-* Implementar Row Level Security (RLS) em todas as tabelas
-* Adaptar APIs e frontend para filtrar por usuário logado
 * Criar testes automatizados
 * Adicionar logs básicos
 * Fazer deploy em produção
@@ -383,4 +417,4 @@ Este projeto reúne práticas importantes de desenvolvimento full stack:
 * Row Level Security e policies provisórias no Supabase;
 * fluxo de branch, commit, Pull Request, merge e limpeza.
 
-> A autenticação foi implementada com Supabase Auth (email/senha), incluindo tabela `profiles` com trigger automático, três clientes Supabase (browser, server, middleware) e páginas de login/cadastro. As próximas etapas incluem middleware de proteção, isolamento de dados por usuário, RLS e adaptação de APIs e frontend.
+> A autenticação foi implementada com Supabase Auth (email/senha), incluindo tabela `profiles` com trigger automático, três clientes Supabase (browser, server, middleware), proxy de proteção de rotas (`proxy.ts`), isolamento de dados por `user_id`, Row Level Security (RLS) em todas as tabelas, adaptação das APIs com helper `getUser()` e frontend com logout e exibição do usuário logado.

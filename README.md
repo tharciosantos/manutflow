@@ -52,15 +52,13 @@ O projeto simula um sistema interno usado por empresas para cadastrar equipament
 
 ## Tecnologias
 
-* Next.js
-* React
+* Next.js 16
+* React 19
 * TypeScript
-* Tailwind CSS
-* Supabase
+* Tailwind CSS 4
+* Supabase (Auth + PostgreSQL)
 * @supabase/ssr
-* PostgreSQL
-* Git
-* GitHub
+* Git / GitHub
 
 ## Funcionalidades
 
@@ -71,17 +69,18 @@ O projeto simula um sistema interno usado por empresas para cadastrar equipament
 * Total de ordens de serviço
 * Contagem de ordens por status: abertas, em andamento e fechadas
 * Contagem de ordens por prioridade: baixa, média, alta e crítica
+* **Auto-refresh** ao voltar para a aba (visibilitychange)
 
 ### Equipamentos
 
 * Cadastro, listagem e exclusão de equipamentos
 * Busca por nome, patrimônio, localização e status
 * Filtro por status: ativo, inativo e em manutenção
-* Página de detalhes do equipamento
+* Página de detalhes do equipamento com **breadcrumbs**
 * Exibição das ordens vinculadas ao equipamento
 * Bloqueio de exclusão quando existem ordens vinculadas
-* Tratamento para código de patrimônio duplicado
-* Estados de carregamento, erro e lista vazia
+* Tratamento para código de patrimônio duplicado por usuário
+* Estados de carregamento (skeleton), erro e lista vazia (com SVG)
 
 ### Ordens de Serviço
 
@@ -91,9 +90,9 @@ O projeto simula um sistema interno usado por empresas para cadastrar equipament
 * Filtro por status: abertas, em andamento e fechadas
 * Filtro por prioridade: baixa, média, alta e crítica
 * Combinação de busca textual, status e prioridade na listagem
-* Alteração de status pela interface
+* Alteração de status pela interface (select dropdown)
 * Exclusão com validação de remoção real na API
-* Página de detalhes da ordem
+* Página de detalhes da ordem com **breadcrumbs**
 * Exibição do equipamento vinculado
 * Histórico de alterações de status
 
@@ -122,6 +121,7 @@ src/
 │  │  ├── app-header.tsx
 │  │  └── app-shell.tsx
 │  └── ui/
+│     ├── breadcrumbs.tsx
 │     └── status-card.tsx
 ├── features/
 │  ├── dashboard/
@@ -136,6 +136,7 @@ src/
 ├── proxy.ts
 └── types/
    ├── equipment.ts
+   ├── equipment-details.ts
    ├── profile.ts
    └── service-order.ts
 ```
@@ -213,6 +214,7 @@ Campos principais:
 * `patrimony_code`
 * `location`
 * `status`
+* `user_id`
 * `created_at`
 * `updated_at`
 
@@ -234,6 +236,7 @@ Campos principais:
 * `status`
 * `priority`
 * `equipment_id`
+* `user_id`
 * `created_at`
 
 Status:
@@ -261,6 +264,7 @@ Campos principais:
 * `previous_status`
 * `new_status`
 * `description`
+* `user_id`
 * `created_at`
 
 ### `profiles`
@@ -311,7 +315,7 @@ A API valida os dados antes de salvar, atualizar ou excluir registros.
 Principais validações implementadas:
 
 * campos obrigatórios no cadastro de equipamentos;
-* código de patrimônio único;
+* código de patrimônio único por usuário;
 * status válido para equipamentos;
 * título obrigatório na abertura de ordem;
 * prioridade válida;
@@ -393,12 +397,50 @@ Acesse:
 http://localhost:3000
 ```
 
+## Deploy
+
+### Vercel (recomendado)
+
+1. Crie uma conta em [vercel.com](https://vercel.com)
+2. Conecte seu repositório do GitHub
+3. Configure as variáveis de ambiente no dashboard da Vercel:
+   - `NEXT_PUBLIC_SUPABASE_URL`
+   - `NEXT_PUBLIC_SUPABASE_ANON_KEY`
+4. Faça o deploy
+
+### Configurações no Supabase para produção
+
+Após o deploy, configure no [Supabase Dashboard](https://supabase.com/dashboard):
+
+**1. Redirect URLs**
+- Vá em **Authentication > URL Configuration**
+- Adicione a URL do seu deploy: `https://seu-app.vercel.app/auth/callback`
+
+**2. Confirmação de e-mail (opcional, recomendado)**
+- Vá em **Authentication > Settings > General**
+- Ative **"Enable email confirmations"**
+- Para enviar e-mails reais, configure um **SMTP** em **Authentication > Settings > SMTP Settings**
+  - Você pode usar serviços como **Resend**, **SendGrid** ou o próprio SMTP do Supabase
+- Se preferir manter sem confirmação durante testes, deixe desabilitado
+
 ## Próximos passos
 
-* Evoluir o dashboard com métricas por período, equipamentos críticos e ordens em atraso
-* Criar testes automatizados
-* Adicionar logs básicos
-* Fazer deploy em produção
+### Pós-deploy imediato
+
+* [ ] Configurar redirect URLs no Supabase para o domínio de produção
+* [ ] Ativar confirmação de e-mail (Authentication > Settings)
+* [ ] Configurar SMTP para envio de e-mails de confirmação
+* [ ] Testar fluxo completo de cadastro e login em produção
+
+### Melhorias futuras
+
+* **Evoluir o dashboard** — métricas por período, equipamentos críticos, ordens em atraso
+* **Edição de equipamentos** — hoje só cria e exclui, sem edição
+* **Notificações** — alertar quando uma ordem está próxima do vencimento
+* **Perfil do usuário** — página para editar nome, email e senha
+* **Upload de imagens** — foto do equipamento ou da ordem de serviço
+* **Testes automatizados** — unitários para APIs e componentes
+* **Logs e monitoramento** — registrar erros e uso do sistema
 
 ## Aprendizados aplicados
 
@@ -414,7 +456,7 @@ Este projeto reúne práticas importantes de desenvolvimento full stack:
 * validação de dados no servidor;
 * regras de negócio baseadas em relacionamento;
 * histórico de alterações;
-* Row Level Security e policies provisórias no Supabase;
+* Row Level Security e policies no Supabase;
 * fluxo de branch, commit, Pull Request, merge e limpeza.
 
-> A autenticação foi implementada com Supabase Auth (email/senha), incluindo tabela `profiles` com trigger automático, três clientes Supabase (browser, server, middleware), proxy de proteção de rotas (`proxy.ts`), isolamento de dados por `user_id`, Row Level Security (RLS) em todas as tabelas, adaptação das APIs com helper `getUser()` e frontend com logout e exibição do usuário logado.
+> A autenticação foi implementada com Supabase Auth (email/senha), incluindo tabela `profiles` com trigger automático, três clientes Supabase (browser, server, middleware), proxy de proteção de rotas (`proxy.ts`) com convenção Next.js 16+, isolamento de dados por `user_id`, Row Level Security (RLS) em todas as tabelas, breadcrumbs, auto-refresh do dashboard e saudação personalizada com nome completo do usuário.

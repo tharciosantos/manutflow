@@ -114,7 +114,7 @@ export default function ServiceOrderDetailsPage({
 
     return (
         <AppShell>
-            <section className="mx-auto max-w-5xl px-6 py-10">
+            <section className="mx-auto max-w-5xl px-4 py-6 sm:px-6 sm:py-10">
                 <Breadcrumbs
                     items={[
                         { label: "Ordens", href: "/ordens" },
@@ -142,132 +142,132 @@ export default function ServiceOrderDetailsPage({
 
                 {!isLoading && serviceOrder && (
                     <>
-                        <div className="mt-6 rounded-2xl border border-slate-800 bg-slate-950/70 p-6">
-                            <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+                        <div className="mt-4 sm:mt-6 rounded-2xl border border-slate-800 bg-slate-950/70 p-4 sm:p-6">
+                            <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
                                 <div>
-                                    <span className="rounded-full border border-teal-500/30 bg-teal-500/10 px-3 py-1 text-xs font-medium text-teal-300">
+                                    <span className="rounded-full border border-teal-500/30 bg-teal-500/10 px-2 py-0.5 text-[11px] font-medium text-teal-300 sm:px-3 sm:py-1 sm:text-xs">
                                         Detalhes da ordem
                                     </span>
 
-                                    <h1 className="mt-3 text-3xl font-bold text-white">
+                                    <h1 className="mt-2 text-2xl font-bold text-white sm:mt-3 sm:text-3xl">
                                         {serviceOrder.title}
                                     </h1>
 
-                                    <p className="mt-2 text-sm text-slate-400">
+                                    <p className="mt-1 text-xs text-slate-400 sm:mt-2 sm:text-sm">
                                         {serviceOrder.description || 'Sem descrição informada.'}
                                     </p>
                                 </div>
 
-                                <div className="flex flex-wrap gap-2 sm:justify-end">
+                                <div className="flex flex-wrap items-center gap-1.5 sm:gap-2 sm:justify-end">
                                     <span
-                                        className={`w-fit rounded-full border px-3 py-1 text-xs font-medium ${serviceOrderStatusStyles[serviceOrder.status]}`}
+                                        className={`rounded-full border px-2.5 py-1 text-[11px] font-medium sm:px-3 sm:py-1 sm:text-xs ${serviceOrderStatusStyles[serviceOrder.status]}`}
                                     >
                                         {serviceOrderStatusLabels[serviceOrder.status]}
                                     </span>
 
                                     <span
-                                        className={`w-fit rounded-full border px-3 py-1 text-xs font-medium ${serviceOrderPriorityStyles[serviceOrder.priority]}`}
+                                        className={`rounded-full border px-2.5 py-1 text-[11px] font-medium sm:px-3 sm:py-1 sm:text-xs ${serviceOrderPriorityStyles[serviceOrder.priority]}`}
                                     >
                                         {serviceOrderPriorityLabels[serviceOrder.priority]}
                                     </span>
                                 </div>
                             </div>
 
-                            <div className="mt-6 grid gap-4 sm:grid-cols-2">
-                                <div className="rounded-xl border border-slate-800 bg-slate-950 p-4">
-                                    <p className="text-xs uppercase tracking-wide text-slate-500">
+                            <div className="grid grid-cols-2 gap-3 sm:gap-4">
+                                <div className="rounded-xl border border-slate-800 bg-slate-950 p-3 sm:p-4">
+                                    <p className="text-[10px] uppercase tracking-wide text-slate-500 sm:text-xs">
                                         Status
                                     </p>
-                                    <p className="mt-1 text-sm font-medium text-slate-200">
+                                    <p className="mt-1 text-xs font-medium text-slate-200 sm:text-sm">
                                         {serviceOrderStatusLabels[serviceOrder.status]}
                                     </p>
                                 </div>
 
-                                <div className="rounded-xl border border-slate-800 bg-slate-950 p-4">
-                                    <p className="text-xs uppercase tracking-wide text-slate-500">
+                                <div className="rounded-xl border border-slate-800 bg-slate-950 p-3 sm:p-4">
+                                    <p className="text-[10px] uppercase tracking-wide text-slate-500 sm:text-xs">
                                         Prioridade
                                     </p>
-                                    <p className="mt-1 text-sm font-medium text-slate-200">
+                                    <p className="mt-1 text-xs font-medium text-slate-200 sm:text-sm">
                                         {serviceOrderPriorityLabels[serviceOrder.priority]}
                                     </p>
                                 </div>
 
-                                <div className="rounded-xl border border-slate-800 bg-slate-950 p-4">
-                                    <p className="text-xs uppercase tracking-wide text-slate-500">
+                                <div className="rounded-xl border border-slate-800 bg-slate-950 p-3 sm:p-4">
+                                    <p className="text-[10px] uppercase tracking-wide text-slate-500 sm:text-xs">
                                         Criada em
                                     </p>
-                                    <p className="mt-1 text-sm font-medium text-slate-200">
+                                    <p className="mt-1 text-xs font-medium text-slate-200 sm:text-sm">
                                         {new Date(serviceOrder.created_at).toLocaleDateString(
                                             'pt-BR',
                                         )}
                                     </p>
                                 </div>
 
-                                <div className="rounded-xl border border-slate-800 bg-slate-950 p-4">
-                                    <p className="text-xs uppercase tracking-wide text-slate-500">
+                                <div className="rounded-xl border border-slate-800 bg-slate-950 p-3 sm:p-4">
+                                    <p className="text-[10px] uppercase tracking-wide text-slate-500 sm:text-xs">
                                         ID da ordem
                                     </p>
-                                    <p className="mt-1 break-all text-sm font-medium text-slate-200">
+                                    <p className="mt-1 break-all text-xs font-medium text-slate-200 sm:text-sm">
                                         {serviceOrder.id}
                                     </p>
                                 </div>
                             </div>
                         </div>
-                        <section className="mt-8 rounded-2xl border border-slate-800 bg-slate-950/70 p-6">
+                        <section className="mt-6 rounded-2xl border border-slate-800 bg-slate-950/70 p-4 sm:mt-8 sm:p-6">
                             <div>
-                                <span className="rounded-full border border-teal-500/30 bg-teal-500/10 px-3 py-1 text-xs font-medium text-teal-300">
+                                <span className="rounded-full border border-teal-500/30 bg-teal-500/10 px-2 py-0.5 text-[11px] font-medium text-teal-300 sm:px-3 sm:py-1 sm:text-xs">
                                     Histórico da ordem
                                 </span>
 
-                                <h2 className="mt-3 text-xl font-semibold text-white">
+                                <h2 className="mt-2 text-lg font-semibold text-white sm:mt-3 sm:text-xl">
                                     Alterações registradas
                                 </h2>
 
-                                <p className="mt-1 text-sm text-slate-400">
+                                <p className="mt-1 text-xs text-slate-400 sm:text-sm">
                                     Registro das mudanças de status realizadas nesta ordem de serviço.
                                 </p>
                             </div>
 
                             {serviceOrder.history.length === 0 ? (
-                                <div className="mt-6 rounded-xl border border-slate-800 bg-slate-950 p-4">
-                                    <p className="text-sm text-slate-400">
+                                <div className="mt-4 rounded-xl border border-slate-800 bg-slate-950 p-3 sm:mt-6 sm:p-4">
+                                    <p className="text-xs text-slate-400 sm:text-sm">
                                         Nenhuma alteração de status registrada até o momento.
                                     </p>
                                 </div>
                             ) : (
-                                <div className="mt-6 space-y-3">
+                                <div className="mt-4 space-y-2 sm:mt-6 sm:space-y-3">
                                     {serviceOrder.history.map((item) => (
                                         <article
                                             key={item.id}
-                                            className="rounded-xl border border-slate-800 bg-slate-950 p-4"
+                                            className="rounded-xl border border-slate-800 bg-slate-950 p-3 sm:p-4"
                                         >
-                                            <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
-                                                <div>
-                                                    <p className="text-sm font-medium text-slate-200">
+                                            <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
+                                                <div className="min-w-0">
+                                                    <p className="text-xs font-medium text-slate-200 sm:text-sm">
                                                         {getHistoryDescription(item)}
                                                     </p>
 
-                                                    <p className="mt-1 text-xs text-slate-500">
+                                                    <p className="mt-1 text-[11px] text-slate-500 sm:text-xs">
                                                         {new Date(item.created_at).toLocaleString(
                                                             'pt-BR',
                                                         )}
                                                     </p>
                                                 </div>
 
-                                                <div className="flex flex-wrap items-center gap-2">
+                                                <div className="flex flex-wrap items-center gap-1.5 sm:gap-2">
                                                     {item.previous_status && (
                                                         <span
-                                                            className={`rounded-full border px-3 py-1 text-xs font-medium ${serviceOrderStatusStyles[item.previous_status]}`}
+                                                            className={`rounded-full border px-2 py-0.5 text-[11px] font-medium sm:px-3 sm:py-1 sm:text-xs ${serviceOrderStatusStyles[item.previous_status]}`}
                                                         >
                                                             {serviceOrderStatusLabels[item.previous_status]}
                                                         </span>
                                                     )}
 
-                                                    <span className="text-xs text-slate-500">→</span>
+                                                    <span className="text-[11px] text-slate-500 sm:text-xs">→</span>
 
                                                     {item.new_status && (
                                                         <span
-                                                            className={`rounded-full border px-3 py-1 text-xs font-medium ${serviceOrderStatusStyles[item.new_status]}`}
+                                                            className={`rounded-full border px-2 py-0.5 text-[11px] font-medium sm:px-3 sm:py-1 sm:text-xs ${serviceOrderStatusStyles[item.new_status]}`}
                                                         >
                                                             {serviceOrderStatusLabels[item.new_status]}
                                                         </span>
@@ -280,56 +280,56 @@ export default function ServiceOrderDetailsPage({
                             )}
                         </section>
 
-                        <section className="mt-8 rounded-2xl border border-slate-800 bg-slate-950/70 p-6">
-                            <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+                        <section className="mt-6 rounded-2xl border border-slate-800 bg-slate-950/70 p-4 sm:mt-8 sm:p-6">
+                            <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
                                 <div>
-                                    <span className="rounded-full border border-teal-500/30 bg-teal-500/10 px-3 py-1 text-xs font-medium text-teal-300">
+                                    <span className="rounded-full border border-teal-500/30 bg-teal-500/10 px-2 py-0.5 text-[11px] font-medium text-teal-300 sm:px-3 sm:py-1 sm:text-xs">
                                         Equipamento vinculado
                                     </span>
 
-                                    <h2 className="mt-3 text-xl font-semibold text-white">
+                                    <h2 className="mt-2 text-lg font-semibold text-white sm:mt-3 sm:text-xl">
                                         {serviceOrder.equipment.name}
                                     </h2>
 
-                                    <p className="mt-1 text-sm text-slate-400">
+                                    <p className="mt-1 text-xs text-slate-400 sm:text-sm">
                                         Dados do equipamento associado a esta ordem de serviço.
                                     </p>
                                 </div>
 
                                 <Link
                                     href={`/equipamentos/${serviceOrder.equipment.id}`}
-                                    className="w-fit rounded-full border border-teal-500/30 px-3 py-1 text-xs font-medium text-teal-300 transition hover:bg-teal-500/10"
+                                    className="w-fit rounded-full border border-teal-500/30 px-2.5 py-1 text-[11px] font-medium text-teal-300 transition hover:bg-teal-500/10 sm:px-3 sm:py-1 sm:text-xs"
                                 >
                                     Ver equipamento
                                 </Link>
                             </div>
 
-                            <div className="mt-6 grid gap-4 sm:grid-cols-3">
-                                <div className="rounded-xl border border-slate-800 bg-slate-950 p-4">
-                                    <p className="text-xs uppercase tracking-wide text-slate-500">
+                            <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4">
+                                <div className="rounded-xl border border-slate-800 bg-slate-950 p-3 sm:p-4">
+                                    <p className="text-[10px] uppercase tracking-wide text-slate-500 sm:text-xs">
                                         Patrimônio
                                     </p>
-                                    <p className="mt-1 text-sm font-medium text-slate-200">
+                                    <p className="mt-1 text-xs font-medium text-slate-200 sm:text-sm truncate">
                                         {serviceOrder.equipment.patrimony_code}
                                     </p>
                                 </div>
 
-                                <div className="rounded-xl border border-slate-800 bg-slate-950 p-4">
-                                    <p className="text-xs uppercase tracking-wide text-slate-500">
+                                <div className="rounded-xl border border-slate-800 bg-slate-950 p-3 sm:p-4">
+                                    <p className="text-[10px] uppercase tracking-wide text-slate-500 sm:text-xs">
                                         Localização
                                     </p>
-                                    <p className="mt-1 text-sm font-medium text-slate-200">
+                                    <p className="mt-1 text-xs font-medium text-slate-200 sm:text-sm truncate">
                                         {serviceOrder.equipment.location}
                                     </p>
                                 </div>
 
-                                <div className="rounded-xl border border-slate-800 bg-slate-950 p-4">
-                                    <p className="text-xs uppercase tracking-wide text-slate-500">
+                                <div className="col-span-2 sm:col-span-1 rounded-xl border border-slate-800 bg-slate-950 p-3 sm:p-4">
+                                    <p className="text-[10px] uppercase tracking-wide text-slate-500 sm:text-xs">
                                         Status do equipamento
                                     </p>
 
                                     <span
-                                        className={`mt-2 inline-flex w-fit rounded-full border px-3 py-1 text-xs font-medium ${equipmentStatusStyles[serviceOrder.equipment.status]}`}
+                                        className={`mt-1.5 inline-flex w-fit rounded-full border px-2.5 py-1 text-[11px] font-medium sm:px-3 sm:py-1 sm:text-xs ${equipmentStatusStyles[serviceOrder.equipment.status]}`}
                                     >
                                         {equipmentStatusLabels[serviceOrder.equipment.status]}
                                     </span>

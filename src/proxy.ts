@@ -2,7 +2,7 @@ import { updateSession } from "@/lib/supabase/middleware";
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 
-// Mudamos o nome da função de 'middleware' para 'proxy'
+// Next.js 16+ usa a convenção "proxy" em vez de "middleware"
 export async function proxy(request: NextRequest) {
     const { supabaseResponse, user } = await updateSession(request);
 
@@ -44,4 +44,4 @@ export const config = {
     matcher: [
         "/((?!_next/static|_next/image|favicon.ico|api/health|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)",
     ],
-}
+};

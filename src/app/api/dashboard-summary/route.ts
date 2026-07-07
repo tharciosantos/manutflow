@@ -86,6 +86,18 @@ export async function GET() {
         highPriorityOrdersResult.error ||
         criticalPriorityOrdersResult.error;
 
+    const responseBody = {
+        totalEquipments: equipmentsResult.count ?? 0,
+        totalServiceOrders: serviceOrdersResult.count ?? 0,
+        openServiceOrders: openOrdersResult.count ?? 0,
+        inProgressServiceOrders: inProgressOrdersResult.count ?? 0,
+        closedServiceOrders: closedOrdersResult.count ?? 0,
+        lowPriorityServiceOrders: lowPriorityOrdersResult.count ?? 0,
+        mediumPriorityServiceOrders: mediumPriorityOrdersResult.count ?? 0,
+        highPriorityServiceOrders: highPriorityOrdersResult.count ?? 0,
+        criticalPriorityServiceOrders: criticalPriorityOrdersResult.count ?? 0,
+    };
+
     if (hasError) {
         console.error('Erro ao buscar resumo do dashboard:', {
             equipmentsError: equipmentsResult.error,
@@ -98,29 +110,7 @@ export async function GET() {
             highPriorityOrdersError: highPriorityOrdersResult.error,
             criticalPriorityOrdersError: criticalPriorityOrdersResult.error,
         });
-
-        return NextResponse.json({
-            totalEquipments: equipmentsResult.count ?? 0,
-            totalServiceOrders: serviceOrdersResult.count ?? 0,
-            openServiceOrders: openOrdersResult.count ?? 0,
-            inProgressServiceOrders: inProgressOrdersResult.count ?? 0,
-            closedServiceOrders: closedOrdersResult.count ?? 0,
-            lowPriorityServiceOrders: lowPriorityOrdersResult.count ?? 0,
-            mediumPriorityServiceOrders: mediumPriorityOrdersResult.count ?? 0,
-            highPriorityServiceOrders: highPriorityOrdersResult.count ?? 0,
-            criticalPriorityServiceOrders: criticalPriorityOrdersResult.count ?? 0,
-        });
     }
 
-    return NextResponse.json({
-        totalEquipments: equipmentsResult.count ?? 0,
-        totalServiceOrders: serviceOrdersResult.count ?? 0,
-        openServiceOrders: openOrdersResult.count ?? 0,
-        inProgressServiceOrders: inProgressOrdersResult.count ?? 0,
-        closedServiceOrders: closedOrdersResult.count ?? 0,
-        lowPriorityServiceOrders: lowPriorityOrdersResult.count ?? 0,
-        mediumPriorityServiceOrders: mediumPriorityOrdersResult.count ?? 0,
-        highPriorityServiceOrders: highPriorityOrdersResult.count ?? 0,
-        criticalPriorityServiceOrders: criticalPriorityOrdersResult.count ?? 0,
-    });
+    return NextResponse.json(responseBody);
 }

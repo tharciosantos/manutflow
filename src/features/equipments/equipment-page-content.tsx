@@ -116,17 +116,19 @@ export function EquipmentPageContent() {
 
     return (
         <>
+            <div className="space-y-5">
+                <EquipmentSearch
+                    searchTerm={searchTerm}
+                    onSearchTermChange={setSearchTerm}
+                />
+
+                <EquipmentStatusFilter
+                    selectedStatus={selectedStatus}
+                    onSelectedStatusChange={setSelectedStatus}
+                />
+            </div>
+
             <EquipmentForm onEquipmentCreated={loadEquipments} />
-
-            <EquipmentSearch
-                searchTerm={searchTerm}
-                onSearchTermChange={setSearchTerm}
-            />
-
-            <EquipmentStatusFilter
-                selectedStatus={selectedStatus}
-                onSelectedStatusChange={setSelectedStatus}
-            />
 
             <EquipmentList
                 equipments={filteredEquipments}

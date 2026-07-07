@@ -74,7 +74,7 @@ export function DashboardOverview() {
 
   if (isLoading) {
     return (
-      <div className="mt-10 rounded-2xl border border-slate-800 bg-slate-950/70 p-6">
+      <div className="mt-6 rounded-2xl border border-slate-800 bg-slate-950/70 p-5 sm:p-6">
         <p className="text-sm text-slate-400">
           Carregando indicadores do dashboard...
         </p>
@@ -84,26 +84,26 @@ export function DashboardOverview() {
 
   if (errorMessage) {
     return (
-      <div className="mt-10 rounded-2xl border border-red-500/30 bg-red-500/10 p-6">
+      <div className="mt-6 rounded-2xl border border-red-500/30 bg-red-500/10 p-5 sm:p-6">
         <p className="text-sm text-red-300">{errorMessage}</p>
       </div>
     );
   }
 
-  return (      <div className="mt-10 space-y-6">
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
-        <StatusCard
-          title="Equipamentos"
-          value={String(summary?.totalEquipments ?? 0)}
-          description="Máquinas e ativos cadastrados"
-          cardClassName="border-teal-500/20 bg-gradient-to-br from-slate-900 to-slate-900/50"
-          valueClassName="text-teal-300"
-          icon={
-            <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M9.53 16.122a3 3 0 00-5.78 1.128 2.25 2.25 0 01-2.4 2.245 4.5 4.5 0 008.4-2.245c0-.399-.078-.78-.22-1.128zm0 0a15.998 15.998 0 003.388-1.62m-5.043-.025a15.994 15.994 0 011.622-3.395m3.42 3.42a15.995 15.995 0 004.764-4.648l3.876-5.814a1.151 1.151 0 00-1.597-1.597L14.146 6.32a15.996 15.996 0 00-4.649 4.763m3.42 3.42a6.776 6.776 0 00-3.42-3.42" />
-            </svg>
-          }
-        />
+  return (      <div className="mt-6 space-y-6 sm:mt-10">
+      <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
+          <StatusCard
+            title="Equipamentos"
+            value={String(summary?.totalEquipments ?? 0)}
+            description="Máquinas e ativos cadastrados"
+            cardClassName="border-teal-500/20 bg-gradient-to-br from-slate-900 to-slate-900/50"
+            valueClassName="text-teal-300"
+            icon={
+              <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M9.53 16.122a3 3 0 00-5.78 1.128 2.25 2.25 0 01-2.4 2.245 4.5 4.5 0 008.4-2.245c0-.399-.078-.78-.22-1.128zm0 0a15.998 15.998 0 003.388-1.62m-5.043-.025a15.994 15.994 0 011.622-3.395m3.42 3.42a15.995 15.995 0 004.764-4.648l3.876-5.814a1.151 1.151 0 00-1.597-1.597L14.146 6.32a15.996 15.996 0 00-4.649 4.763m3.42 3.42a6.776 6.776 0 00-3.42-3.42" />
+              </svg>
+            }
+          />
 
         <StatusCard
           title="Ordens"
@@ -158,7 +158,7 @@ export function DashboardOverview() {
         />
       </div>
 
-      <section className="rounded-2xl border border-slate-800 bg-slate-950/70 p-6">
+      <section className="rounded-2xl border border-slate-800 bg-slate-950/70 p-5 sm:p-6">
         <div>
           <span className="rounded-full border border-teal-500/30 bg-teal-500/10 px-3 py-1 text-xs font-medium text-teal-300">
             Prioridades
@@ -173,38 +173,37 @@ export function DashboardOverview() {
           </p>
         </div>
 
-        <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          <StatusCard
-            title={serviceOrderPriorityLabels.low}
-            value={String(summary?.lowPriorityServiceOrders ?? 0)}
-            description="Baixa urgência"
-            cardClassName="border-slate-700 bg-slate-900"
-            valueClassName="text-slate-100"
-          />
+        <div className="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-2 lg:grid-cols-4">                    <StatusCard
+                        title={serviceOrderPriorityLabels.low}
+                        value={String(summary?.lowPriorityServiceOrders ?? 0)}
+                        description="Baixa urgência"
+                        cardClassName="border-slate-700 bg-slate-900"
+                        valueClassName="text-slate-100"
+                      />
 
-          <StatusCard
-            title={serviceOrderPriorityLabels.medium}
-            value={String(summary?.mediumPriorityServiceOrders ?? 0)}
-            description="Atenção moderada"
-            cardClassName="border-yellow-500/30 bg-slate-900"
-            valueClassName="text-yellow-300"
-          />
+                      <StatusCard
+                        title={serviceOrderPriorityLabels.medium}
+                        value={String(summary?.mediumPriorityServiceOrders ?? 0)}
+                        description="Atenção moderada"
+                        cardClassName="border-yellow-500/30 bg-slate-900"
+                        valueClassName="text-yellow-300"
+                      />
 
-          <StatusCard
-            title={serviceOrderPriorityLabels.high}
-            value={String(summary?.highPriorityServiceOrders ?? 0)}
-            description="Alta prioridade"
-            cardClassName="border-orange-500/30 bg-slate-900"
-            valueClassName="text-orange-300"
-          />
+                      <StatusCard
+                        title={serviceOrderPriorityLabels.high}
+                        value={String(summary?.highPriorityServiceOrders ?? 0)}
+                        description="Alta prioridade"
+                        cardClassName="border-orange-500/30 bg-slate-900"
+                        valueClassName="text-orange-300"
+                      />
 
-          <StatusCard
-            title={serviceOrderPriorityLabels.critical}
-            value={String(summary?.criticalPriorityServiceOrders ?? 0)}
-            description="Atendimento crítico"
-            cardClassName="border-red-500/30 bg-slate-900"
-            valueClassName="text-red-300"
-          />
+                      <StatusCard
+                        title={serviceOrderPriorityLabels.critical}
+                        value={String(summary?.criticalPriorityServiceOrders ?? 0)}
+                        description="Atendimento crítico"
+                        cardClassName="border-red-500/30 bg-slate-900"
+                        valueClassName="text-red-300"
+                      />
         </div>
       </section>
     </div>

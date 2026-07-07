@@ -193,20 +193,19 @@ export function ServiceOrderList({
         );
     }
 
-    return (
-        <section className="space-y-4">
+    return (            <section className="space-y-4">
             <div className="flex flex-col gap-1 sm:flex-row sm:items-end sm:justify-between">
                 <div>
-                    <h2 className="text-xl font-semibold text-white">
+                    <h2 className="text-lg font-semibold text-white sm:text-xl">
                         Ordens cadastradas
                     </h2>
 
-                    <p className="text-sm text-slate-400">
+                    <p className="text-xs text-slate-400 sm:text-sm">
                         Acompanhe as solicitações abertas e seus equipamentos vinculados.
                     </p>
                 </div>
 
-                <span className="text-sm text-slate-500">
+                <span className="text-xs text-slate-500 sm:text-sm">
                     {orders.length} {orders.length === 1 ? 'ordem' : 'ordens'}
                 </span>
             </div>
@@ -215,36 +214,36 @@ export function ServiceOrderList({
                 {orders.map((order) => (
                     <article
                         key={order.id}
-                        className="group rounded-2xl border border-slate-800 bg-slate-950/70 p-5 shadow-sm transition-all duration-200 hover:scale-[1.01] hover:border-teal-500/30 hover:shadow-lg hover:shadow-teal-500/5"
+                        className="group rounded-2xl border border-slate-800 bg-slate-950/70 p-4 shadow-sm transition-all duration-200 hover:scale-[1.01] hover:border-teal-500/30 hover:shadow-lg hover:shadow-teal-500/5 sm:p-5"
                     >
-                        <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
-                            <div className="space-y-3">
+                        <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
+                            <div className="min-w-0 space-y-2">
                                 <div>
-                                    <h3 className="text-base font-semibold text-white">
+                                    <h3 className="text-sm font-semibold text-white sm:text-base">
                                         {order.title}
                                     </h3>
 
-                                    <p className="mt-1 text-sm text-slate-400">
+                                    <p className="mt-0.5 text-xs text-slate-400 line-clamp-2 sm:text-sm">
                                         {order.description || 'Sem descrição informada.'}
                                     </p>
                                 </div>
 
-                                <div className="grid gap-1 text-sm text-slate-400">
-                                    <p>
+                                <div className="grid gap-0.5 text-xs text-slate-400 sm:gap-1 sm:text-sm">
+                                    <p className="truncate">
                                         <span className="text-slate-500">Equipamento:</span>{' '}
                                         <span className="text-slate-300">
                                             {order.equipment.name}
                                         </span>
                                     </p>
 
-                                    <p>
+                                    <p className="truncate">
                                         <span className="text-slate-500">Patrimônio:</span>{' '}
                                         <span className="text-slate-300">
                                             {order.equipment.patrimony_code}
                                         </span>
                                     </p>
 
-                                    <p>
+                                    <p className="truncate">
                                         <span className="text-slate-500">Local:</span>{' '}
                                         <span className="text-slate-300">
                                             {order.equipment.location}
@@ -253,7 +252,7 @@ export function ServiceOrderList({
                                 </div>
                             </div>
 
-                            <div className="flex flex-wrap gap-2 lg:justify-end">
+                            <div className="flex flex-wrap items-center gap-1.5 sm:gap-2 lg:justify-end">
                                 <select
                                     value={order.status}
                                     disabled={updatingStatusOrderId === order.id}
@@ -263,7 +262,7 @@ export function ServiceOrderList({
                                             event.target.value as ServiceOrderStatus,
                                         )
                                     }
-                                    className={`rounded-full border px-3 py-1 text-xs font-medium outline-none transition disabled:cursor-not-allowed disabled:opacity-60 ${serviceOrderStatusStyles[order.status]}`}
+                                    className={`rounded-full border px-2.5 py-1 text-[11px] font-medium outline-none transition disabled:cursor-not-allowed disabled:opacity-60 sm:px-3 sm:py-1 sm:text-xs ${serviceOrderStatusStyles[order.status]}`}
                                 >
                                     <option value="open" className="bg-slate-950 text-slate-100">
                                         {serviceOrderStatusLabels.open}
@@ -277,21 +276,21 @@ export function ServiceOrderList({
                                 </select>
 
                                 <span
-                                    className={`rounded-full border px-3 py-1 text-xs font-medium ${serviceOrderPriorityStyles[order.priority]}`}
+                                    className={`rounded-full border px-2.5 py-1 text-[11px] font-medium sm:px-3 sm:py-1 sm:text-xs ${serviceOrderPriorityStyles[order.priority]}`}
                                 >
                                     {serviceOrderPriorityLabels[order.priority]}
                                 </span>
                                 <Link
                                     href={`/ordens/${order.id}`}
-                                    className="rounded-full border border-teal-500/30 px-3 py-1 text-xs font-medium text-teal-300 transition hover:bg-teal-500/10"
+                                    className="rounded-full border border-teal-500/30 px-2.5 py-1 text-[11px] font-medium text-teal-300 transition hover:bg-teal-500/10 sm:px-3 sm:py-1 sm:text-xs"
                                 >
-                                    Ver detalhes
+                                    Detalhes
                                 </Link>
                                 <button
                                     type="button"
                                     onClick={() => handleDelete(order.id)}
                                     disabled={deletingOrderId === order.id}
-                                    className="rounded-full border border-red-500/30 px-3 py-1 text-xs font-medium text-red-300 transition hover:bg-red-500/10 disabled:cursor-not-allowed disabled:opacity-60"
+                                    className="rounded-full border border-red-500/30 px-2.5 py-1 text-[11px] font-medium text-red-300 transition hover:bg-red-500/10 disabled:cursor-not-allowed disabled:opacity-60 sm:px-3 sm:py-1 sm:text-xs"
                                 >
                                     {deletingOrderId === order.id ? 'Excluindo...' : 'Excluir'}
                                 </button>

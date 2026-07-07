@@ -1,9 +1,13 @@
 import { createClient } from "@/lib/supabase/server";
 import { NextResponse } from 'next/server';
+import { getUser } from "@/lib/auth";
 
 export const dynamic = "force-dynamic";
 
 export async function GET() {
+    const { user, error: authError } = await getUser();
+    if (authError) return authError;
+
     const supabase = await createClient();
     const { data, error } = await supabase
         .from('service_orders')
@@ -23,6 +27,7 @@ export async function GET() {
         status
       )
     `)
+        .eq("user_id", user.id)
         .order('created_at', { ascending: false });
 
     if (error) {
@@ -41,9 +46,17 @@ export async function GET() {
 const allowedPriorities = ['low', 'medium', 'high', 'critical'];
 
 export async function POST(request: Request) {
-    const supabase = await createClient();
+    const { user, error: authError } = await getUser();
+    if (authError) return authError;
 
-    const body = await request.json().catch(() => null);
+    const supabase = await createClient();
+    let body = await request.json().catch(() => null);
+
+    // ⚠️ SEGURANÇA: Remove user_id do body para evitar que o cliente envie um id de outro usuário
+    if (body) {
+      const { user_id: _, ...safeBody } = body;
+      body = safeBody;
+    }
 
     const title = typeof body?.title === 'string' ? body.title.trim() : '';
     const description = typeof body?.description === 'string' ? body.description.trim() : null;
@@ -79,6 +92,7 @@ export async function POST(request: Request) {
             equipment_id: equipmentId,
             priority,
             status: 'open',
+            user_id: user.id,
         })
         .select()
         .single();

@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { createClient } from "@/lib/supabase/server";
+import { getUser } from "@/lib/auth";
 
 export const dynamic = "force-dynamic";
 
@@ -12,8 +13,10 @@ type RouteParams = {
 };
 
 export async function GET(_request: Request, { params }: RouteParams) {
-    const supabase = await createClient();
+    const { user, error: authError } = await getUser();
+    if (authError) return authError;
 
+    const supabase = await createClient();
     const { id } = await params;
 
     if (!id) {
@@ -42,6 +45,7 @@ export async function GET(_request: Request, { params }: RouteParams) {
             )
         `)
         .eq('id', id)
+        .eq("user_id", user.id)
         .maybeSingle();
 
     if (error) {
@@ -92,8 +96,10 @@ export async function GET(_request: Request, { params }: RouteParams) {
 }
 
 export async function PATCH(request: Request, { params }: RouteParams) {
-    const supabase = await createClient();
+    const { user, error: authError } = await getUser();
+    if (authError) return authError;
 
+    const supabase = await createClient();
     const { id } = await params;
 
     if (!id) {
@@ -119,6 +125,7 @@ export async function PATCH(request: Request, { params }: RouteParams) {
             .from('service_orders')
             .select('id, status')
             .eq('id', id)
+            .eq("user_id", user.id)
             .maybeSingle();
 
     if (currentServiceOrderError) {
@@ -185,8 +192,10 @@ export async function PATCH(request: Request, { params }: RouteParams) {
 }
 
 export async function DELETE(_request: Request, { params }: RouteParams) {
-    const supabase = await createClient();
+    const { user, error: authError } = await getUser();
+    if (authError) return authError;
 
+    const supabase = await createClient();
     const { id } = await params;
 
     if (!id) {
@@ -200,6 +209,7 @@ export async function DELETE(_request: Request, { params }: RouteParams) {
         .from('service_orders')
         .delete()
         .eq('id', id)
+        .eq("user_id", user.id)
         .select('id')
         .maybeSingle();
 

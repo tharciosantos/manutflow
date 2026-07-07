@@ -1,5 +1,5 @@
 import { createClient } from "@/lib/supabase/server";
-
+import { getUser } from "@/lib/auth";
 
 export const dynamic = "force-dynamic";
 
@@ -22,11 +22,15 @@ function isEquipmentStatus(value: unknown): value is EquipmentStatus {
 }
 
 export async function GET() {
+  const { user, error: authError } = await getUser();
+  if (authError) return authError;
+
   const supabase = await createClient();
 
   const { data, error } = await supabase
     .from("equipments")
     .select("*")
+    .eq("user_id", user.id)
     .order("created_at", { ascending: false });
 
   if (error) {
@@ -35,9 +39,7 @@ export async function GET() {
         error: "Erro ao buscar equipamentos.",
         details: error.message,
       },
-      {
-        status: 500,
-      },
+      { status: 500 }
     );
   }
 
@@ -47,6 +49,8 @@ export async function GET() {
 }
 
 export async function POST(request: Request) {
+  const { user, error: authError } = await getUser();
+  if (authError) return authError;
 
   const supabase = await createClient();
   let body: CreateEquipmentBody;
@@ -122,6 +126,7 @@ export async function POST(request: Request) {
       patrimony_code: patrimonyCode,
       location,
       status,
+      user_id: user.id,
     })
     .select("*")
     .single();

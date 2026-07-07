@@ -1,9 +1,14 @@
 import { createClient } from "@/lib/supabase/server";
 import { NextResponse } from 'next/server';
+import { getUser } from "@/lib/auth";
 
 export const dynamic = "force-dynamic";
 
 export async function GET() {
+
+    const { user, error: authError } = await getUser();
+    if (authError) return authError;
+
     const supabase = await createClient();
 
     const [
@@ -19,46 +24,48 @@ export async function GET() {
     ] = await Promise.all([
         supabase
             .from('equipments')
-            .select('*', { count: 'exact', head: true }),
-
-        supabase
-            .from('service_orders')
-            .select('*', { count: 'exact', head: true }),
+            .select('*', { count: 'exact', head: true })
+            .eq("user_id", user.id),
 
         supabase
             .from('service_orders')
             .select('*', { count: 'exact', head: true })
-            .eq('status', 'open'),
+            .eq("user_id", user.id),
 
         supabase
             .from('service_orders')
             .select('*', { count: 'exact', head: true })
-            .eq('status', 'in_progress'),
+            .eq("user_id", user.id),
 
         supabase
             .from('service_orders')
             .select('*', { count: 'exact', head: true })
-            .eq('status', 'closed'),
+            .eq("user_id", user.id),
 
         supabase
             .from('service_orders')
             .select('*', { count: 'exact', head: true })
-            .eq('priority', 'low'),
+            .eq("user_id", user.id),
 
         supabase
             .from('service_orders')
             .select('*', { count: 'exact', head: true })
-            .eq('priority', 'medium'),
+            .eq("user_id", user.id),
 
         supabase
             .from('service_orders')
             .select('*', { count: 'exact', head: true })
-            .eq('priority', 'high'),
+            .eq("user_id", user.id),
 
         supabase
             .from('service_orders')
             .select('*', { count: 'exact', head: true })
-            .eq('priority', 'critical'),
+            .eq("user_id", user.id),
+
+        supabase
+            .from('service_orders')
+            .select('*', { count: 'exact', head: true })
+            .eq("user_id", user.id),
     ]);
 
     const hasError =

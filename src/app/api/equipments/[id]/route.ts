@@ -1,15 +1,16 @@
 import { createClient } from "@/lib/supabase/server";
-
+import { getUser } from "@/lib/auth";
 
 export const dynamic = "force-dynamic";
 
 type RouteParams = {
-    params: Promise<{
-        id: string;
-    }>;
+    params: Promise<{ id: string }>;
 };
 
 export async function GET(_request: Request, { params }: RouteParams) {
+    const { user, error: authError } = await getUser();
+    if (authError) return authError;
+
     const supabase = await createClient();
 
     const { id } = await params;
@@ -29,6 +30,7 @@ export async function GET(_request: Request, { params }: RouteParams) {
         .from("equipments")
         .select("*")
         .eq("id", id)
+        .eq("user_id", user.id)
         .maybeSingle();
 
     if (equipmentError) {
@@ -79,8 +81,11 @@ export async function GET(_request: Request, { params }: RouteParams) {
 }
 
 export async function DELETE(_request: Request, { params }: RouteParams) {
-    const supabase = await createClient();
+    const { user, error: authError } = await getUser();
+    if (authError) return authError;
 
+
+    const supabase = await createClient();
     const { id } = await params;
 
     if (!id) {
@@ -129,6 +134,7 @@ export async function DELETE(_request: Request, { params }: RouteParams) {
         .from("equipments")
         .delete()
         .eq("id", id)
+        .eq("user_id", user.id)
         .select("id")
         .maybeSingle();
 

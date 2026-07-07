@@ -92,10 +92,40 @@ export function ServiceOrderList({
 
     if (isLoading) {
         return (
-            <div className="rounded-2xl border border-slate-800 bg-slate-950/70 p-6">
-                <p className="text-sm text-slate-400">
-                    Carregando ordens de serviço...
-                </p>
+            <div className="space-y-4">
+                <div className="flex flex-col gap-1 sm:flex-row sm:items-end sm:justify-between">
+                    <div>
+                        <div className="h-7 w-40 animate-pulse rounded-lg bg-slate-800" />
+                        <div className="mt-2 h-4 w-56 animate-pulse rounded bg-slate-800/70" />
+                    </div>
+                    <div className="mt-2 h-4 w-28 animate-pulse rounded bg-slate-800/50 sm:mt-0" />
+                </div>
+                <div className="space-y-4">
+                    {[1, 2, 3].map((i) => (
+                        <div
+                            key={i}
+                            className="rounded-2xl border border-slate-800 bg-slate-950/70 p-5"
+                        >
+                            <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+                                <div className="flex-1 space-y-3">
+                                    <div className="h-5 w-56 animate-pulse rounded bg-slate-800" />
+                                    <div className="h-4 w-full animate-pulse rounded bg-slate-800/60" />
+                                    <div className="grid gap-1">
+                                        <div className="h-3.5 w-36 animate-pulse rounded bg-slate-800/50" />
+                                        <div className="h-3.5 w-28 animate-pulse rounded bg-slate-800/50" />
+                                        <div className="h-3.5 w-32 animate-pulse rounded bg-slate-800/50" />
+                                    </div>
+                                </div>
+                                <div className="flex flex-wrap gap-2 lg:justify-end">
+                                    <div className="h-7 w-24 animate-pulse rounded-full bg-slate-800" />
+                                    <div className="h-7 w-16 animate-pulse rounded-full bg-slate-800" />
+                                    <div className="h-7 w-24 animate-pulse rounded-full bg-slate-800" />
+                                    <div className="h-7 w-16 animate-pulse rounded-full bg-slate-800" />
+                                </div>
+                            </div>
+                        </div>
+                    ))}
+                </div>
             </div>
         );
     }
@@ -113,24 +143,51 @@ export function ServiceOrderList({
         const hasSearch = searchTerm.trim().length > 0;
 
         return (
-            <div className='rounded-2xl border border-dashed border-slate-700 bg-slate-950/50 p-6'>
-                <p className='text-sm font-medium text-slate-300'>
-                    {
-                        hasOrders
-                            ? 'Nenhuma ordem encontrada para os filtros atuais.'
-                            : 'Nenhuma ordem de serviço cadastrada ainda.'}
+            <div className="flex flex-col items-center justify-center rounded-2xl border border-dashed border-slate-700 bg-slate-950/30 px-6 py-16 text-center">
+                {/* Ilustração SVG */}
+                <svg
+                    className="mb-4 h-16 w-16 text-slate-600"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                    strokeWidth={1}
+                    aria-hidden="true"
+                >
+                    <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        d="M11.35 3.836c-.765.66-1.516 1.47-2.152 2.71a2.75 2.75 0 01-2.036 1.644 2.753 2.753 0 00-1.736 1.074A7.5 7.5 0 0112 2.25c2.07 0 3.944 1.18 4.83 3.02a2.754 2.754 0 001.736 1.074 2.752 2.752 0 012.036-1.644c.636-1.24 1.387-2.05 2.152-2.71M12 18.75c-2.07 0-3.944-1.18-4.83-3.02A2.752 2.752 0 006.434 14.28m0 0A7.5 7.5 0 0112 14.25a7.5 7.5 0 015.566 2.28m0 0a2.752 2.752 0 002.036 1.644c.636 1.24 1.387 2.05 2.152 2.71M6.434 14.28a2.75 2.75 0 00-1.736-1.074 2.753 2.753 0 00-2.036-1.644M3.75 12h.008v.008H3.75V12z"
+                    />
+                </svg>
+
+                <p className="text-base font-medium text-slate-300">
+                    {hasOrders
+                        ? 'Nenhuma ordem encontrada'
+                        : 'Nenhuma ordem de serviço cadastrada'}
+                </p>
+
+                <p className="mt-1 text-sm text-slate-500">
+                    {hasOrders
+                        ? 'Tente alterar os filtros ou buscar por outro termo.'
+                        : 'Crie sua primeira ordem de serviço para começar.'}
                 </p>
 
                 {hasOrders && hasSearch && (
-                    <p className='mt-2 text-sm text-slate-500'>
-                        Busca ativa: {searchTerm.trim()}
+                    <p className="mt-3 text-xs text-slate-600">
+                        Busca: &ldquo;{searchTerm.trim()}&rdquo;
                     </p>
                 )}
 
-                {hasOrders && (
-                    <p className='mt-2 text-xs text-slate-500'>
-                        Tente alterar os filtros selecionados ou buscar por outro termo.
-                    </p>
+                {!hasOrders && (
+                    <a
+                        href="#service-order-form"
+                        className="mt-6 inline-flex items-center gap-2 rounded-xl bg-teal-600 px-5 py-2.5 text-sm font-medium text-white transition hover:bg-teal-500"
+                    >
+                        <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+                        </svg>
+                        Criar Ordem de Serviço
+                    </a>
                 )}
             </div>
         );
@@ -158,7 +215,7 @@ export function ServiceOrderList({
                 {orders.map((order) => (
                     <article
                         key={order.id}
-                        className="rounded-2xl border border-slate-800 bg-slate-950/70 p-5 shadow-sm transition hover:border-slate-700"
+                        className="group rounded-2xl border border-slate-800 bg-slate-950/70 p-5 shadow-sm transition-all duration-200 hover:scale-[1.01] hover:border-teal-500/30 hover:shadow-lg hover:shadow-teal-500/5"
                     >
                         <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
                             <div className="space-y-3">

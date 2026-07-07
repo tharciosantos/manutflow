@@ -69,8 +69,9 @@ export function EquipmentForm({ onEquipmentCreated }: EquipmentFormProps) {
 
   return (
     <form
+      id="equipment-form"
       onSubmit={handleSubmit}
-      className="mt-8 rounded-2xl border border-slate-800 bg-slate-950/70 p-5 shadow-sm"
+      className="mt-8 scroll-mt-20 rounded-2xl border border-slate-800 bg-slate-950/70 p-5 shadow-sm"
     >
       <div>
         <span className="rounded-full border border-teal-500/30 bg-teal-500/10 px-3 py-1 text-xs font-medium text-teal-300">

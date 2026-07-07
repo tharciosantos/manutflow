@@ -119,6 +119,25 @@ export async function POST(request: Request) {
     );
   }
 
+  // Verifica se o patrimônio já existe SOMENTE para este usuário
+  const { data: existingEquipment } = await supabase
+    .from("equipments")
+    .select("id")
+    .eq("user_id", user.id)
+    .eq("patrimony_code", patrimonyCode)
+    .maybeSingle();
+
+  if (existingEquipment) {
+    return Response.json(
+      {
+        error: "Já existe um equipamento com esse código de patrimônio.",
+      },
+      {
+        status: 409,
+      },
+    );
+  }
+
   const { data, error } = await supabase
     .from("equipments")
     .insert({
@@ -137,9 +156,7 @@ export async function POST(request: Request) {
         {
           error: "Já existe um equipamento com esse código de patrimônio.",
         },
-        {
-          status: 409,
-        },
+        { status: 409 },
       );
     }
 

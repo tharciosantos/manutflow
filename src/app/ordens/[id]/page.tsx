@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
 import { AppShell } from '@/components/layout/app-shell';
+import { Breadcrumbs } from '@/components/ui/breadcrumbs';
 import {
     serviceOrderPriorityLabels,
     serviceOrderPriorityStyles,
@@ -114,12 +115,12 @@ export default function ServiceOrderDetailsPage({
     return (
         <AppShell>
             <section className="mx-auto max-w-5xl px-6 py-10">
-                <Link
-                    href="/ordens"
-                    className="text-sm font-medium text-teal-300 transition hover:text-teal-200"
-                >
-                    ← Voltar para ordens
-                </Link>
+                <Breadcrumbs
+                    items={[
+                        { label: "Ordens", href: "/ordens" },
+                        { label: serviceOrder?.title ?? "Carregando..." },
+                    ]}
+                />
 
                 {isLoading && (
                     <div className="mt-6 rounded-2xl border border-slate-800 bg-slate-950/70 p-6">

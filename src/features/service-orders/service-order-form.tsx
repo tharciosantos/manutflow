@@ -103,8 +103,9 @@ export function ServiceOrderForm({ onCreated }: ServiceOrderFormProps) {
 
     return (
         <form
+            id="service-order-form"
             onSubmit={handleSubmit}
-            className="rounded-2xl border border-slate-800 bg-slate-950/70 p-5 shadow-sm"
+            className="scroll-mt-20 rounded-2xl border border-slate-800 bg-slate-950/70 p-5 shadow-sm"
         >
             <div className="mb-6 flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
                 <div>

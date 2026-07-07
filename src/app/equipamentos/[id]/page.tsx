@@ -1,9 +1,9 @@
 "use client";
 
-import Link from "next/link";
 import { useEffect, useState } from "react";
 
 import { AppShell } from "@/components/layout/app-shell";
+import { Breadcrumbs } from "@/components/ui/breadcrumbs";
 import {
     equipmentStatusLabels,
     equipmentStatusStyles,
@@ -115,12 +115,12 @@ export default function EquipmentDetailsPage({
     return (
         <AppShell>
             <section className="mx-auto max-w-5xl px-6 py-10">
-                <Link
-                    href="/equipamentos"
-                    className="text-sm font-medium text-teal-300 transition hover:text-teal-200"
-                >
-                    ← Voltar para equipamentos
-                </Link>
+                <Breadcrumbs
+                    items={[
+                        { label: "Equipamentos", href: "/equipamentos" },
+                        { label: details?.equipment.name ?? "Carregando..." },
+                    ]}
+                />
 
                 {isLoading && (
                     <div className="mt-6 rounded-2xl border border-slate-800 bg-slate-950/70 p-6">

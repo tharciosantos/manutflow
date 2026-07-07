@@ -7,13 +7,15 @@ import { DashboardOverview } from "@/features/dashboard/dashboard-overview";
 import Link from "next/link";
 
 export default function Home() {
-  const [userEmail, setUserEmail] = useState<string | null>(null);
+  const [userName, setUserName] = useState<string | null>(null);
 
   useEffect(() => {
     async function getUser() {
       const { data: { user } } = await createClient().auth.getUser();
-      if (user?.email) {
-        setUserEmail(user.email.split("@")[0]);
+      if (user) {
+        // Tenta pegar o nome completo do user_metadata, senão usa a parte local do email
+        const name = user.user_metadata?.full_name || user.email?.split("@")[0] || null;
+        setUserName(name);
       }
     }
     getUser();
@@ -25,7 +27,7 @@ export default function Home() {
         {/* Saudação */}
         <div className="mb-8 animate-fade-in">
           <h1 className="text-2xl font-semibold text-slate-100">
-            Olá, {userEmail ? <span className="text-teal-400">{userEmail}</span> : "visitante"} 👋
+            Olá, {userName ? <span className="text-teal-400">{userName}</span> : "visitante"} 👋
           </h1>
           <p className="mt-1 text-sm text-slate-400">
             Bem-vindo ao ManutFlow. Aqui está o resumo do seu sistema.

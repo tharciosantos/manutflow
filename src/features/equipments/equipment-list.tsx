@@ -82,7 +82,7 @@ export function EquipmentList({
                             key={i}
                             className="rounded-2xl border border-slate-800 bg-slate-950/70 p-5"
                         >
-                            <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+                            <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
                                 <div className="flex-1 space-y-3">
                                     <div className="h-5 w-40 animate-pulse rounded bg-slate-800" />
                                     <div className="space-y-2">
@@ -90,10 +90,10 @@ export function EquipmentList({
                                         <div className="h-3.5 w-28 animate-pulse rounded bg-slate-800/60" />
                                     </div>
                                 </div>
-                                <div className="flex gap-2">
-                                    <div className="h-7 w-20 animate-pulse rounded-full bg-slate-800" />
-                                    <div className="h-7 w-24 animate-pulse rounded-full bg-slate-800" />
-                                    <div className="h-7 w-16 animate-pulse rounded-full bg-slate-800" />
+                                <div className="flex flex-wrap gap-2">
+                                    <div className="h-8 w-20 animate-pulse rounded-full bg-slate-800" />
+                                    <div className="h-8 w-24 animate-pulse rounded-full bg-slate-800" />
+                                    <div className="h-8 w-16 animate-pulse rounded-full bg-slate-800" />
                                 </div>
                             </div>
                         </div>
@@ -178,20 +178,19 @@ export function EquipmentList({
         );
     }
 
-    return (
-        <section className="mt-6 space-y-4">
+    return (            <section className="mt-6 space-y-4">
             <div className="flex flex-col gap-1 sm:flex-row sm:items-end sm:justify-between">
                 <div>
-                    <h2 className="text-xl font-semibold text-white">
+                    <h2 className="text-lg font-semibold text-white sm:text-xl">
                         Equipamentos cadastrados
                     </h2>
 
-                    <p className="text-sm text-slate-400">
+                    <p className="text-xs text-slate-400 sm:text-sm">
                         Acompanhe os ativos registrados para manutenção.
                     </p>
                 </div>
 
-                <span className="text-sm text-slate-500">
+                <span className="text-xs text-slate-500 sm:text-sm">
                     {equipments.length}{" "}
                     {equipments.length === 1 ? "equipamento encontrado" : "equipamentos encontrados"}
                 </span>
@@ -201,23 +200,23 @@ export function EquipmentList({
                 {equipments.map((equipment) => (
                     <article
                         key={equipment.id}
-                        className="group rounded-2xl border border-slate-800 bg-slate-950/70 p-5 shadow-sm transition-all duration-200 hover:scale-[1.02] hover:border-teal-500/30 hover:shadow-lg hover:shadow-teal-500/5"
+                        className="group rounded-2xl border border-slate-800 bg-slate-950/70 p-4 shadow-sm transition-all duration-200 hover:scale-[1.02] hover:border-teal-500/30 hover:shadow-lg hover:shadow-teal-500/5 sm:p-5"
                     >
-                        <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
-                            <div>
-                                <h3 className="text-base font-semibold text-white">
+                        <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+                            <div className="min-w-0">
+                                <h3 className="text-sm font-semibold text-white sm:text-base">
                                     {equipment.name}
                                 </h3>
 
-                                <div className="mt-3 grid gap-1 text-sm">
-                                    <p>
+                                <div className="mt-2 grid gap-0.5 text-xs sm:mt-3 sm:gap-1 sm:text-sm">
+                                    <p className="truncate">
                                         <span className="text-slate-500">Patrimônio:</span>{' '}
                                         <span className="text-slate-300">
                                             {equipment.patrimony_code}
                                         </span>
                                     </p>
 
-                                    <p>
+                                    <p className="truncate">
                                         <span className="text-slate-500">Localização:</span>{' '}
                                         <span className="text-slate-300">
                                             {equipment.location}
@@ -226,23 +225,23 @@ export function EquipmentList({
                                 </div>
                             </div>
 
-                            <div className="flex flex-wrap gap-2 sm:justify-end">
+                            <div className="flex flex-wrap items-center gap-1.5 sm:gap-2 sm:justify-end">
                                 <span
-                                    className={`w-fit rounded-full border px-3 py-1 text-xs font-medium ${equipmentStatusStyles[equipment.status]}`}
+                                    className={`rounded-full border px-2.5 py-1 text-[11px] font-medium sm:px-3 sm:py-1 sm:text-xs ${equipmentStatusStyles[equipment.status]}`}
                                 >
                                     {equipmentStatusLabels[equipment.status]}
                                 </span>
                                 <Link
                                     href={`/equipamentos/${equipment.id}`}
-                                    className="w-fit rounded-full border border-teal-500/30 px-3 py-1 text-xs font-medium text-teal-300 transition hover:bg-teal-500/10"
+                                    className="rounded-full border border-teal-500/30 px-2.5 py-1 text-[11px] font-medium text-teal-300 transition hover:bg-teal-500/10 sm:px-3 sm:py-1 sm:text-xs"
                                 >
-                                    Ver detalhes
+                                    Detalhes
                                 </Link>
                                 <button
                                     type="button"
                                     onClick={() => handleDelete(equipment.id)}
                                     disabled={deletingEquipmentId === equipment.id}
-                                    className="w-fit rounded-full border border-red-500/30 px-3 py-1 text-xs font-medium text-red-300 transition hover:bg-red-500/10 disabled:cursor-not-allowed disabled:opacity-60"
+                                    className="rounded-full border border-red-500/30 px-2.5 py-1 text-[11px] font-medium text-red-300 transition hover:bg-red-500/10 disabled:cursor-not-allowed disabled:opacity-60 sm:px-3 sm:py-1 sm:text-xs"
                                 >
                                     {deletingEquipmentId === equipment.id ? "Excluindo..." : "Excluir"}
                                 </button>

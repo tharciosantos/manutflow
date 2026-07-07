@@ -105,9 +105,9 @@ export function ServiceOrderForm({ onCreated }: ServiceOrderFormProps) {
         <form
             id="service-order-form"
             onSubmit={handleSubmit}
-            className="scroll-mt-20 rounded-2xl border border-slate-800 bg-slate-950/70 p-5 shadow-sm"
+            className="scroll-mt-24 rounded-2xl border border-slate-800 bg-slate-950/70 p-4 shadow-sm sm:p-5"
         >
-            <div className="mb-6 flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
+            <div className="mb-5 flex flex-col gap-2 sm:mb-6 sm:flex-row sm:items-start sm:justify-between">
                 <div>
                     <span className="rounded-full border border-teal-500/30 bg-teal-500/10 px-3 py-1 text-xs font-medium text-teal-300">
                         Nova OS
@@ -123,7 +123,7 @@ export function ServiceOrderForm({ onCreated }: ServiceOrderFormProps) {
                 </div>
             </div>
 
-            <div className="grid gap-4">
+            <div className="grid gap-3 sm:gap-4">
                 <div>
                     <label
                         htmlFor="title"
@@ -142,7 +142,7 @@ export function ServiceOrderForm({ onCreated }: ServiceOrderFormProps) {
                     />
                 </div>
 
-                <div className="grid gap-4 md:grid-cols-2">
+                <div className="grid gap-3 sm:gap-4 sm:grid-cols-2">
                     <div>
                         <label
                             htmlFor="equipment"

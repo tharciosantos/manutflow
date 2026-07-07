@@ -22,22 +22,22 @@ export function StatusCard({
     valueClassName = 'text-slate-100',
 }: StatusCardProps) {
     return (
-        <div className={`group rounded-2xl border p-6 shadow-lg transition-all hover:scale-[1.02] hover:shadow-xl ${cardClassName}`}>
+        <div className={`group rounded-2xl border p-4 shadow-lg transition-all hover:scale-[1.02] hover:shadow-xl sm:p-6 ${cardClassName}`}>
             <div className="flex items-start justify-between">
-                <p className="text-sm text-slate-400">{title}</p>
+                <p className="text-xs text-slate-400 sm:text-sm">{title}</p>
                 {icon && (
-                    <span className="text-slate-600 transition-colors group-hover:text-slate-400">
+                    <span className="hidden text-slate-600 transition-colors group-hover:text-slate-400 sm:block">
                         {icon}
                     </span>
                 )}
             </div>
 
-            <strong className={`mt-2 block text-3xl font-bold tracking-tight ${valueClassName}`}>
+            <strong className={`mt-1 block text-2xl font-bold tracking-tight sm:mt-2 sm:text-3xl ${valueClassName}`}>
                 {value}
             </strong>
 
-            <div className="mt-2 flex items-center gap-2">
-                <p className="text-sm text-slate-400">{description}</p>
+            <div className="mt-1 flex items-center gap-2 sm:mt-2">
+                <p className="text-[11px] text-slate-400 sm:text-sm">{description}</p>
                 {trend && (
                     <span className={`inline-flex items-center gap-0.5 text-xs font-medium ${trendUp ? 'text-emerald-400' : 'text-red-400'}`}>
                         <svg className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>

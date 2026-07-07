@@ -50,12 +50,11 @@ export async function POST(request: Request) {
     if (authError) return authError;
 
     const supabase = await createClient();
-    let body = await request.json().catch(() => null);
+    const body = await request.json().catch(() => null);
 
     // ⚠️ SEGURANÇA: Remove user_id do body para evitar que o cliente envie um id de outro usuário
     if (body) {
-      const { user_id: _, ...safeBody } = body;
-      body = safeBody;
+      delete body.user_id;
     }
 
     const title = typeof body?.title === 'string' ? body.title.trim() : '';

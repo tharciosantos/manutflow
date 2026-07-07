@@ -71,7 +71,7 @@ export function EquipmentForm({ onEquipmentCreated }: EquipmentFormProps) {
     <form
       id="equipment-form"
       onSubmit={handleSubmit}
-      className="mt-8 scroll-mt-20 rounded-2xl border border-slate-800 bg-slate-950/70 p-5 shadow-sm"
+      className="mt-6 scroll-mt-24 rounded-2xl border border-slate-800 bg-slate-950/70 p-4 shadow-sm sm:mt-8 sm:p-5"
     >
       <div>
         <span className="rounded-full border border-teal-500/30 bg-teal-500/10 px-3 py-1 text-xs font-medium text-teal-300">
@@ -87,7 +87,7 @@ export function EquipmentForm({ onEquipmentCreated }: EquipmentFormProps) {
         </p>
       </div>
 
-      <div className="mt-6 grid gap-4 sm:grid-cols-2">
+      <div className="mt-5 grid gap-4 sm:mt-6 sm:grid-cols-2">
         <div>
           <label
             htmlFor="name"

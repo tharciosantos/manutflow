@@ -114,7 +114,7 @@ export default function EquipmentDetailsPage({
 
     return (
         <AppShell>
-            <section className="mx-auto max-w-5xl px-6 py-10">
+            <section className="mx-auto max-w-5xl px-4 py-6 sm:px-6 sm:py-10">
                 <Breadcrumbs
                     items={[
                         { label: "Equipamentos", href: "/equipamentos" },
@@ -142,107 +142,107 @@ export default function EquipmentDetailsPage({
 
                 {!isLoading && details && (
                     <>
-                        <div className="mt-6 rounded-2xl border border-slate-800 bg-slate-950/70 p-6">
-                            <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+                        <div className="mt-4 sm:mt-6 rounded-2xl border border-slate-800 bg-slate-950/70 p-4 sm:p-6">
+                            <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
                                 <div>
-                                    <span className="rounded-full border border-teal-500/30 bg-teal-500/10 px-3 py-1 text-xs font-medium text-teal-300">
+                                    <span className="rounded-full border border-teal-500/30 bg-teal-500/10 px-2 py-0.5 text-[11px] font-medium text-teal-300 sm:px-3 sm:py-1 sm:text-xs">
                                         Detalhes do equipamento
                                     </span>
 
-                                    <h1 className="mt-3 text-3xl font-bold text-white">
+                                    <h1 className="mt-2 text-2xl font-bold text-white sm:mt-3 sm:text-3xl">
                                         {details.equipment.name}
                                     </h1>
 
-                                    <p className="mt-2 text-sm text-slate-400">
+                                    <p className="mt-1 text-xs text-slate-400 sm:mt-2 sm:text-sm">
                                         Informações gerais do equipamento e ordens de serviço
                                         vinculadas.
                                     </p>
                                 </div>
 
                                 <span
-                                    className={`w-fit rounded-full border px-3 py-1 text-xs font-medium ${equipmentStatusStyles[details.equipment.status]}`}
+                                    className={`w-fit rounded-full border px-2.5 py-1 text-[11px] font-medium sm:px-3 sm:py-1 sm:text-xs ${equipmentStatusStyles[details.equipment.status]}`}
                                 >
                                     {equipmentStatusLabels[details.equipment.status]}
                                 </span>
                             </div>
 
-                            <div className="mt-6 grid gap-4 sm:grid-cols-2">
-                                <div className="rounded-xl border border-slate-800 bg-slate-950 p-4">
-                                    <p className="text-xs uppercase tracking-wide text-slate-500">
+                            <div className="grid grid-cols-2 gap-3 sm:gap-4">
+                                <div className="rounded-xl border border-slate-800 bg-slate-950 p-3 sm:p-4">
+                                    <p className="text-[10px] uppercase tracking-wide text-slate-500 sm:text-xs">
                                         Patrimônio
                                     </p>
-                                    <p className="mt-1 text-sm font-medium text-slate-200">
+                                    <p className="mt-1 text-xs font-medium text-slate-200 sm:text-sm truncate">
                                         {details.equipment.patrimony_code}
                                     </p>
                                 </div>
 
-                                <div className="rounded-xl border border-slate-800 bg-slate-950 p-4">
-                                    <p className="text-xs uppercase tracking-wide text-slate-500">
+                                <div className="rounded-xl border border-slate-800 bg-slate-950 p-3 sm:p-4">
+                                    <p className="text-[10px] uppercase tracking-wide text-slate-500 sm:text-xs">
                                         Localização
                                     </p>
-                                    <p className="mt-1 text-sm font-medium text-slate-200">
+                                    <p className="mt-1 text-xs font-medium text-slate-200 sm:text-sm truncate">
                                         {details.equipment.location}
                                     </p>
                                 </div>
 
-                                <div className="rounded-xl border border-slate-800 bg-slate-950 p-4">
-                                    <p className="text-xs uppercase tracking-wide text-slate-500">
+                                <div className="rounded-xl border border-slate-800 bg-slate-950 p-3 sm:p-4">
+                                    <p className="text-[10px] uppercase tracking-wide text-slate-500 sm:text-xs">
                                         Criado em
                                     </p>
-                                    <p className="mt-1 text-sm font-medium text-slate-200">
+                                    <p className="mt-1 text-xs font-medium text-slate-200 sm:text-sm">
                                         {new Date(
                                             details.equipment.created_at,
                                         ).toLocaleDateString("pt-BR")}
                                     </p>
                                 </div>
 
-                                <div className="rounded-xl border border-slate-800 bg-slate-950 p-4">
-                                    <p className="text-xs uppercase tracking-wide text-slate-500">
+                                <div className="rounded-xl border border-slate-800 bg-slate-950 p-3 sm:p-4">
+                                    <p className="text-[10px] uppercase tracking-wide text-slate-500 sm:text-xs">
                                         Ordens vinculadas
                                     </p>
-                                    <p className="mt-1 text-sm font-medium text-slate-200">
+                                    <p className="mt-1 text-xs font-medium text-slate-200 sm:text-sm">
                                         {details.serviceOrders.length}
                                     </p>
                                 </div>
                             </div>
                         </div>
 
-                        <section className="mt-8 space-y-4">
+                        <section className="mt-6 space-y-3 sm:mt-8 sm:space-y-4">
                             <div>
-                                <h2 className="text-xl font-semibold text-white">
+                                <h2 className="text-lg font-semibold text-white sm:text-xl">
                                     Ordens de serviço vinculadas
                                 </h2>
 
-                                <p className="mt-1 text-sm text-slate-400">
+                                <p className="mt-1 text-xs text-slate-400 sm:text-sm">
                                     Histórico de solicitações relacionadas a este equipamento.
                                 </p>
                             </div>
 
                             {details.serviceOrders.length === 0 ? (
-                                <div className="rounded-2xl border border-dashed border-slate-700 bg-slate-950/50 p-6">
-                                    <p className="text-sm text-slate-400">
+                                <div className="rounded-2xl border border-dashed border-slate-700 bg-slate-950/50 p-4 sm:p-6">
+                                    <p className="text-xs text-slate-400 sm:text-sm">
                                         Nenhuma ordem de serviço vinculada a este equipamento.
                                     </p>
                                 </div>
                             ) : (
-                                <div className="space-y-4">
+                                <div className="space-y-3 sm:space-y-4">
                                     {details.serviceOrders.map((order) => (
                                         <article
                                             key={order.id}
-                                            className="rounded-2xl border border-slate-800 bg-slate-950/70 p-5"
+                                            className="rounded-2xl border border-slate-800 bg-slate-950/70 p-4 sm:p-5"
                                         >
-                                            <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
-                                                <div>
-                                                    <h3 className="text-base font-semibold text-white">
+                                            <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+                                                <div className="min-w-0">
+                                                    <h3 className="text-sm font-semibold text-white sm:text-base">
                                                         {order.title}
                                                     </h3>
 
-                                                    <p className="mt-1 text-sm text-slate-400">
+                                                    <p className="mt-0.5 text-xs text-slate-400 line-clamp-2 sm:text-sm">
                                                         {order.description ||
                                                             "Sem descrição informada."}
                                                     </p>
 
-                                                    <p className="mt-3 text-xs text-slate-500">
+                                                    <p className="mt-2 text-[11px] text-slate-500 sm:mt-3 sm:text-xs">
                                                         Criada em{" "}
                                                         {new Date(
                                                             order.created_at,
@@ -250,12 +250,12 @@ export default function EquipmentDetailsPage({
                                                     </p>
                                                 </div>
 
-                                                <div className="flex flex-wrap gap-2 sm:justify-end">
-                                                    <span className="rounded-full border border-teal-500/30 bg-teal-500/10 px-3 py-1 text-xs font-medium text-teal-300">
+                                                <div className="flex flex-wrap items-center gap-1.5 sm:gap-2 sm:justify-end">
+                                                    <span className="rounded-full border border-teal-500/30 bg-teal-500/10 px-2.5 py-1 text-[11px] font-medium text-teal-300 sm:px-3 sm:py-1 sm:text-xs">
                                                         {serviceOrderStatusLabels[order.status]}
                                                     </span>
 
-                                                    <span className="rounded-full border border-slate-700 px-3 py-1 text-xs font-medium text-slate-300">
+                                                    <span className="rounded-full border border-slate-700 px-2.5 py-1 text-[11px] font-medium text-slate-300 sm:px-3 sm:py-1 sm:text-xs">
                                                         {serviceOrderPriorityLabels[order.priority]}
                                                     </span>
                                                 </div>

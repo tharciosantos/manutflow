@@ -1,10 +1,62 @@
 "use client";
-import { useState } from "react";
+
+import { Suspense, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 
+// ============================================================
+//  LoginPage (Página principal)
+// ============================================================
+//  O Next.js exige que useSearchParams() esteja DENTRO de um
+//  <Suspense> boundary.
+// ============================================================
+
 export default function LoginPage() {
+    return (
+        <Suspense fallback={<LoginSkeleton />}>
+            <LoginForm />
+        </Suspense>
+    );
+}
+
+// ============================================================
+//  LoginSkeleton (placeholder de carregamento)
+// ============================================================
+
+function LoginSkeleton() {
+    return (
+        <div className="min-h-screen flex items-center justify-center bg-slate-950 px-4 relative overflow-hidden font-sans">
+            <div className="absolute top-0 left-1/4 w-96 h-96 bg-teal-900/20 rounded-full blur-3xl pointer-events-none"></div>
+            <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-blue-900/10 rounded-full blur-3xl pointer-events-none"></div>
+
+            <div className="relative w-full max-w-md p-8 bg-slate-900/80 backdrop-blur-md border border-slate-800 rounded-2xl shadow-2xl z-10">
+                <div className="space-y-2 text-center mb-8">
+                    <div className="h-9 w-48 bg-slate-800 rounded-lg animate-pulse mx-auto"></div>
+                    <div className="h-4 w-64 bg-slate-800 rounded animate-pulse mx-auto"></div>
+                </div>
+
+                <div className="space-y-5">
+                    <div>
+                        <div className="h-4 w-12 bg-slate-800 rounded mb-1.5 animate-pulse"></div>
+                        <div className="h-10 bg-slate-800/50 rounded-lg animate-pulse"></div>
+                    </div>
+                    <div>
+                        <div className="h-4 w-12 bg-slate-800 rounded mb-1.5 animate-pulse"></div>
+                        <div className="h-10 bg-slate-800/50 rounded-lg animate-pulse"></div>
+                    </div>
+                    <div className="h-10 bg-slate-700/50 rounded-lg animate-pulse"></div>
+                </div>
+            </div>
+        </div>
+    );
+}
+
+// ============================================================
+//  LoginForm (formulário de login)
+// ============================================================
+
+function LoginForm() {
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [showPassword, setShowPassword] = useState(false);
@@ -12,6 +64,9 @@ export default function LoginPage() {
     const [loading, setLoading] = useState(false);
     const router = useRouter();
     const supabase = createClient();
+    const searchParams = useSearchParams();
+    const redirectTo = searchParams.get("redirect") || "/";
+
 
     const handleLogin = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -26,7 +81,7 @@ export default function LoginPage() {
             return;
         }
 
-        router.push("/");
+        router.push(redirectTo);
         router.refresh();
     };
 

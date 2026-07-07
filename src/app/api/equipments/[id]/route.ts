@@ -51,7 +51,7 @@ export async function GET(_request: Request, { params }: RouteParams) {
                 error: "Equipamento não encontrado.",
             },
             {
-                status: 400,
+                status: 404,
             },
         );
     }

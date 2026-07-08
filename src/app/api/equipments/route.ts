@@ -1,4 +1,3 @@
-import { createClient } from "@/lib/supabase/server";
 import { getUser } from "@/lib/auth";
 
 export const dynamic = "force-dynamic";
@@ -22,10 +21,8 @@ function isEquipmentStatus(value: unknown): value is EquipmentStatus {
 }
 
 export async function GET() {
-  const { user, error: authError } = await getUser();
+  const { user, supabase, error: authError } = await getUser();
   if (authError) return authError;
-
-  const supabase = await createClient();
 
   const { data, error } = await supabase
     .from("equipments")
@@ -49,10 +46,8 @@ export async function GET() {
 }
 
 export async function POST(request: Request) {
-  const { user, error: authError } = await getUser();
+  const { user, supabase, error: authError } = await getUser();
   if (authError) return authError;
-
-  const supabase = await createClient();
   let body: CreateEquipmentBody;
 
   try {

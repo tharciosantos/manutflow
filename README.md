@@ -66,9 +66,9 @@ O projeto simula um sistema interno usado por empresas para cadastrar equipament
 
 * Indicadores reais consumidos do Supabase
 * Total de equipamentos cadastrados
-* Total de ordens de serviço
-* Contagem de ordens por status: abertas, em andamento e fechadas
-* Contagem de ordens por prioridade: baixa, média, alta e crítica
+* Contagem de ordens abertas
+* Contagem de ordens em andamento
+* Resumo de ordens por prioridade (formato compacto)
 * **Auto-refresh** ao voltar para a aba (visibilitychange)
 
 ### Equipamentos
@@ -122,6 +122,7 @@ src/
 │  │  └── app-shell.tsx
 │  └── ui/
 │     ├── breadcrumbs.tsx
+│     ├── modal.tsx
 │     └── status-card.tsx
 ├── features/
 │  ├── dashboard/
@@ -434,7 +435,6 @@ Após o deploy, configure no [Supabase Dashboard](https://supabase.com/dashboard
 
 ### Melhorias futuras
 
-* **Evoluir o dashboard** — métricas por período, equipamentos críticos, ordens em atraso
 * **Edição de equipamentos** — hoje só cria e exclui, sem edição
 * **Notificações** — alertar quando uma ordem está próxima do vencimento
 * **Perfil do usuário** — página para editar nome, email e senha
@@ -457,6 +457,9 @@ Este projeto reúne práticas importantes de desenvolvimento full stack:
 * regras de negócio baseadas em relacionamento;
 * histórico de alterações;
 * Row Level Security e policies no Supabase;
-* fluxo de branch, commit, Pull Request, merge e limpeza.
+* fluxo de branch, commit, Pull Request, merge e limpeza;
+* componentes reutilizáveis (Modal de confirmação);
+* padronização de respostas de API;
+* otimização de clientes Supabase.
 
 > A autenticação foi implementada com Supabase Auth (email/senha), incluindo tabela `profiles` com trigger automático, três clientes Supabase (browser, server, middleware), proxy de proteção de rotas (`proxy.ts`) com convenção Next.js 16+, isolamento de dados por `user_id`, Row Level Security (RLS) em todas as tabelas, breadcrumbs, auto-refresh do dashboard e saudação personalizada com nome completo do usuário.

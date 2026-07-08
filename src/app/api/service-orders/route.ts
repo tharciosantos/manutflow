@@ -1,14 +1,11 @@
-import { createClient } from "@/lib/supabase/server";
 import { NextResponse } from 'next/server';
 import { getUser } from "@/lib/auth";
 
 export const dynamic = "force-dynamic";
 
 export async function GET() {
-    const { user, error: authError } = await getUser();
+    const { user, supabase, error: authError } = await getUser();
     if (authError) return authError;
-
-    const supabase = await createClient();
     const { data, error } = await supabase
         .from('service_orders')
         .select(`
@@ -46,10 +43,8 @@ export async function GET() {
 const allowedPriorities = ['low', 'medium', 'high', 'critical'];
 
 export async function POST(request: Request) {
-    const { user, error: authError } = await getUser();
+    const { user, supabase, error: authError } = await getUser();
     if (authError) return authError;
-
-    const supabase = await createClient();
     const body = await request.json().catch(() => null);
 
     // ⚠️ SEGURANÇA: Remove user_id do body para evitar que o cliente envie um id de outro usuário

@@ -1,4 +1,3 @@
-import { createClient } from "@/lib/supabase/server";
 import { getUser } from "@/lib/auth";
 
 export const dynamic = "force-dynamic";
@@ -8,10 +7,8 @@ type RouteParams = {
 };
 
 export async function GET(_request: Request, { params }: RouteParams) {
-    const { user, error: authError } = await getUser();
+    const { user, supabase, error: authError } = await getUser();
     if (authError) return authError;
-
-    const supabase = await createClient();
 
     const { id } = await params;
 
@@ -82,11 +79,9 @@ export async function GET(_request: Request, { params }: RouteParams) {
 }
 
 export async function DELETE(_request: Request, { params }: RouteParams) {
-    const { user, error: authError } = await getUser();
+    const { user, supabase, error: authError } = await getUser();
     if (authError) return authError;
 
-
-    const supabase = await createClient();
     const { id } = await params;
 
     if (!id) {

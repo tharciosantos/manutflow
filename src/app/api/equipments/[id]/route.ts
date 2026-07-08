@@ -31,10 +31,10 @@ export async function GET(_request: Request, { params }: RouteParams) {
         .maybeSingle();
 
     if (equipmentError) {
+        console.error("Erro ao buscar equipamento:", equipmentError);
         return Response.json(
             {
                 error: "Erro ao buscar equipamento.",
-                details: equipmentError.message,
             },
             {
                 status: 500,
@@ -61,10 +61,10 @@ export async function GET(_request: Request, { params }: RouteParams) {
         .order("created_at", { ascending: false });
 
     if (serviceOrdersError) {
+        console.error("Erro ao buscar ordens vinculadas:", serviceOrdersError);
         return Response.json(
             {
                 error: "Erro ao buscar ordens vinculadas ao equipamento.",
-                details: serviceOrdersError.message,
             },
             {
                 status: 500,
@@ -104,10 +104,10 @@ export async function DELETE(_request: Request, { params }: RouteParams) {
             .limit(1);
 
     if (linkedServiceOrdersError) {
+        console.error("Erro ao verificar ordens vinculadas:", linkedServiceOrdersError);
         return Response.json(
             {
                 error: "Erro ao verificar ordens vinculadas ao equipamento.",
-                details: linkedServiceOrdersError.message,
             },
             {
                 status: 500,
@@ -136,10 +136,10 @@ export async function DELETE(_request: Request, { params }: RouteParams) {
         .maybeSingle();
 
     if (error) {
+        console.error("Erro ao excluir equipamento:", error);
         return Response.json(
             {
                 error: "Erro ao excluir equipamento.",
-                details: error.message,
             },
             {
                 status: 500,

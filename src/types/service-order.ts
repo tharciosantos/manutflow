@@ -28,6 +28,7 @@ export type ServiceOrder = {
 export type ServiceOrderHistory = {
     id: string;
     service_order_id: string;
+    user_id: string;
     event_type: string;
     previous_status: ServiceOrderStatus | null;
     new_status: ServiceOrderStatus | null;

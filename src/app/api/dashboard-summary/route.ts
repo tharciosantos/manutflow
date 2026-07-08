@@ -110,6 +110,11 @@ export async function GET() {
             highPriorityOrdersError: highPriorityOrdersResult.error,
             criticalPriorityOrdersError: criticalPriorityOrdersResult.error,
         });
+
+        return NextResponse.json(
+            { error: 'Erro ao carregar resumo do dashboard.' },
+            { status: 500 },
+        );
     }
 
     return NextResponse.json(responseBody);

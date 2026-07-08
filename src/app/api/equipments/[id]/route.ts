@@ -60,6 +60,7 @@ export async function GET(_request: Request, { params }: RouteParams) {
         .from("service_orders")
         .select("id, title, description, status, priority, equipment_id, created_at")
         .eq("equipment_id", id)
+        .eq("user_id", user.id)
         .order("created_at", { ascending: false });
 
     if (serviceOrdersError) {
@@ -104,6 +105,7 @@ export async function DELETE(_request: Request, { params }: RouteParams) {
             .from("service_orders")
             .select("id")
             .eq("equipment_id", id)
+            .eq("user_id", user.id)
             .limit(1);
 
     if (linkedServiceOrdersError) {

@@ -2,6 +2,11 @@
 
 import { useCallback, useEffect, useState } from 'react';
 import type { ServiceOrder } from '@/types/service-order';
+
+type ServiceOrdersApiResponse = {
+    serviceOrders: ServiceOrder[];
+    error?: string;
+};
 import { ServiceOrderForm } from './service-order-form';
 import { ServiceOrderList } from './service-order-list';
 import {
@@ -18,12 +23,13 @@ import { ServiceOrderSearch } from './service-order-search';
 
 async function fetchServiceOrders(): Promise<ServiceOrder[]> {
     const response = await fetch('/api/service-orders');
+    const result = (await response.json()) as ServiceOrdersApiResponse;
 
     if (!response.ok) {
-        throw new Error('Erro ao carregar ordens de serviço.');
+        throw new Error(result.error ?? 'Erro ao carregar ordens de serviço.');
     }
 
-    return response.json();
+    return result.serviceOrders;
 }
 
 export function ServiceOrderPageContent() {

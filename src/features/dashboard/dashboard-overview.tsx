@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from 'react';
 import { StatusCard } from '@/components/ui/status-card';
-import { serviceOrderPriorityLabels } from '@/features/service-orders/service-order-config';
 
 type DashboardSummary = {
   totalEquipments: number;
@@ -133,52 +132,25 @@ export function DashboardOverview() {
 
       </div>
 
-      <section className="rounded-2xl border border-slate-800 bg-slate-950/70 p-5 sm:p-6">
-        <div>
-          <span className="rounded-full border border-teal-500/30 bg-teal-500/10 px-3 py-1 text-xs font-medium text-teal-300">
-            Prioridades
-          </span>
-
-          <h2 className="mt-3 text-xl font-semibold text-white">
-            Ordens por prioridade
-          </h2>
-
-          <p className="mt-1 text-sm text-slate-400">
-            Distribuição das ordens de serviço por nível de urgência.
-          </p>
-        </div>
-
-        <div className="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-2 lg:grid-cols-4">                    <StatusCard
-                        title={serviceOrderPriorityLabels.low}
-                        value={String(summary?.lowPriorityServiceOrders ?? 0)}
-                        description="Baixa urgência"
-                        cardClassName="border-slate-700 bg-slate-900"
-                        valueClassName="text-slate-100"
-                      />
-
-                      <StatusCard
-                        title={serviceOrderPriorityLabels.medium}
-                        value={String(summary?.mediumPriorityServiceOrders ?? 0)}
-                        description="Atenção moderada"
-                        cardClassName="border-yellow-500/30 bg-slate-900"
-                        valueClassName="text-yellow-300"
-                      />
-
-                      <StatusCard
-                        title={serviceOrderPriorityLabels.high}
-                        value={String(summary?.highPriorityServiceOrders ?? 0)}
-                        description="Alta prioridade"
-                        cardClassName="border-orange-500/30 bg-slate-900"
-                        valueClassName="text-orange-300"
-                      />
-
-                      <StatusCard
-                        title={serviceOrderPriorityLabels.critical}
-                        value={String(summary?.criticalPriorityServiceOrders ?? 0)}
-                        description="Atendimento crítico"
-                        cardClassName="border-red-500/30 bg-slate-900"
-                        valueClassName="text-red-300"
-                      />
+      <section className="rounded-2xl border border-slate-800 bg-slate-950/70 p-5">
+        <h3 className="text-sm font-medium text-slate-400 mb-4">Ordens por Prioridade</h3>
+        <div className="flex flex-wrap items-center gap-6 text-sm">
+          <div>
+            <span className="text-slate-500">Baixa:</span>
+            <span className="ml-2 font-semibold text-slate-200">{summary?.lowPriorityServiceOrders ?? 0}</span>
+          </div>
+          <div>
+            <span className="text-slate-500">Média:</span>
+            <span className="ml-2 font-semibold text-yellow-300">{summary?.mediumPriorityServiceOrders ?? 0}</span>
+          </div>
+          <div>
+            <span className="text-slate-500">Alta:</span>
+            <span className="ml-2 font-semibold text-orange-300">{summary?.highPriorityServiceOrders ?? 0}</span>
+          </div>
+          <div>
+            <span className="text-slate-500">Crítica:</span>
+            <span className="ml-2 font-semibold text-red-300">{summary?.criticalPriorityServiceOrders ?? 0}</span>
+          </div>
         </div>
       </section>
     </div>

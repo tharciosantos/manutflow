@@ -138,6 +138,7 @@ export function ServiceOrderForm({ onCreated }: ServiceOrderFormProps) {
                         value={title}
                         onChange={(event) => setTitle(event.target.value)}
                         placeholder="Ex: Troca de correia"
+                        required
                         className="w-full rounded-xl border border-slate-700 bg-slate-950 px-3 py-2.5 text-sm text-slate-100 outline-none transition placeholder:text-slate-600 focus:border-teal-500"
                     />
                 </div>
@@ -155,6 +156,7 @@ export function ServiceOrderForm({ onCreated }: ServiceOrderFormProps) {
                             id="equipment"
                             value={equipmentId}
                             onChange={(event) => setEquipmentId(event.target.value)}
+                            required
                             className="w-full rounded-xl border border-slate-700 bg-slate-950 px-3 py-2.5 text-sm text-slate-100 outline-none transition focus:border-teal-500"
                         >
                             <option value="">Selecione um equipamento</option>

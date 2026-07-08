@@ -268,6 +268,7 @@ export function ServiceOrderList({
                                             event.target.value as ServiceOrderStatus,
                                         )
                                     }
+                                    aria-label={`Alterar status da ordem ${order.title}`}
                                     className={`rounded-full border px-2.5 py-1 text-[11px] font-medium outline-none transition disabled:cursor-not-allowed disabled:opacity-60 sm:px-3 sm:py-1 sm:text-xs ${serviceOrderStatusStyles[order.status]}`}
                                 >
                                     <option value="open" className="bg-slate-950 text-slate-100">

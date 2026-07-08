@@ -71,7 +71,7 @@ export async function POST(request: Request) {
 
     if (!equipmentId) {
         return NextResponse.json(
-            { error: 'Selecione um equpamento para a ordem de serviço.' },
+            { error: 'Selecione um equipamento para a ordem de serviço.' },
             { status: 400 },
         );
     }

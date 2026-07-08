@@ -23,9 +23,9 @@ export default function Home() {
 
   return (
     <AppShell>
-      <section className="mx-auto flex max-w-5xl flex-col px-4 py-8 sm:px-6 sm:py-12">
+      <section className="mx-auto flex max-w-5xl flex-col px-4 py-12 sm:px-6 sm:py-16">
         {/* Saudação */}
-        <div className="mb-8 animate-fade-in">
+        <div className="mb-10 animate-fade-in">
           <h1 className="text-2xl font-semibold text-slate-100">
             Olá, {userName ? <span className="text-teal-400">{userName}</span> : "visitante"} 👋
           </h1>
@@ -35,7 +35,7 @@ export default function Home() {
         </div>
 
         {/* Ações rápidas */}
-        <div className="mb-10 grid grid-cols-2 gap-3 animate-fade-in-delay-1">
+        <div className="mb-14 grid grid-cols-2 gap-3 animate-fade-in-delay-1">
           <Link
             href="/equipamentos#equipment-form"
             className="inline-flex items-center justify-center gap-2 rounded-xl border border-teal-500/30 bg-teal-500/10 px-4 py-3 text-sm font-medium text-teal-300 transition-all hover:bg-teal-500/20 hover:border-teal-400/50 active:scale-95 sm:hover:scale-105"

@@ -8,6 +8,7 @@ import {
     type EquipmentStatusFilterValue,
 } from "@/features/equipments/equipment-status-config";
 import type { Equipment } from "@/types/equipment";
+import { Modal } from "@/components/ui/modal";
 
 type EquipmentListProps = {
     equipments: Equipment[];
@@ -30,20 +31,23 @@ export function EquipmentList({
 }: EquipmentListProps) {
 
     const [deletingEquipmentId, setDeletingEquipmentId] = useState("");
+    const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+    const [isErrorModalOpen, setIsErrorModalOpen] = useState(false);
+    const [errorMessageModal, setErrorMessageModal] = useState("");
 
-    async function handleDelete(equipmentId: string) {
-        const confirmed = window.confirm(
-            "Tem certeza que deseja excluir este equipamento?",
-        );
+    function openDeleteModal(equipmentId: string) {
+        setDeletingEquipmentId(equipmentId);
+        setIsDeleteModalOpen(true);
+    }
 
-        if (!confirmed) {
-            return;
-        }
+    function closeDeleteModal() {
+        setDeletingEquipmentId("");
+        setIsDeleteModalOpen(false);
+    }
 
+    async function handleDelete() {
         try {
-            setDeletingEquipmentId(equipmentId);
-
-            const response = await fetch(`/api/equipments/${equipmentId}`, {
+            const response = await fetch(`/api/equipments/${deletingEquipmentId}`, {
                 method: "DELETE",
             });
 
@@ -53,6 +57,7 @@ export function EquipmentList({
                 throw new Error(result.error ?? "Erro ao excluir equipamento.");
             }
 
+            closeDeleteModal();
             await onRefresh();
         } catch (error) {
             const message =
@@ -60,9 +65,9 @@ export function EquipmentList({
                     ? error.message
                     : "Não foi possível excluir o equipamento.";
 
-            window.alert(message);
-        } finally {
-            setDeletingEquipmentId("");
+            setErrorMessageModal(message);
+            setIsErrorModalOpen(true);
+            closeDeleteModal();
         }
     }
 
@@ -178,7 +183,9 @@ export function EquipmentList({
         );
     }
 
-    return (            <section className="mt-6 space-y-4">
+    return (
+        <>
+        <section className="mt-6 space-y-4">
             <div className="flex flex-col gap-1 sm:flex-row sm:items-end sm:justify-between">
                 <div>
                     <h2 className="text-lg font-semibold text-white sm:text-xl">
@@ -239,7 +246,7 @@ export function EquipmentList({
                                 </Link>
                                 <button
                                     type="button"
-                                    onClick={() => handleDelete(equipment.id)}
+                                    onClick={() => openDeleteModal(equipment.id)}
                                     disabled={deletingEquipmentId === equipment.id}
                                     className="rounded-full border border-red-500/30 px-2.5 py-1 text-[11px] font-medium text-red-300 transition hover:bg-red-500/10 disabled:cursor-not-allowed disabled:opacity-60 sm:px-3 sm:py-1 sm:text-xs"
                                 >
@@ -251,5 +258,27 @@ export function EquipmentList({
                 ))}
             </div>
         </section>
+
+        <Modal
+            isOpen={isDeleteModalOpen}
+            onClose={closeDeleteModal}
+            onConfirm={handleDelete}
+            title="Excluir equipamento"
+            description="Tem certeza que deseja excluir este equipamento? Esta ação não pode ser desfeita."
+            confirmLabel="Excluir"
+            cancelLabel="Cancelar"
+            variant="danger"
+        />
+
+        <Modal
+            isOpen={isErrorModalOpen}
+            onClose={() => setIsErrorModalOpen(false)}
+            onConfirm={() => setIsErrorModalOpen(false)}
+            title="Erro"
+            description={errorMessageModal}
+            confirmLabel="Entendi"
+            variant="danger"
+        />
+        </>
     );
 }

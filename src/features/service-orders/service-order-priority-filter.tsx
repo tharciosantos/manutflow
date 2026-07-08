@@ -3,11 +3,9 @@ import {
     type ServiceOrderPriorityFilterValue,
 } from '@/features/service-orders/service-order-config';
 
-export type ServiceOrderPriorityFilter = ServiceOrderPriorityFilterValue;
-
 type ServiceOrderPriorityFilterProps = {
-    selectedPriority: ServiceOrderPriorityFilter;
-    onPriorityChange: (priority: ServiceOrderPriorityFilter) => void;
+    selectedPriority: ServiceOrderPriorityFilterValue;
+    onPriorityChange: (priority: ServiceOrderPriorityFilterValue) => void;
 };
 
 export function ServiceOrderPriorityFilter({

@@ -3,11 +3,9 @@ import {
     type ServiceOrderStatusFilterValue,
 } from '@/features/service-orders/service-order-config';
 
-export type ServiceOrderStatusFilter = ServiceOrderStatusFilterValue;
-
 type ServiceOrderStatusFilterProps = {
-    selectedStatus: ServiceOrderStatusFilter;
-    onStatusChange: (status: ServiceOrderStatusFilter) => void;
+    selectedStatus: ServiceOrderStatusFilterValue;
+    onStatusChange: (status: ServiceOrderStatusFilterValue) => void;
 };
 
 export function ServiceOrderStatusFilter({

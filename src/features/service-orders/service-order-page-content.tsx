@@ -6,12 +6,14 @@ import { ServiceOrderForm } from './service-order-form';
 import { ServiceOrderList } from './service-order-list';
 import {
     ServiceOrderPriorityFilter,
-    type ServiceOrderPriorityFilter as ServiceOrderPriorityFilterType,
 } from './service-order-priority-filter';
 import {
     ServiceOrderStatusFilter,
-    type ServiceOrderStatusFilter as ServiceOrderStatusFilterType
 } from './service-order-status-filter';
+import type {
+    ServiceOrderStatusFilterValue,
+    ServiceOrderPriorityFilterValue,
+} from './service-order-config';
 import { ServiceOrderSearch } from './service-order-search';
 
 async function fetchServiceOrders(): Promise<ServiceOrder[]> {
@@ -29,9 +31,9 @@ export function ServiceOrderPageContent() {
     const [isLoading, setIsLoading] = useState(true);
     const [errorMessage, setErrorMessage] = useState('');
     const [selectedStatus, setSelectedStatus] =
-        useState<ServiceOrderStatusFilterType>('all');
+        useState<ServiceOrderStatusFilterValue>('all');
     const [selectedPriority, setSelectedPriority] =
-        useState<ServiceOrderPriorityFilterType>('all');
+        useState<ServiceOrderPriorityFilterValue>('all');
 
     const [searchTerm, setSearchTerm] = useState('');
 

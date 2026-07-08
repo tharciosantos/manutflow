@@ -139,6 +139,31 @@ export async function PATCH(request: Request, { params }: RouteParams) {
         );
     }
 
+    // Inserir histórico PRIMEIRO para garantir atomicidade
+    // Se o histórico falhar, o status permanece inalterado
+    if (currentServiceOrder.status !== status) {
+        const { error: historyError } = await supabase
+            .from('service_order_history')
+            .insert({
+                service_order_id: id,
+                user_id: user.id,
+                event_type: 'status_changed',
+                previous_status: currentServiceOrder.status,
+                new_status: status,
+                description: `Status alterado de ${currentServiceOrder.status} para ${status}.`,
+            });
+
+        if (historyError) {
+            console.error('Erro ao registrar histórico da ordem:', historyError);
+
+            return NextResponse.json(
+                { error: 'Erro ao registrar histórico. Status não foi alterado.' },
+                { status: 500 },
+            );
+        }
+    }
+
+    // Atualizar status DEPOIS de inserir o histórico
     const { data, error } = await supabase
         .from('service_orders')
         .update({ status })
@@ -160,28 +185,6 @@ export async function PATCH(request: Request, { params }: RouteParams) {
             { error: 'Ordem de serviço não encontrada.' },
             { status: 404 },
         );
-    }
-
-    if (currentServiceOrder.status !== status) {
-        const { error: historyError } = await supabase
-            .from('service_order_history')
-            .insert({
-                service_order_id: id,
-                user_id: user.id,
-                event_type: 'status_changed',
-                previous_status: currentServiceOrder.status,
-                new_status: status,
-                description: `Status alterado de ${currentServiceOrder.status} para ${status}.`,
-            });
-
-        if (historyError) {
-            console.error('Erro ao registrar histórico da ordem:', historyError);
-
-            return NextResponse.json(
-                { error: 'Status atualizado, mas houve erro ao registrar histórico.' },
-                { status: 500 },
-            );
-        }
     }
 
     return NextResponse.json(data);

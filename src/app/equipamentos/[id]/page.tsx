@@ -8,29 +8,16 @@ import {
     equipmentStatusLabels,
     equipmentStatusStyles,
 } from "@/features/equipments/equipment-status-config";
+import {
+    serviceOrderStatusLabels,
+    serviceOrderPriorityLabels,
+} from "@/features/service-orders/service-order-config";
 import type { EquipmentDetails } from "@/types/equipment-details";
-import type {
-    ServiceOrderPriority,
-    ServiceOrderStatus,
-} from "@/types/service-order";
 
 type EquipmentDetailsPageProps = {
     params: Promise<{
         id: string;
     }>;
-};
-
-const serviceOrderStatusLabels: Record<ServiceOrderStatus, string> = {
-    open: "Aberta",
-    in_progress: "Em andamento",
-    closed: "Fechada",
-};
-
-const serviceOrderPriorityLabels: Record<ServiceOrderPriority, string> = {
-    low: "Baixa",
-    medium: "Média",
-    high: "Alta",
-    critical: "Crítica",
 };
 
 export default function EquipmentDetailsPage({

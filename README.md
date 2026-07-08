@@ -170,19 +170,21 @@ Usuário → [Login/Registro] → Supabase Auth → JWT Token
 
 ### Camadas de segurança
 
-| Camada | Onde | O que faz |
-|--------|------|-----------|
-| 1. Proxy (`proxy.ts`) | Edge | Redireciona não logados para /login |
-| 2. API (`auth.ts`) | Servidor | Verifica JWT e filtra por user_id |
-| 3. RLS (banco) | PostgreSQL | Bloqueia acesso direto ao banco |
+| Camada                                | Onde       | O que faz                                  |
+| ------------------------------------- | ---------- | ------------------------------------------ |
+| 1. Proxy (`proxy.ts`)                 | Edge       | Redireciona não logados para /login        |
+| 2. API (`auth.ts`)                    | Servidor   | Verifica JWT e filtra por user_id          |
+| 3. Validação de URL (`auth/callback`) | Servidor   | Evita redirecionamento para sites externos |
+| 4. Respostas seguras (API)            | Servidor   | Não expõe detalhes de erro internos        |
+| 5. RLS (banco)                        | PostgreSQL | Bloqueia acesso direto ao banco            |
 
 ### Páginas
 
-| Rota | Descrição |
-|------|-----------|
-| `/login` | Login com email e senha |
-| `/register` | Cadastro com nome, email e senha |
-| `/auth/callback` | Callback do Supabase OAuth |
+| Rota             | Descrição                        |
+| ---------------- | -------------------------------- |
+| `/login`         | Login com email e senha          |
+| `/register`      | Cadastro com nome, email e senha |
+| `/auth/callback` | Callback do Supabase OAuth       |
 
 ## Rotas de API
 
@@ -324,7 +326,7 @@ Principais validações implementadas:
 * vínculo obrigatório entre ordem e equipamento;
 * bloqueio de exclusão de equipamentos com ordens vinculadas;
 * validação de remoção real ao excluir equipamentos e ordens;
-* registro de histórico quando o status da ordem é alterado.
+* registro de histórico antes da atualização do status (para manter consistência).
 
 ## Interface e identidade visual
 
@@ -460,6 +462,10 @@ Este projeto reúne práticas importantes de desenvolvimento full stack:
 * fluxo de branch, commit, Pull Request, merge e limpeza;
 * componentes reutilizáveis (Modal de confirmação);
 * padronização de respostas de API;
-* otimização de clientes Supabase.
+* otimização de clientes Supabase;
+* acessibilidade em formulários e componentes (aria-labels, required);
+* proteção contra redirecionamento malicioso (open redirect);
+* remoção de detalhes de erro para não expor informações internas;
+* ordem correta de operações para manter dados consistentes.
 
 > A autenticação foi implementada com Supabase Auth (email/senha), incluindo tabela `profiles` com trigger automático, três clientes Supabase (browser, server, middleware), proxy de proteção de rotas (`proxy.ts`) com convenção Next.js 16+, isolamento de dados por `user_id`, Row Level Security (RLS) em todas as tabelas, breadcrumbs, auto-refresh do dashboard e saudação personalizada com nome completo do usuário.

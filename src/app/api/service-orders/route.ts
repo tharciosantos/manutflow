@@ -36,7 +36,7 @@ export async function GET() {
         );
     }
 
-    return NextResponse.json(data);
+    return NextResponse.json({ serviceOrders: data ?? [] });
 }
 
 
@@ -100,5 +100,5 @@ export async function POST(request: Request) {
         );
     }
 
-    return NextResponse.json(data, { status: 201 });
+    return NextResponse.json({ serviceOrder: data }, { status: 201 });
 }

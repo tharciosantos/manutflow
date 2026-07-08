@@ -31,10 +31,10 @@ export async function GET() {
     .order("created_at", { ascending: false });
 
   if (error) {
+    console.error("Erro ao buscar equipamentos:", error);
     return Response.json(
       {
         error: "Erro ao buscar equipamentos.",
-        details: error.message,
       },
       { status: 500 }
     );
@@ -155,10 +155,10 @@ export async function POST(request: Request) {
       );
     }
 
+    console.error("Erro ao cadastrar equipamento:", error);
     return Response.json(
       {
         error: "Erro ao cadastrar equipamento.",
-        details: error.message,
       },
       {
         status: 500,

@@ -102,6 +102,7 @@ export function EquipmentForm({ onEquipmentCreated }: EquipmentFormProps) {
             value={name}
             onChange={(event) => setName(event.target.value)}
             placeholder="Ex: Motor Elétrico"
+            required
             className="w-full rounded-xl border border-slate-700 bg-slate-950 px-4 py-3 text-slate-100 outline-none transition placeholder:text-slate-500 focus:border-teal-500"
           />
         </div>
@@ -120,6 +121,7 @@ export function EquipmentForm({ onEquipmentCreated }: EquipmentFormProps) {
             value={patrimonyCode}
             onChange={(event) => setPatrimonyCode(event.target.value)}
             placeholder="Ex: MOTOR-001"
+            required
             className="w-full rounded-xl border border-slate-700 bg-slate-950 px-4 py-3 text-slate-100 outline-none transition placeholder:text-slate-500 focus:border-teal-500"
           />
         </div>
@@ -138,6 +140,7 @@ export function EquipmentForm({ onEquipmentCreated }: EquipmentFormProps) {
             value={location}
             onChange={(event) => setLocation(event.target.value)}
             placeholder="Ex: Setor C"
+            required
             className="w-full rounded-xl border border-slate-700 bg-slate-950 px-4 py-3 text-slate-100 outline-none transition placeholder:text-slate-500 focus:border-teal-500"
           />
         </div>

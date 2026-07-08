@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useId } from "react";
 
 type ModalProps = {
   isOpen: boolean;
@@ -26,6 +26,7 @@ export function Modal({
   variant = "danger",
 }: ModalProps) {
   const dialogRef = useRef<HTMLDialogElement>(null);
+  const titleId = useId();
 
   useEffect(() => {
     const dialog = dialogRef.current;
@@ -87,6 +88,7 @@ export function Modal({
       ref={dialogRef}
       onClick={handleBackdropClick}
       onKeyDown={handleKeyDown}
+      aria-labelledby={titleId}
       className="fixed inset-0 m-auto h-fit w-full max-w-md rounded-2xl border border-slate-800 bg-slate-900 p-0 shadow-2xl backdrop:bg-black/70 backdrop:backdrop-blur-sm"
     >
       <div className="p-6">
@@ -95,7 +97,7 @@ export function Modal({
             {styles.icon}
           </div>
           <div className="min-w-0 flex-1">
-            <h2 className="text-lg font-semibold text-white">{title}</h2>
+            <h2 id={titleId} className="text-lg font-semibold text-white">{title}</h2>
             {description && (
               <p className="mt-2 text-sm text-slate-400">{description}</p>
             )}

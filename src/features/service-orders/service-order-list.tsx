@@ -12,6 +12,7 @@ import type {
     ServiceOrder,
     ServiceOrderStatus,
 } from '@/types/service-order';
+import { Modal } from '@/components/ui/modal';
 
 type ServiceOrderListProps = {
     orders: ServiceOrder[];
@@ -21,8 +22,6 @@ type ServiceOrderListProps = {
     errorMessage: string;
     onRefresh: () => Promise<void>;
 };
-
-
 
 export function ServiceOrderList({
     orders,
@@ -34,20 +33,23 @@ export function ServiceOrderList({
 }: ServiceOrderListProps) {
     const [deletingOrderId, setDeletingOrderId] = useState('');
     const [updatingStatusOrderId, setUpdatingStatusOrderId] = useState('');
+    const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+    const [isErrorModalOpen, setIsErrorModalOpen] = useState(false);
+    const [errorMessageModal, setErrorMessageModal] = useState('');
 
-    async function handleDelete(orderId: string) {
-        const confirmed = window.confirm(
-            'Tem certeza que deseja excluir esta ordem de serviço?',
-        );
+    function openDeleteModal(orderId: string) {
+        setDeletingOrderId(orderId);
+        setIsDeleteModalOpen(true);
+    }
 
-        if (!confirmed) {
-            return;
-        }
+    function closeDeleteModal() {
+        setDeletingOrderId('');
+        setIsDeleteModalOpen(false);
+    }
 
+    async function handleDelete() {
         try {
-            setDeletingOrderId(orderId);
-
-            const response = await fetch(`/api/service-orders/${orderId}`, {
+            const response = await fetch(`/api/service-orders/${deletingOrderId}`, {
                 method: 'DELETE',
             });
 
@@ -55,11 +57,12 @@ export function ServiceOrderList({
                 throw new Error('Erro ao excluir ordem de serviço.');
             }
 
+            closeDeleteModal();
             await onRefresh();
         } catch {
-            window.alert('Não foi possível excluir a ordem de serviço.');
-        } finally {
-            setDeletingOrderId('');
+            setErrorMessageModal('Não foi possível excluir a ordem de serviço.');
+            setIsErrorModalOpen(true);
+            closeDeleteModal();
         }
     }
 
@@ -84,7 +87,8 @@ export function ServiceOrderList({
 
             await onRefresh();
         } catch {
-            window.alert('Não foi possível atualizar o status da ordem de serviço.');
+            setErrorMessageModal('Não foi possível atualizar o status da ordem de serviço.');
+            setIsErrorModalOpen(true);
         } finally {
             setUpdatingStatusOrderId('');
         }
@@ -193,7 +197,9 @@ export function ServiceOrderList({
         );
     }
 
-    return (            <section className="space-y-4">
+    return (
+        <>
+        <section className="space-y-4">
             <div className="flex flex-col gap-1 sm:flex-row sm:items-end sm:justify-between">
                 <div>
                     <h2 className="text-lg font-semibold text-white sm:text-xl">
@@ -288,7 +294,7 @@ export function ServiceOrderList({
                                 </Link>
                                 <button
                                     type="button"
-                                    onClick={() => handleDelete(order.id)}
+                                    onClick={() => openDeleteModal(order.id)}
                                     disabled={deletingOrderId === order.id}
                                     className="rounded-full border border-red-500/30 px-2.5 py-1 text-[11px] font-medium text-red-300 transition hover:bg-red-500/10 disabled:cursor-not-allowed disabled:opacity-60 sm:px-3 sm:py-1 sm:text-xs"
                                 >
@@ -300,5 +306,27 @@ export function ServiceOrderList({
                 ))}
             </div>
         </section>
+
+        <Modal
+            isOpen={isDeleteModalOpen}
+            onClose={closeDeleteModal}
+            onConfirm={handleDelete}
+            title="Excluir ordem de serviço"
+            description="Tem certeza que deseja excluir esta ordem de serviço? Esta ação não pode ser desfeita."
+            confirmLabel="Excluir"
+            cancelLabel="Cancelar"
+            variant="danger"
+        />
+
+        <Modal
+            isOpen={isErrorModalOpen}
+            onClose={() => setIsErrorModalOpen(false)}
+            onConfirm={() => setIsErrorModalOpen(false)}
+            title="Erro"
+            description={errorMessageModal}
+            confirmLabel="Entendi"
+            variant="danger"
+        />
+        </>
     );
 }

@@ -8,17 +8,21 @@ import { getUser } from '@/lib/auth';
 import { GET, POST } from '../route';
 
 function createMockSupabase(data?: unknown, error: unknown = null) {
+  // Resultado com count para paginação
+  const resultWithCount = { data: data ?? [], count: Array.isArray(data) ? (data as unknown[]).length : 0, error };
+
   const chainableMock = {
     select: vi.fn().mockReturnThis(),
     eq: vi.fn().mockReturnThis(),
     order: vi.fn().mockReturnThis(),
+    range: vi.fn().mockResolvedValue(resultWithCount),
     insert: vi.fn().mockReturnThis(),
     single: vi.fn().mockReturnThis(),
     maybeSingle: vi.fn().mockResolvedValue({ data: null, error: null }),
   };
 
   // Configurar o comportamento final da chain
-  chainableMock.order.mockResolvedValue({ data: data ?? [], error });
+  chainableMock.range.mockResolvedValue(resultWithCount);
   chainableMock.single.mockResolvedValue({ data: data ?? null, error });
   chainableMock.maybeSingle.mockResolvedValue({ data: data ?? null, error });
 
@@ -45,7 +49,8 @@ describe('Equipments API', () => {
         }),
       });
 
-      const response = await GET();
+      const request = new Request('http://localhost/api/equipments?page=1&limit=10');
+      const response = await GET(request);
       expect(response.status).toBe(401);
     });
 
@@ -79,12 +84,16 @@ describe('Equipments API', () => {
         error: null,
       });
 
-      const response = await GET();
+      const request = new Request('http://localhost/api/equipments?page=1&limit=10');
+      const response = await GET(request);
       const body = await response.json();
 
       expect(response.status).toBe(200);
       expect(body.equipments).toHaveLength(2);
       expect(body.equipments[0].name).toBe('Notebook Dell');
+      expect(body.total).toBe(2);
+      expect(body.page).toBe(1);
+      expect(body.totalPages).toBe(1);
     });
 
     it('deve retornar 500 quando o banco falha', async () => {
@@ -96,7 +105,8 @@ describe('Equipments API', () => {
         error: null,
       });
 
-      const response = await GET();
+      const request = new Request('http://localhost/api/equipments?page=1&limit=10');
+      const response = await GET(request);
       expect(response.status).toBe(500);
     });
   });

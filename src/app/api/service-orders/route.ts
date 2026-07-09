@@ -3,10 +3,23 @@ import { getUser } from "@/lib/auth";
 
 export const dynamic = "force-dynamic";
 
-export async function GET() {
+const allowedOrderStatuses = ['open', 'in_progress', 'closed'];
+
+export async function GET(request: Request) {
     const { user, supabase, error: authError } = await getUser();
     if (authError) return authError;
-    const { data, error } = await supabase
+
+    const url = new URL(request.url);
+    const page = Math.max(1, Number(url.searchParams.get("page")) || 1);
+    const limit = Math.min(50, Math.max(1, Number(url.searchParams.get("limit")) || 10));
+    const offset = (page - 1) * limit;
+
+    const searchQuery = url.searchParams.get("q")?.trim() || "";
+    const statusFilter = url.searchParams.get("status") || "";
+    const priorityFilter = url.searchParams.get("priority") || "";
+
+    // Construir query com filtros
+    let query = supabase
         .from('service_orders')
         .select(`
       id,
@@ -23,9 +36,29 @@ export async function GET() {
         location,
         status
       )
-    `)
-        .eq("user_id", user.id)
-        .order('created_at', { ascending: false });
+    `, { count: "exact", head: false })
+        .eq("user_id", user.id);
+
+    // Filtro por status
+    if (statusFilter && allowedOrderStatuses.includes(statusFilter)) {
+        query = query.eq('status', statusFilter);
+    }
+
+    // Filtro por prioridade
+    if (priorityFilter && allowedPriorities.includes(priorityFilter)) {
+        query = query.eq('priority', priorityFilter);
+    }
+
+    // Filtro por busca textual
+    if (searchQuery) {
+        query = query.or(
+          `title.ilike.%${searchQuery}%,description.ilike.%${searchQuery}%`
+        );
+    }
+
+    const { data, error, count } = await query
+        .order('created_at', { ascending: false })
+        .range(offset, offset + limit - 1);
 
     if (error) {
         console.error('Erro ao buscar ordens de serviço:', error);
@@ -36,7 +69,15 @@ export async function GET() {
         );
     }
 
-    return NextResponse.json({ serviceOrders: data ?? [] });
+    const total = count ?? 0;
+    const totalPages = Math.ceil(total / limit);
+
+    return NextResponse.json({
+      serviceOrders: data ?? [],
+      total,
+      page,
+      totalPages,
+    });
 }
 
 

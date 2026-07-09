@@ -8,16 +8,19 @@ import { getUser } from '@/lib/auth';
 import { GET, POST } from '../route';
 
 function createMockSupabase(data?: unknown, error: unknown = null) {
+  const resultWithCount = { data: data ?? [], count: Array.isArray(data) ? (data as unknown[]).length : 0, error };
+
   const chainableMock = {
     select: vi.fn().mockReturnThis(),
     eq: vi.fn().mockReturnThis(),
     order: vi.fn().mockReturnThis(),
+    range: vi.fn().mockResolvedValue(resultWithCount),
     insert: vi.fn().mockReturnThis(),
     single: vi.fn().mockReturnThis(),
     maybeSingle: vi.fn().mockResolvedValue({ data: null, error: null }),
   };
 
-  chainableMock.order.mockResolvedValue({ data: data ?? [], error });
+  chainableMock.range.mockResolvedValue(resultWithCount);
   chainableMock.single.mockResolvedValue({ data: data ?? null, error });
 
   return {
@@ -43,7 +46,8 @@ describe('Service Orders API', () => {
         }),
       });
 
-      const response = await GET();
+      const request = new Request('http://localhost/api/service-orders?page=1&limit=10');
+      const response = await GET(request);
       const body = await response.json();
 
       expect(response.status).toBe(401);
@@ -78,13 +82,17 @@ describe('Service Orders API', () => {
         error: null,
       });
 
-      const response = await GET();
+      const request = new Request('http://localhost/api/service-orders?page=1&limit=10');
+      const response = await GET(request);
       const body = await response.json();
 
       expect(response.status).toBe(200);
       expect(body.serviceOrders).toHaveLength(1);
       expect(body.serviceOrders[0].title).toBe('Manutenção preventiva');
       expect(body.serviceOrders[0].equipment.name).toBe('Notebook Dell');
+      expect(body.total).toBe(1);
+      expect(body.page).toBe(1);
+      expect(body.totalPages).toBe(1);
     });
 
     it('deve retornar 500 quando o banco falha', async () => {
@@ -96,7 +104,8 @@ describe('Service Orders API', () => {
         error: null,
       });
 
-      const response = await GET();
+      const request = new Request('http://localhost/api/service-orders?page=1&limit=10');
+      const response = await GET(request);
       expect(response.status).toBe(500);
     });
   });

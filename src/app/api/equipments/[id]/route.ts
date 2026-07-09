@@ -87,6 +87,7 @@ type UpdateEquipmentBody = {
   patrimony_code?: unknown;
   location?: unknown;
   status?: unknown;
+  photo_url?: unknown;
 };
 
 export async function PATCH(request: Request, { params }: RouteParams) {
@@ -136,7 +137,7 @@ export async function PATCH(request: Request, { params }: RouteParams) {
     );
   }
 
-  const updateData: Record<string, string> = {};
+  const updateData: Record<string, string | null> = {};
 
   // Validar e preparar campos para atualização
   if (body.name !== undefined) {
@@ -229,6 +230,11 @@ export async function PATCH(request: Request, { params }: RouteParams) {
     }
 
     updateData.status = status;
+  }
+
+  if (body.photo_url !== undefined) {
+    const photoUrl = typeof body.photo_url === "string" ? body.photo_url.trim() : null;
+    updateData.photo_url = photoUrl;
   }
 
   if (Object.keys(updateData).length === 0) {

@@ -130,24 +130,33 @@ export default function EquipmentDetailsPage({
                 {!isLoading && details && (
                     <>
                         <div className="mt-4 sm:mt-6 rounded-2xl border border-slate-800 bg-slate-950/70 p-4 sm:p-6">
-                            <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
-                                <div>
-                                    <span className="rounded-full border border-teal-500/30 bg-teal-500/10 px-2 py-0.5 text-[11px] font-medium text-teal-300 sm:px-3 sm:py-1 sm:text-xs">
-                                        Detalhes do equipamento
-                                    </span>
+                            <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+                                <div className="flex gap-4">
+                                    {details.equipment.photo_url && (
+                                        <img
+                                            src={details.equipment.photo_url}
+                                            alt={details.equipment.name}
+                                            className="h-20 w-20 shrink-0 rounded-xl border border-slate-700 object-cover sm:h-24 sm:w-24"
+                                        />
+                                    )}
+                                    <div>
+                                        <span className="rounded-full border border-teal-500/30 bg-teal-500/10 px-2 py-0.5 text-[11px] font-medium text-teal-300 sm:px-3 sm:py-1 sm:text-xs">
+                                            Detalhes do equipamento
+                                        </span>
 
-                                    <h1 className="mt-2 text-2xl font-bold text-white sm:mt-3 sm:text-3xl">
-                                        {details.equipment.name}
-                                    </h1>
+                                        <h1 className="mt-2 text-2xl font-bold text-white sm:mt-3 sm:text-3xl">
+                                            {details.equipment.name}
+                                        </h1>
 
-                                    <p className="mt-1 text-xs text-slate-400 sm:mt-2 sm:text-sm">
-                                        Informações gerais do equipamento e ordens de serviço
-                                        vinculadas.
-                                    </p>
+                                        <p className="mt-1 text-xs text-slate-400 sm:mt-2 sm:text-sm">
+                                            Informações gerais do equipamento e ordens de serviço
+                                            vinculadas.
+                                        </p>
+                                    </div>
                                 </div>
 
                                 <span
-                                    className={`w-fit rounded-full border px-2.5 py-1 text-[11px] font-medium sm:px-3 sm:py-1 sm:text-xs ${equipmentStatusStyles[details.equipment.status]}`}
+                                    className={`w-fit shrink-0 rounded-full border px-2.5 py-1 text-[11px] font-medium sm:px-3 sm:py-1 sm:text-xs ${equipmentStatusStyles[details.equipment.status]}`}
                                 >
                                     {equipmentStatusLabels[details.equipment.status]}
                                 </span>

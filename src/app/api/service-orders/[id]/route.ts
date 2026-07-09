@@ -1,5 +1,7 @@
 import { NextResponse } from 'next/server';
 import { getUser } from "@/lib/auth";
+import { checkRateLimit } from "@/lib/rate-limit";
+import { logger } from "@/lib/logger";
 
 export const dynamic = "force-dynamic";
 
@@ -46,7 +48,7 @@ export async function GET(_request: Request, { params }: RouteParams) {
         .maybeSingle();
 
     if (error) {
-        console.error('Erro ao buscar ordem de serviço:', error);
+        logger('error', 'api.error', { route: 'service-orders/[id]', method: 'GET', error: error.message });
 
         return NextResponse.json(
             { error: 'Erro ao buscar ordem de serviço.' },
@@ -76,7 +78,7 @@ export async function GET(_request: Request, { params }: RouteParams) {
         .order('created_at', { ascending: false });
 
     if (historyError) {
-        console.error('Erro ao buscar histórico da ordem:', historyError);
+        logger('error', 'api.error', { route: 'service-orders/[id]', method: 'GET', error: historyError.message });
 
         return NextResponse.json(
             { error: 'Erro ao buscar histórico da ordem.' },
@@ -95,6 +97,19 @@ export async function GET(_request: Request, { params }: RouteParams) {
 export async function PATCH(request: Request, { params }: RouteParams) {
     const { user, supabase, error: authError } = await getUser();
     if (authError) return authError;
+
+    const { allowed, remaining } = checkRateLimit(`service-orders:patch:${user.id}`);
+    if (!allowed) {
+        logger('warn', 'rate_limit.exceeded', { userId: user.id, route: 'service-orders/[id]', method: 'PATCH' });
+        return NextResponse.json(
+            { error: 'Muitas requisições. Tente novamente mais tarde.' },
+            {
+                status: 429,
+                headers: { 'X-RateLimit-Remaining': String(remaining) },
+            },
+        );
+    }
+
     const { id } = await params;
 
     if (!id) {
@@ -124,7 +139,7 @@ export async function PATCH(request: Request, { params }: RouteParams) {
             .maybeSingle();
 
     if (currentServiceOrderError) {
-        console.error('Erro ao buscar ordem de serviço atual:', currentServiceOrderError);
+        logger('error', 'api.error', { route: 'service-orders/[id]', method: 'PATCH', error: currentServiceOrderError.message });
 
         return NextResponse.json(
             { error: 'Erro ao buscar ordem de serviço atual.' },
@@ -154,7 +169,7 @@ export async function PATCH(request: Request, { params }: RouteParams) {
             });
 
         if (historyError) {
-            console.error('Erro ao registrar histórico da ordem:', historyError);
+            logger('error', 'api.error', { route: 'service-orders/[id]', method: 'PATCH', error: historyError.message });
 
             return NextResponse.json(
                 { error: 'Erro ao registrar histórico. Status não foi alterado.' },
@@ -172,7 +187,7 @@ export async function PATCH(request: Request, { params }: RouteParams) {
         .maybeSingle();
 
     if (error) {
-        console.error('Erro ao atualizar status da ordem de serviço:', error);
+        logger('error', 'api.error', { route: 'service-orders/[id]', method: 'PATCH', error: error.message });
 
         return NextResponse.json(
             { error: 'Erro ao atualizar status da ordem de serviço.' },
@@ -193,6 +208,19 @@ export async function PATCH(request: Request, { params }: RouteParams) {
 export async function DELETE(_request: Request, { params }: RouteParams) {
     const { user, supabase, error: authError } = await getUser();
     if (authError) return authError;
+
+    const { allowed, remaining } = checkRateLimit(`service-orders:delete:${user.id}`);
+    if (!allowed) {
+        logger('warn', 'rate_limit.exceeded', { userId: user.id, route: 'service-orders/[id]', method: 'DELETE' });
+        return NextResponse.json(
+            { error: 'Muitas requisições. Tente novamente mais tarde.' },
+            {
+                status: 429,
+                headers: { 'X-RateLimit-Remaining': String(remaining) },
+            },
+        );
+    }
+
     const { id } = await params;
 
     if (!id) {
@@ -211,7 +239,7 @@ export async function DELETE(_request: Request, { params }: RouteParams) {
         .maybeSingle();
 
     if (error) {
-        console.error('Erro ao excluir ordem de serviço:', error);
+        logger('error', 'api.error', { route: 'service-orders/[id]', method: 'DELETE', error: error.message });
 
         return NextResponse.json(
             { error: 'Erro ao excluir ordem de serviço.' },

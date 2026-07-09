@@ -1,5 +1,7 @@
 import { NextResponse } from 'next/server';
 import { getUser } from "@/lib/auth";
+import { checkRateLimit } from "@/lib/rate-limit";
+import { logger } from "@/lib/logger";
 
 export const dynamic = "force-dynamic";
 
@@ -61,7 +63,7 @@ export async function GET(request: Request) {
         .range(offset, offset + limit - 1);
 
     if (error) {
-        console.error('Erro ao buscar ordens de serviço:', error);
+        logger('error', 'api.error', { route: 'service-orders', method: 'GET', error: error.message });
 
         return NextResponse.json(
             { error: 'Erro ao buscar ordens de serviço.' },
@@ -86,6 +88,18 @@ const allowedPriorities = ['low', 'medium', 'high', 'critical'];
 export async function POST(request: Request) {
     const { user, supabase, error: authError } = await getUser();
     if (authError) return authError;
+
+    const { allowed, remaining } = checkRateLimit(`service-orders:post:${user.id}`);
+    if (!allowed) {
+        logger('warn', 'rate_limit.exceeded', { userId: user.id, route: 'service-orders', method: 'POST' });
+        return NextResponse.json(
+            { error: 'Muitas requisições. Tente novamente mais tarde.' },
+            {
+                status: 429,
+                headers: { 'X-RateLimit-Remaining': String(remaining) },
+            },
+        );
+    }
     const body = await request.json().catch(() => null);
 
     // ⚠️ SEGURANÇA: Remove user_id do body para evitar que o cliente envie um id de outro usuário
@@ -147,7 +161,7 @@ export async function POST(request: Request) {
         .single();
 
     if (error) {
-        console.error('Erro ao cadastrar ordem de serviço:', error);
+        logger('error', 'api.error', { route: 'service-orders', method: 'POST', error: error.message });
 
         return NextResponse.json(
             { error: 'Erro ao cadastrar ordem de serviço.' },

@@ -27,7 +27,7 @@ export function ServiceOrderForm({ onCreated }: ServiceOrderFormProps) {
     useEffect(() => {
         async function loadEquipments() {
             try {
-                const response = await fetch('/api/equipments');
+                const response = await fetch('/api/equipments?limit=999');
 
                 if (!response.ok) {
                     throw new Error('Erro ao carregar equipamentos.');

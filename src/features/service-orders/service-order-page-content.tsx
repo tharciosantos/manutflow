@@ -3,144 +3,188 @@
 import { useCallback, useEffect, useState } from 'react';
 import type { ServiceOrder } from '@/types/service-order';
 
-type ServiceOrdersApiResponse = {
-    serviceOrders: ServiceOrder[];
-    error?: string;
-};
 import { ServiceOrderForm } from './service-order-form';
 import { ServiceOrderList } from './service-order-list';
-import {
-    ServiceOrderPriorityFilter,
-} from './service-order-priority-filter';
-import {
-    ServiceOrderStatusFilter,
-} from './service-order-status-filter';
+import { Toolbar } from '@/components/ui/toolbar';
+import { Modal } from '@/components/ui/modal';
 import type {
     ServiceOrderStatusFilterValue,
     ServiceOrderPriorityFilterValue,
 } from './service-order-config';
-import { ServiceOrderSearch } from './service-order-search';
+import {
+    serviceOrderStatusFilterOptions,
+    serviceOrderPriorityFilterOptions,
+} from './service-order-config';
 
-async function fetchServiceOrders(): Promise<ServiceOrder[]> {
-    const response = await fetch('/api/service-orders');
-    const result = (await response.json()) as ServiceOrdersApiResponse;
+type ServiceOrdersApiResponse = {
+    serviceOrders: ServiceOrder[];
+    total: number;
+    page: number;
+    totalPages: number;
+    error?: string;
+};
 
-    if (!response.ok) {
-        throw new Error(result.error ?? 'Erro ao carregar ordens de serviço.');
-    }
+type ServiceOrderPageContentProps = {
+  isFormModalOpen: boolean;
+  setIsFormModalOpen: (open: boolean) => void;
+};
 
-    return result.serviceOrders;
-}
-
-export function ServiceOrderPageContent() {
+export function ServiceOrderPageContent({ isFormModalOpen, setIsFormModalOpen }: ServiceOrderPageContentProps) {
     const [orders, setOrders] = useState<ServiceOrder[]>([]);
+    const [total, setTotal] = useState(0);
+    const [page, setPage] = useState(1);
+    const [totalPages, setTotalPages] = useState(1);
+    const [limit, setLimit] = useState(10);
     const [isLoading, setIsLoading] = useState(true);
     const [errorMessage, setErrorMessage] = useState('');
     const [selectedStatus, setSelectedStatus] =
         useState<ServiceOrderStatusFilterValue>('all');
     const [selectedPriority, setSelectedPriority] =
         useState<ServiceOrderPriorityFilterValue>('all');
-
     const [searchTerm, setSearchTerm] = useState('');
+
+    const buildUrl = useCallback(() => {
+      const params = new URLSearchParams();
+      params.set("page", String(page));
+      params.set("limit", String(limit));
+      if (searchTerm.trim()) params.set("q", searchTerm.trim());
+      if (selectedStatus !== "all") params.set("status", selectedStatus);
+      if (selectedPriority !== "all") params.set("priority", selectedPriority);
+      return `/api/service-orders?${params.toString()}`;
+    }, [page, limit, searchTerm, selectedStatus, selectedPriority]);
 
     const loadServiceOrders = useCallback(async () => {
         try {
             setIsLoading(true);
             setErrorMessage('');
 
-            const data = await fetchServiceOrders();
+            const response = await fetch(buildUrl());
+            const result = (await response.json()) as ServiceOrdersApiResponse;
 
-            setOrders(data);
+            if (!response.ok) {
+                throw new Error(result.error ?? 'Erro ao carregar ordens de serviço.');
+            }
+
+            setOrders(result.serviceOrders);
+            setTotal(result.total);
+            setPage(result.page);
+            setTotalPages(result.totalPages);
         } catch {
             setErrorMessage('Não foi possível carregar as ordens de serviço.');
         } finally {
             setIsLoading(false);
         }
-    }, []);
+    }, [buildUrl]);
 
     useEffect(() => {
         let ignore = false;
 
-        async function loadInitialServiceOrders() {
+        async function loadInitial() {
             try {
-                const data = await fetchServiceOrders();
+                setIsLoading(true);
 
-                if (ignore) {
-                    return;
+                const response = await fetch(buildUrl());
+                const result = (await response.json()) as ServiceOrdersApiResponse;
+
+                if (!response.ok) {
+                    throw new Error(result.error ?? 'Erro ao carregar ordens de serviço.');
                 }
 
-                setOrders(data);
+                if (ignore) return;
+
+                setOrders(result.serviceOrders);
+                setTotal(result.total);
+                setPage(result.page);
+                setTotalPages(result.totalPages);
                 setErrorMessage('');
             } catch {
                 if (!ignore) {
                     setErrorMessage('Não foi possível carregar as ordens de serviço.');
                 }
             } finally {
-                if (!ignore) {
-                    setIsLoading(false);
-                }
+                if (!ignore) setIsLoading(false);
             }
         }
 
-        void loadInitialServiceOrders();
+        void loadInitial();
+        return () => { ignore = true; };
+    }, [buildUrl]);
 
-        return () => {
-            ignore = true;
-        };
-    }, []);
+    function handleSearchChange(value: string) {
+        setSearchTerm(value);
+        setPage(1);
+    }
 
-    const normalizedSearchTerm = searchTerm.trim().toLowerCase();
+    function handleStatusChange(value: string) {
+        setSelectedStatus(value as ServiceOrderStatusFilterValue);
+        setPage(1);
+    }
 
-    const filteredOrders = orders.filter((order) => {
-        const matchesStatus =
-            selectedStatus === 'all' || order.status === selectedStatus;
-        const matchesPriority =
-            selectedPriority === 'all' || order.priority === selectedPriority;
+    function handlePriorityChange(value: string) {
+        setSelectedPriority(value as ServiceOrderPriorityFilterValue);
+        setPage(1);
+    }
 
-        const searchableText = [
-            order.title,
-            order.description,
-            order.equipment.name,
-            order.equipment.patrimony_code,
-            order.equipment.location,
-        ]
-            .filter(Boolean)
-            .join(' ')
-            .toLowerCase();
-
-        const matchesSearch =
-            !normalizedSearchTerm || searchableText.includes(normalizedSearchTerm);
-
-        return matchesStatus && matchesPriority && matchesSearch;
-    });
+    async function handleFormCreated() {
+        setIsFormModalOpen(false);
+        await loadServiceOrders();
+    }
 
     return (
         <div className="space-y-6">
-            <ServiceOrderForm onCreated={loadServiceOrders} />
-
-            <ServiceOrderSearch
-                searchTerm={searchTerm}
-                onSearchChange={setSearchTerm}
+            <Toolbar
+                searchPlaceholder="Buscar ordens..."
+                searchValue={searchTerm}
+                onSearchChange={handleSearchChange}
+                filterOptions={[
+                    { value: "all", label: "Todos os status" },
+                    ...serviceOrderStatusFilterOptions
+                        .filter((opt) => opt.value !== "all")
+                        .map((opt) => ({ value: opt.value, label: opt.label })),
+                ]}
+                filterValue={selectedStatus}
+                onFilterChange={handleStatusChange}
+                filterLabel="Status"
             />
 
-            <ServiceOrderStatusFilter
-                selectedStatus={selectedStatus}
-                onStatusChange={setSelectedStatus}
-            />
-
-            <ServiceOrderPriorityFilter
-                selectedPriority={selectedPriority}
-                onPriorityChange={setSelectedPriority}
+            {/* Filtro de prioridade */}
+            <Toolbar
+                filterOptions={[
+                    { value: "all", label: "Todas as prioridades" },
+                    ...serviceOrderPriorityFilterOptions
+                        .filter((opt) => opt.value !== "all")
+                        .map((opt) => ({ value: opt.value, label: opt.label })),
+                ]}
+                filterValue={selectedPriority}
+                onFilterChange={handlePriorityChange}
+                filterLabel="Prioridade"
             />
 
             <ServiceOrderList
-                orders={filteredOrders}
-                totalOrders={orders.length}
+                orders={orders}
+                totalOrders={total}
                 searchTerm={searchTerm}
                 isLoading={isLoading}
                 errorMessage={errorMessage}
                 onRefresh={loadServiceOrders}
+                page={page}
+                totalPages={totalPages}
+                limit={limit}
+                onPageChange={setPage}
+                onLimitChange={(newLimit) => {
+                    setLimit(newLimit);
+                    setPage(1);
+                }}
             />
+
+            {/* Modal de criação */}
+            <Modal
+                isOpen={isFormModalOpen}
+                onClose={() => setIsFormModalOpen(false)}
+                title="Nova Ordem de Serviço"
+            >
+                <ServiceOrderForm onCreated={handleFormCreated} />
+            </Modal>
         </div>
     );
 }

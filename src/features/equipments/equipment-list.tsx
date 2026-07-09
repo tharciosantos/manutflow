@@ -256,22 +256,22 @@ export function EquipmentList({
                         </div>
                             </div>
 
-                            <div className="flex flex-wrap items-center gap-1.5 sm:gap-2 sm:justify-end">
+                            <div className="mt-3 flex flex-wrap items-center gap-1.5 sm:mt-0 sm:gap-2 sm:justify-end">
                                 <span
-                                    className={`rounded-full border px-2.5 py-1 text-[11px] font-medium sm:px-3 sm:py-1 sm:text-xs ${equipmentStatusStyles[equipment.status]}`}
+                                    className={`rounded-full border px-2 py-0.5 text-[11px] font-medium sm:px-3 sm:py-1 sm:text-xs ${equipmentStatusStyles[equipment.status]}`}
                                 >
                                     {equipmentStatusLabels[equipment.status]}
                                 </span>
                                 <button
                                     type="button"
                                     onClick={() => onEditEquipment(equipment)}
-                                    className="rounded-full border border-sky-500/30 px-2.5 py-1 text-[11px] font-medium text-sky-300 transition hover:bg-sky-500/10 sm:px-3 sm:py-1 sm:text-xs"
+                                    className="rounded-full border border-sky-500/30 px-2 py-0.5 text-[11px] font-medium text-sky-300 transition hover:bg-sky-500/10 sm:px-3 sm:py-1 sm:text-xs"
                                 >
                                     Editar
                                 </button>
                                 <Link
                                     href={`/equipamentos/${equipment.id}`}
-                                    className="rounded-full border border-teal-500/30 px-2.5 py-1 text-[11px] font-medium text-teal-300 transition hover:bg-teal-500/10 sm:px-3 sm:py-1 sm:text-xs"
+                                    className="rounded-full border border-teal-500/30 px-2 py-0.5 text-[11px] font-medium text-teal-300 transition hover:bg-teal-500/10 sm:px-3 sm:py-1 sm:text-xs"
                                 >
                                     Detalhes
                                 </Link>
@@ -279,7 +279,7 @@ export function EquipmentList({
                                     type="button"
                                     onClick={() => openDeleteModal(equipment.id)}
                                     disabled={deletingEquipmentId === equipment.id}
-                                    className="rounded-full border border-red-500/30 px-2.5 py-1 text-[11px] font-medium text-red-300 transition hover:bg-red-500/10 disabled:cursor-not-allowed disabled:opacity-60 sm:px-3 sm:py-1 sm:text-xs"
+                                    className="rounded-full border border-red-500/30 px-2 py-0.5 text-[11px] font-medium text-red-300 transition hover:bg-red-500/10 disabled:cursor-not-allowed disabled:opacity-60 sm:px-3 sm:py-1 sm:text-xs"
                                 >
                                     {deletingEquipmentId === equipment.id ? "Excluindo..." : "Excluir"}
                                 </button>

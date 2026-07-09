@@ -173,7 +173,7 @@ export default function ServiceOrderDetailsPage({
                                 </div>
                             </div>
 
-                            <div className="grid grid-cols-2 gap-3 sm:gap-4">
+                            <div className="mt-4 grid grid-cols-2 gap-3 sm:mt-6 sm:gap-4">
                                 <div className="rounded-xl border border-slate-800 bg-slate-950 p-3 sm:p-4">
                                     <p className="text-[10px] uppercase tracking-wide text-slate-500 sm:text-xs">
                                         Status
@@ -304,12 +304,12 @@ export default function ServiceOrderDetailsPage({
                                 </Link>
                             </div>
 
-                            <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4">
+                            <div className="mt-4 grid grid-cols-2 gap-3 sm:mt-6 sm:grid-cols-3 sm:gap-4">
                                 <div className="rounded-xl border border-slate-800 bg-slate-950 p-3 sm:p-4">
                                     <p className="text-[10px] uppercase tracking-wide text-slate-500 sm:text-xs">
                                         Patrimônio
                                     </p>
-                                    <p className="mt-1 text-xs font-medium text-slate-200 sm:text-sm truncate">
+                                    <p className="mt-1 text-xs font-medium text-slate-200 sm:text-sm">
                                         {serviceOrder.equipment.patrimony_code}
                                     </p>
                                 </div>
@@ -318,7 +318,7 @@ export default function ServiceOrderDetailsPage({
                                     <p className="text-[10px] uppercase tracking-wide text-slate-500 sm:text-xs">
                                         Localização
                                     </p>
-                                    <p className="mt-1 text-xs font-medium text-slate-200 sm:text-sm truncate">
+                                    <p className="mt-1 text-xs font-medium text-slate-200 sm:text-sm">
                                         {serviceOrder.equipment.location}
                                     </p>
                                 </div>

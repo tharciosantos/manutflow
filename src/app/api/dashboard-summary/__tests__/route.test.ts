@@ -8,63 +8,45 @@ import { getUser } from '@/lib/auth';
 import { GET } from '../route';
 
 /**
- * Cria um mock de Supabase que suporta encadeamento duplo de .eq().
+ * Cria um mock de Supabase que suporta:
+ * - .select('*', { count: 'exact', head: true }).eq().eq()
+ * - .select('...').eq().order().limit()
+ * - .select('created_at').eq().gte().order()
  *
- * O truque: .eq() retorna um objeto que É um Promise (thenable) E também
- * tem um método .eq() para suportar chains como:
- *   supabase.from('x').select('*').eq('user_id', uid).eq('status', 'open')
- *
- * Queries com 1 eq: await resolve para o resultado diretamente no Promise.
- * Queries com 2 eq: 1º eq retorna objeto thenable, 2º eq retorna o resultado.
+ * Cada chamada a .from() produz um novo .eq() mock que retorna o PRÓXIMO
+ * resultado do array callResults. O segundo .eq() (encadeado) retorna o
+ * MESMO resultado (mesmo count), sem consumir índice extra.
  */
-function createEqReturn(data: unknown, count: number, error: unknown) {
-  const result = { data, count, error };
-  const promise = Promise.resolve(result);
-  // Adiciona .eq() ao próprio Promise para suportar segundo encadeamento
-  (promise as Record<string, unknown>).eq = vi.fn().mockResolvedValue(result);
-  return promise;
-}
+function createMockSupabase(callResults?: unknown[]) {
+  let callIndex = 0;
 
-function createMockSupabase(options?: {
-  equipmentsCount?: number;
-  serviceOrdersCount?: number;
-  failOnFirstCall?: boolean;
-}) {
-  let isFirstEquipmentsCall = true;
+  function makeEqFn() {
+    return vi.fn().mockImplementation(() => {
+      const result = (callResults?.[callIndex] ?? { data: [], count: 0, error: null }) as { data: unknown; count: number; error: unknown };
+      if (callResults && callIndex < callResults.length) callIndex++;
 
-  const defaultEq = vi.fn().mockImplementation(() => {
-    if (options?.failOnFirstCall && isFirstEquipmentsCall) {
-      isFirstEquipmentsCall = false;
-      return createEqReturn([], 0, { message: 'DB error' });
-    }
-    return createEqReturn([], 0, null);
-  });
+      const promise = Promise.resolve(result) as Promise<{ data: unknown; count: number; error: unknown }> & Record<string, unknown>;
 
-  // Para queries com 2 .eq() (status/priority), retorna o count do último eq
-  const eqWithCount = (count: number) =>
-    vi.fn().mockImplementation(() => {
-      const result = { data: [], count, error: null };
-      const promise = Promise.resolve(result);
-      (promise as Record<string, unknown>).eq = vi.fn().mockResolvedValue(result);
+      // Segundo .eq() retorna o MESMO resultado (sem consumir novo índice)
+      promise.eq = vi.fn().mockResolvedValue(result);
+
+      // .order().limit() para recent queries
+      promise.order = vi.fn().mockReturnThis();
+      promise.limit = vi.fn().mockResolvedValue(result);
+
+      // .gte().order() para ordersByMonth
+      promise.gte = vi.fn().mockReturnThis();
+
       return promise;
     });
+  }
 
   return {
-    from: vi.fn().mockImplementation((table: string) => {
-      if (table === 'equipments') {
-        return {
-          select: vi.fn().mockReturnValue({
-            eq: eqWithCount(options?.equipmentsCount ?? 0),
-          }),
-        };
-      }
-      // service_orders
-      return {
-        select: vi.fn().mockReturnValue({
-          eq: defaultEq,
-        }),
-      };
-    }),
+    from: vi.fn().mockImplementation(() => ({
+      select: vi.fn().mockReturnValue({
+        eq: makeEqFn(),
+      }),
+    })),
   };
 }
 
@@ -74,7 +56,9 @@ describe('Dashboard Summary API', () => {
   });
 
   it('deve retornar totais zerados quando não há dados', async () => {
-    const mockSupabase = createMockSupabase();
+    const emptyResult = { data: [], count: 0, error: null };
+    // 12 chamadas: 9 count queries + recentOrders + recentEquipments + ordersByMonth
+    const mockSupabase = createMockSupabase(Array(12).fill(emptyResult));
 
     const mockGetUser = getUser as ReturnType<typeof vi.fn>;
     mockGetUser.mockResolvedValue({
@@ -96,38 +80,30 @@ describe('Dashboard Summary API', () => {
     expect(body.mediumPriorityServiceOrders).toBe(0);
     expect(body.highPriorityServiceOrders).toBe(0);
     expect(body.criticalPriorityServiceOrders).toBe(0);
+    expect(body.completionRate).toBe(0);
+    expect(body.recentOrders).toEqual([]);
+    expect(body.recentEquipments).toEqual([]);
+    expect(body.ordersByMonth).toBeDefined();
+    expect(body.ordersByMonth.length).toBe(6);
   });
 
   it('deve retornar totais corretos com dados', async () => {
-    // Configura o mock para retornar contagens específicas por tipo de query
-    let callIndex = 0;
     const counts = [
-      5,   // equipments total
-      10,  // service_orders total
-      3,   // open
-      2,   // in_progress
-      5,   // closed
-      2,   // low priority
-      3,   // medium priority
-      3,   // high priority
-      2,   // critical priority
+      { data: [], count: 5, error: null },   // equipments total
+      { data: [], count: 10, error: null },   // service_orders total
+      { data: [], count: 3, error: null },    // open
+      { data: [], count: 2, error: null },    // in_progress
+      { data: [], count: 5, error: null },    // closed
+      { data: [], count: 2, error: null },    // low priority
+      { data: [], count: 3, error: null },    // medium priority
+      { data: [], count: 3, error: null },    // high priority
+      { data: [], count: 2, error: null },    // critical priority
+      { data: [{ id: '1', title: 'Ordem 1', status: 'open', priority: 'high', created_at: new Date().toISOString(), equipment: { name: 'Equip A' } }], count: null, error: null },
+      { data: [{ id: '2', name: 'Equip B', patrimony_code: 'PAT-002', status: 'active', created_at: new Date().toISOString() }], count: null, error: null },
+      { data: [{ created_at: new Date().toISOString() }], count: null, error: null },
     ];
 
-    const eqFn = vi.fn().mockImplementation(() => {
-      const count = callIndex < counts.length ? counts[callIndex++] : 0;
-      const result = { data: [], count, error: null };
-      const promise = Promise.resolve(result);
-      (promise as Record<string, unknown>).eq = vi.fn().mockResolvedValue(result);
-      return promise;
-    });
-
-    const mockSupabase = {
-      from: vi.fn().mockReturnValue({
-        select: vi.fn().mockReturnValue({
-          eq: eqFn,
-        }),
-      }),
-    };
+    const mockSupabase = createMockSupabase(counts);
 
     const mockGetUser = getUser as ReturnType<typeof vi.fn>;
     mockGetUser.mockResolvedValue({
@@ -145,34 +121,29 @@ describe('Dashboard Summary API', () => {
     expect(body.openServiceOrders).toBe(3);
     expect(body.inProgressServiceOrders).toBe(2);
     expect(body.closedServiceOrders).toBe(5);
+    expect(body.completionRate).toBe(50);
+    expect(body.recentOrders).toHaveLength(1);
+    expect(body.recentEquipments).toHaveLength(1);
+    expect(body.ordersByMonth).toHaveLength(6);
   });
 
   it('deve retornar 500 quando alguma query falha', async () => {
-    let firstCall = true;
+    const results = [
+      { data: [], count: 0, error: { message: 'DB error' } }, // primeira query falha
+      { data: [], count: 0, error: null },
+      { data: [], count: 0, error: null },
+      { data: [], count: 0, error: null },
+      { data: [], count: 0, error: null },
+      { data: [], count: 0, error: null },
+      { data: [], count: 0, error: null },
+      { data: [], count: 0, error: null },
+      { data: [], count: 0, error: null },
+      { data: [], count: 0, error: null },
+      { data: [], count: 0, error: null },
+      { data: [], count: 0, error: null },
+    ];
 
-    const eqFn = vi.fn().mockImplementation(() => {
-      if (firstCall) {
-        firstCall = false;
-        const errorResult = { data: [], count: 0, error: { message: 'DB error' } };
-        const promise = Promise.resolve(errorResult);
-        (promise as Record<string, unknown>).eq = vi
-          .fn()
-          .mockResolvedValue(errorResult);
-        return promise;
-      }
-      const result = { data: [], count: 0, error: null };
-      const promise = Promise.resolve(result);
-      (promise as Record<string, unknown>).eq = vi.fn().mockResolvedValue(result);
-      return promise;
-    });
-
-    const mockSupabase = {
-      from: vi.fn().mockReturnValue({
-        select: vi.fn().mockReturnValue({
-          eq: eqFn,
-        }),
-      }),
-    };
+    const mockSupabase = createMockSupabase(results);
 
     const mockGetUser = getUser as ReturnType<typeof vi.fn>;
     mockGetUser.mockResolvedValue({

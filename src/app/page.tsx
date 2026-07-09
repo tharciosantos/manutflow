@@ -37,7 +37,7 @@ export default function Home() {
         {/* Ações rápidas */}
         <div className="mb-14 grid grid-cols-2 gap-3 animate-fade-in-delay-1">
           <Link
-            href="/equipamentos#equipment-form"
+            href="/equipamentos"
             className="inline-flex items-center justify-center gap-2 rounded-xl border border-teal-500/30 bg-teal-500/10 px-4 py-3 text-sm font-medium text-teal-300 transition-all hover:bg-teal-500/20 hover:border-teal-400/50 active:scale-95 sm:hover:scale-105"
           >
             <svg className="h-4 w-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -48,7 +48,7 @@ export default function Home() {
           </Link>
 
           <Link
-            href="/ordens#service-order-form"
+            href="/ordens"
             className="inline-flex items-center justify-center gap-2 rounded-xl border border-emerald-500/30 bg-emerald-500/10 px-4 py-3 text-sm font-medium text-emerald-300 transition-all hover:bg-emerald-500/20 hover:border-emerald-400/50 active:scale-95 sm:hover:scale-105"
           >
             <svg className="h-4 w-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>

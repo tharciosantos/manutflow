@@ -20,15 +20,39 @@ function isEquipmentStatus(value: unknown): value is EquipmentStatus {
   );
 }
 
-export async function GET() {
+export async function GET(request: Request) {
   const { user, supabase, error: authError } = await getUser();
   if (authError) return authError;
 
-  const { data, error } = await supabase
+  const url = new URL(request.url);
+  const page = Math.max(1, Number(url.searchParams.get("page")) || 1);
+  const limit = Math.min(50, Math.max(1, Number(url.searchParams.get("limit")) || 10));
+  const offset = (page - 1) * limit;
+
+  const searchQuery = url.searchParams.get("q")?.trim() || "";
+  const statusFilter = url.searchParams.get("status") || "";
+
+  // Construir query com filtros
+  let query = supabase
     .from("equipments")
-    .select("*")
-    .eq("user_id", user.id)
-    .order("created_at", { ascending: false });
+    .select("*", { count: "exact", head: false })
+    .eq("user_id", user.id);
+
+  // Filtro por status
+  if (statusFilter && allowedStatuses.includes(statusFilter as EquipmentStatus)) {
+    query = query.eq("status", statusFilter);
+  }
+
+  // Filtro por busca textual
+  if (searchQuery) {
+    query = query.or(
+      `name.ilike.%${searchQuery}%,patrimony_code.ilike.%${searchQuery}%,location.ilike.%${searchQuery}%`
+    );
+  }
+
+  const { data, error, count } = await query
+    .order("created_at", { ascending: false })
+    .range(offset, offset + limit - 1);
 
   if (error) {
     console.error("Erro ao buscar equipamentos:", error);
@@ -40,8 +64,14 @@ export async function GET() {
     );
   }
 
+  const total = count ?? 0;
+  const totalPages = Math.ceil(total / limit);
+
   return Response.json({
     equipments: data ?? [],
+    total,
+    page,
+    totalPages,
   });
 }
 

@@ -13,6 +13,7 @@ import type {
     ServiceOrderStatus,
 } from '@/types/service-order';
 import { Modal } from '@/components/ui/modal';
+import { Pagination } from '@/components/ui/pagination';
 
 type ServiceOrderListProps = {
     orders: ServiceOrder[];
@@ -21,6 +22,11 @@ type ServiceOrderListProps = {
     isLoading: boolean;
     errorMessage: string;
     onRefresh: () => Promise<void>;
+    page: number;
+    totalPages: number;
+    limit: number;
+    onPageChange: (page: number) => void;
+    onLimitChange: (limit: number) => void;
 };
 
 export function ServiceOrderList({
@@ -30,6 +36,11 @@ export function ServiceOrderList({
     isLoading,
     errorMessage,
     onRefresh,
+    page,
+    totalPages,
+    limit,
+    onPageChange,
+    onLimitChange,
 }: ServiceOrderListProps) {
     const [deletingOrderId, setDeletingOrderId] = useState('');
     const [updatingStatusOrderId, setUpdatingStatusOrderId] = useState('');
@@ -309,6 +320,15 @@ export function ServiceOrderList({
                 ))}
             </div>
         </section>
+
+        <Pagination
+          page={page}
+          totalPages={totalPages}
+          total={totalOrders}
+          limit={limit}
+          onPageChange={onPageChange}
+          onLimitChange={onLimitChange}
+        />
 
         <Modal
             isOpen={isDeleteModalOpen}

@@ -7,6 +7,7 @@ type EquipmentFormProps = {
   onEquipmentCreated: () => void;
   editingEquipment?: Equipment | null;
   onEditCancel?: () => void;
+  inModal?: boolean;
 };
 
 type ApiResponse = {
@@ -14,7 +15,7 @@ type ApiResponse = {
   error?: string;
 };
 
-export function EquipmentForm({ onEquipmentCreated, editingEquipment, onEditCancel }: EquipmentFormProps) {
+export function EquipmentForm({ onEquipmentCreated, editingEquipment, onEditCancel, inModal }: EquipmentFormProps) {
   const [name, setName] = useState(editingEquipment?.name ?? "");
   const [patrimonyCode, setPatrimonyCode] = useState(editingEquipment?.patrimony_code ?? "");
   const [location, setLocation] = useState(editingEquipment?.location ?? "");
@@ -99,7 +100,7 @@ export function EquipmentForm({ onEquipmentCreated, editingEquipment, onEditCanc
     <form
       id="equipment-form"
       onSubmit={handleSubmit}
-      className="mt-6 scroll-mt-24 rounded-2xl border border-slate-800 bg-slate-950/70 p-4 shadow-sm sm:mt-8 sm:p-5"
+      className={`rounded-2xl border border-slate-800 bg-slate-950/70 p-4 shadow-sm sm:p-5 ${inModal ? '' : 'mt-6 scroll-mt-24 sm:mt-8'}`}
     >
       <div>
         <span className="rounded-full border border-teal-500/30 bg-teal-500/10 px-3 py-1 text-xs font-medium text-teal-300">

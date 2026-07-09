@@ -9,6 +9,7 @@ import {
 } from "@/features/equipments/equipment-status-config";
 import type { Equipment } from "@/types/equipment";
 import { Modal } from "@/components/ui/modal";
+import { Pagination } from "@/components/ui/pagination";
 
 type EquipmentListProps = {
     equipments: Equipment[];
@@ -19,6 +20,11 @@ type EquipmentListProps = {
     errorMessage: string;
     onRefresh: () => Promise<void>;
     onEditEquipment: (equipment: Equipment) => void;
+    page: number;
+    totalPages: number;
+    limit: number;
+    onPageChange: (page: number) => void;
+    onLimitChange: (limit: number) => void;
 };
 
 export function EquipmentList({
@@ -30,6 +36,11 @@ export function EquipmentList({
     errorMessage,
     onRefresh,
     onEditEquipment,
+    page,
+    totalPages,
+    limit,
+    onPageChange,
+    onLimitChange,
 }: EquipmentListProps) {
 
     const [deletingEquipmentId, setDeletingEquipmentId] = useState("");
@@ -267,6 +278,15 @@ export function EquipmentList({
                 ))}
             </div>
         </section>
+
+        <Pagination
+          page={page}
+          totalPages={totalPages}
+          total={totalEquipments}
+          limit={limit}
+          onPageChange={onPageChange}
+          onLimitChange={onLimitChange}
+        />
 
         <Modal
             isOpen={isDeleteModalOpen}

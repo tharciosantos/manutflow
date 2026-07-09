@@ -57,6 +57,20 @@ export async function POST(request: Request) {
     const equipmentId = typeof body?.equipment_id === 'string' ? body.equipment_id : '';
     const priority = typeof body?.priority === 'string' ? body.priority : 'medium';
 
+    if (title.length > 255) {
+        return NextResponse.json(
+            { error: 'O título deve ter no máximo 255 caracteres.' },
+            { status: 400 },
+        );
+    }
+
+    if (description && description.length > 2000) {
+        return NextResponse.json(
+            { error: 'A descrição deve ter no máximo 2000 caracteres.' },
+            { status: 400 },
+        );
+    }
+
     if (!title) {
         return NextResponse.json(
             { error: 'O título da ordem de serviço é obrigatório.' },

@@ -70,6 +70,27 @@ export async function POST(request: Request) {
     typeof body.location === "string" ? body.location.trim() : "";
   const status = body.status ?? "active";
 
+  if (name.length > 255) {
+    return Response.json(
+      { error: "Nome deve ter no máximo 255 caracteres." },
+      { status: 400 },
+    );
+  }
+
+  if (patrimonyCode.length > 100) {
+    return Response.json(
+      { error: "Código de patrimônio deve ter no máximo 100 caracteres." },
+      { status: 400 },
+    );
+  }
+
+  if (location.length > 255) {
+    return Response.json(
+      { error: "Localização deve ter no máximo 255 caracteres." },
+      { status: 400 },
+    );
+  }
+
   if (!name) {
     return Response.json(
       {

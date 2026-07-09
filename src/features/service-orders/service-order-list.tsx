@@ -54,13 +54,14 @@ export function ServiceOrderList({
             });
 
             if (!response.ok) {
-                throw new Error('Erro ao excluir ordem de serviço.');
+                const result = await response.json().catch(() => ({})) as { error?: string };
+                throw new Error(result.error ?? 'Erro ao excluir ordem de serviço.');
             }
 
             closeDeleteModal();
             await onRefresh();
-        } catch {
-            setErrorMessageModal('Não foi possível excluir a ordem de serviço.');
+        } catch (error) {
+            setErrorMessageModal(error instanceof Error ? error.message : 'Não foi possível excluir a ordem de serviço.');
             setIsErrorModalOpen(true);
             closeDeleteModal();
         }
@@ -82,12 +83,13 @@ export function ServiceOrderList({
             });
 
             if (!response.ok) {
-                throw new Error('Erro ao atualizar status da ordem de serviço.');
+                const result = await response.json().catch(() => ({})) as { error?: string };
+                throw new Error(result.error ?? 'Erro ao atualizar status da ordem de serviço.');
             }
 
             await onRefresh();
-        } catch {
-            setErrorMessageModal('Não foi possível atualizar o status da ordem de serviço.');
+        } catch (error) {
+            setErrorMessageModal(error instanceof Error ? error.message : 'Não foi possível atualizar o status da ordem de serviço.');
             setIsErrorModalOpen(true);
         } finally {
             setUpdatingStatusOrderId('');

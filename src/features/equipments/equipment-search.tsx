@@ -26,6 +26,9 @@ export function EquipmentSearch({
                         </p>
                     </div>
 
+                    <label htmlFor="equipmentSearch" className="sr-only">
+                        Buscar equipamento
+                    </label>
                     <input
                         id="equipmentSearch"
                         type="search"

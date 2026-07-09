@@ -228,21 +228,32 @@ export function EquipmentList({
                                     {equipment.name}
                                 </h3>
 
+                                <div className="flex items-start gap-3">
+                            {equipment.photo_url && (
+                                <img
+                                    src={equipment.photo_url}
+                                    alt={equipment.name}
+                                    className="mt-1 h-12 w-12 shrink-0 rounded-lg border border-slate-700 object-cover sm:h-14 sm:w-14"
+                                />
+                            )}
+                            <div className="min-w-0 flex-1">
                                 <div className="mt-2 grid gap-0.5 text-xs sm:mt-3 sm:gap-1 sm:text-sm">
-                                    <p className="truncate">
+                                    <p>
                                         <span className="text-slate-500">Patrimônio:</span>{' '}
                                         <span className="text-slate-300">
                                             {equipment.patrimony_code}
                                         </span>
                                     </p>
 
-                                    <p className="truncate">
+                                    <p>
                                         <span className="text-slate-500">Localização:</span>{' '}
                                         <span className="text-slate-300">
                                             {equipment.location}
                                         </span>
                                     </p>
                                 </div>
+                            </div>
+                        </div>
                             </div>
 
                             <div className="flex flex-wrap items-center gap-1.5 sm:gap-2 sm:justify-end">

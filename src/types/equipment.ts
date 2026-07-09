@@ -7,6 +7,7 @@ export type Equipment = {
     location: string;
     status: EquipmentStatus;
     user_id: string;
+    photo_url: string | null;
     created_at: string;
     updated_at: string;
 };

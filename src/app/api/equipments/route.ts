@@ -13,6 +13,7 @@ type CreateEquipmentBody = {
   patrimony_code?: unknown;
   location?: unknown;
   status?: unknown;
+  photo_url?: unknown;
 };
 
 function isEquipmentStatus(value: unknown): value is EquipmentStatus {
@@ -113,6 +114,8 @@ export async function POST(request: Request) {
   const location =
     typeof body.location === "string" ? body.location.trim() : "";
   const status = body.status ?? "active";
+  const photoUrl =
+    typeof body.photo_url === "string" ? body.photo_url.trim() : null;
 
   if (name.length > 255) {
     return Response.json(
@@ -205,6 +208,7 @@ export async function POST(request: Request) {
       patrimony_code: patrimonyCode,
       location,
       status,
+      photo_url: photoUrl,
       user_id: user.id,
     })
     .select("*")

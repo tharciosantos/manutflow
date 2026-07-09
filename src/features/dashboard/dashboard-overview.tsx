@@ -225,8 +225,10 @@ export function DashboardOverview() {
                                         tickLine={false}
                                     />
                                     <Tooltip
+                                        cursor={{ fill: '#1e293b' }}
                                         contentStyle={{ backgroundColor: '#0f172a', border: '1px solid #1e293b', borderRadius: '12px', fontSize: '13px' }}
                                         labelStyle={{ color: '#e2e8f0', fontWeight: 600 }}
+                                        itemStyle={{ color: '#cbd5e1' }}
                                         formatter={(value) => [`${value} ordem${Number(value) !== 1 ? 'ns' : ''}`, 'Total']}
                                     />
                                     <Bar dataKey="count" fill="#14b8a6" radius={[4, 4, 0, 0]} maxBarSize={40} />

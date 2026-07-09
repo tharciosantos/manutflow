@@ -72,11 +72,9 @@ export function AppHeader() {
 
         {/* Desktop User Area */}
         <div className="hidden items-center gap-3 md:flex">
-          {userEmail && (
-            <span className="hidden truncate text-sm text-slate-400 sm:block max-w-[120px] lg:max-w-none">
-              {userEmail}
-            </span>
-          )}
+          <span className={`hidden truncate text-sm text-slate-400 sm:block max-w-[120px] lg:max-w-none ${userEmail ? 'visible' : 'invisible'}`}>
+            {userEmail || 'email@exemplo.com'}
+          </span>
           <Link
             href="/perfil"
             className="rounded-lg border border-slate-700 px-3 py-1.5 text-sm text-slate-300 transition hover:border-teal-500 hover:text-teal-400"

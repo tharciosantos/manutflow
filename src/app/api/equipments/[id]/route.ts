@@ -78,6 +78,190 @@ export async function GET(_request: Request, { params }: RouteParams) {
     });
 }
 
+const allowedUpdateStatuses = ["active", "inactive", "maintenance"] as const;
+
+type UpdateEquipmentBody = {
+  name?: unknown;
+  patrimony_code?: unknown;
+  location?: unknown;
+  status?: unknown;
+};
+
+export async function PATCH(request: Request, { params }: RouteParams) {
+  const { user, supabase, error: authError } = await getUser();
+  if (authError) return authError;
+
+  const { id } = await params;
+
+  if (!id) {
+    return Response.json(
+      { error: "ID do equipamento é obrigatório." },
+      { status: 400 },
+    );
+  }
+
+  // Verificar se o equipamento existe e pertence ao usuário
+  const { data: existing, error: fetchError } = await supabase
+    .from("equipments")
+    .select("id, patrimony_code")
+    .eq("id", id)
+    .eq("user_id", user.id)
+    .maybeSingle();
+
+  if (fetchError) {
+    console.error("Erro ao buscar equipamento:", fetchError);
+    return Response.json(
+      { error: "Erro ao buscar equipamento." },
+      { status: 500 },
+    );
+  }
+
+  if (!existing) {
+    return Response.json(
+      { error: "Equipamento não encontrado." },
+      { status: 404 },
+    );
+  }
+
+  let body: UpdateEquipmentBody;
+
+  try {
+    body = (await request.json()) as UpdateEquipmentBody;
+  } catch {
+    return Response.json(
+      { error: "JSON inválido." },
+      { status: 400 },
+    );
+  }
+
+  const updateData: Record<string, string> = {};
+
+  // Validar e preparar campos para atualização
+  if (body.name !== undefined) {
+    const name = typeof body.name === "string" ? body.name.trim() : "";
+
+    if (!name) {
+      return Response.json(
+        { error: "O nome do equipamento é obrigatório." },
+        { status: 400 },
+      );
+    }
+
+    if (name.length > 255) {
+      return Response.json(
+        { error: "Nome deve ter no máximo 255 caracteres." },
+        { status: 400 },
+      );
+    }
+
+    updateData.name = name;
+  }
+
+  if (body.patrimony_code !== undefined) {
+    const patrimonyCode =
+      typeof body.patrimony_code === "string" ? body.patrimony_code.trim() : "";
+
+    if (!patrimonyCode) {
+      return Response.json(
+        { error: "O código de patrimônio é obrigatório." },
+        { status: 400 },
+      );
+    }
+
+    if (patrimonyCode.length > 100) {
+      return Response.json(
+        { error: "Código de patrimônio deve ter no máximo 100 caracteres." },
+        { status: 400 },
+      );
+    }
+
+    // Verificar duplicidade apenas se o patrimônio mudou
+    if (patrimonyCode !== existing.patrimony_code) {
+      const { data: duplicate } = await supabase
+        .from("equipments")
+        .select("id")
+        .eq("user_id", user.id)
+        .eq("patrimony_code", patrimonyCode)
+        .maybeSingle();
+
+      if (duplicate) {
+        return Response.json(
+          { error: "Já existe um equipamento com esse código de patrimônio." },
+          { status: 409 },
+        );
+      }
+    }
+
+    updateData.patrimony_code = patrimonyCode;
+  }
+
+  if (body.location !== undefined) {
+    const location =
+      typeof body.location === "string" ? body.location.trim() : "";
+
+    if (!location) {
+      return Response.json(
+        { error: "A localização é obrigatória." },
+        { status: 400 },
+      );
+    }
+
+    if (location.length > 255) {
+      return Response.json(
+        { error: "Localização deve ter no máximo 255 caracteres." },
+        { status: 400 },
+      );
+    }
+
+    updateData.location = location;
+  }
+
+  if (body.status !== undefined) {
+    const status = typeof body.status === "string" ? body.status : "";
+
+    if (!allowedUpdateStatuses.includes(status as typeof allowedUpdateStatuses[number])) {
+      return Response.json(
+        { error: "Status inválido." },
+        { status: 400 },
+      );
+    }
+
+    updateData.status = status;
+  }
+
+  if (Object.keys(updateData).length === 0) {
+    return Response.json(
+      { error: "Nenhum campo válido para atualizar." },
+      { status: 400 },
+    );
+  }
+
+  const { data: updatedEquipment, error: updateError } = await supabase
+    .from("equipments")
+    .update(updateData)
+    .eq("id", id)
+    .eq("user_id", user.id)
+    .select("*")
+    .single();
+
+  if (updateError) {
+    if (updateError.code === "23505") {
+      return Response.json(
+        { error: "Já existe um equipamento com esse código de patrimônio." },
+        { status: 409 },
+      );
+    }
+
+    console.error("Erro ao atualizar equipamento:", updateError);
+    return Response.json(
+      { error: "Erro ao atualizar equipamento." },
+      { status: 500 },
+    );
+  }
+
+  return Response.json({ equipment: updatedEquipment });
+}
+
 export async function DELETE(_request: Request, { params }: RouteParams) {
     const { user, supabase, error: authError } = await getUser();
     if (authError) return authError;

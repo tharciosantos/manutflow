@@ -1,4 +1,6 @@
 import { getUser } from "@/lib/auth";
+import { checkRateLimit } from "@/lib/rate-limit";
+import { logger } from "@/lib/logger";
 
 export const dynamic = "force-dynamic";
 
@@ -31,7 +33,7 @@ export async function GET(_request: Request, { params }: RouteParams) {
         .maybeSingle();
 
     if (equipmentError) {
-        console.error("Erro ao buscar equipamento:", equipmentError);
+        logger('error', 'api.error', { route: 'equipments/[id]', method: 'GET', error: equipmentError.message });
         return Response.json(
             {
                 error: "Erro ao buscar equipamento.",
@@ -61,7 +63,7 @@ export async function GET(_request: Request, { params }: RouteParams) {
         .order("created_at", { ascending: false });
 
     if (serviceOrdersError) {
-        console.error("Erro ao buscar ordens vinculadas:", serviceOrdersError);
+        logger('error', 'api.error', { route: 'equipments/[id]', method: 'GET', error: serviceOrdersError.message });
         return Response.json(
             {
                 error: "Erro ao buscar ordens vinculadas ao equipamento.",
@@ -109,7 +111,7 @@ export async function PATCH(request: Request, { params }: RouteParams) {
     .maybeSingle();
 
   if (fetchError) {
-    console.error("Erro ao buscar equipamento:", fetchError);
+    logger('error', 'api.error', { route: 'equipments/[id]', method: 'PATCH', error: fetchError.message });
     return Response.json(
       { error: "Erro ao buscar equipamento." },
       { status: 500 },
@@ -252,7 +254,7 @@ export async function PATCH(request: Request, { params }: RouteParams) {
       );
     }
 
-    console.error("Erro ao atualizar equipamento:", updateError);
+    logger('error', 'api.error', { route: 'equipments/[id]', method: 'PATCH', error: updateError.message });
     return Response.json(
       { error: "Erro ao atualizar equipamento." },
       { status: 500 },
@@ -265,6 +267,18 @@ export async function PATCH(request: Request, { params }: RouteParams) {
 export async function DELETE(_request: Request, { params }: RouteParams) {
     const { user, supabase, error: authError } = await getUser();
     if (authError) return authError;
+
+    const { allowed, remaining } = checkRateLimit(`equipments:delete:${user.id}`);
+    if (!allowed) {
+        logger('warn', 'rate_limit.exceeded', { userId: user.id, route: 'equipments/[id]', method: 'DELETE' });
+        return Response.json(
+            { error: 'Muitas requisições. Tente novamente mais tarde.' },
+            {
+                status: 429,
+                headers: { 'X-RateLimit-Remaining': String(remaining) },
+            },
+        );
+    }
 
     const { id } = await params;
 
@@ -288,7 +302,7 @@ export async function DELETE(_request: Request, { params }: RouteParams) {
             .limit(1);
 
     if (linkedServiceOrdersError) {
-        console.error("Erro ao verificar ordens vinculadas:", linkedServiceOrdersError);
+        logger('error', 'api.error', { route: 'equipments/[id]', method: 'DELETE', error: linkedServiceOrdersError.message });
         return Response.json(
             {
                 error: "Erro ao verificar ordens vinculadas ao equipamento.",
@@ -320,7 +334,7 @@ export async function DELETE(_request: Request, { params }: RouteParams) {
         .maybeSingle();
 
     if (error) {
-        console.error("Erro ao excluir equipamento:", error);
+        logger('error', 'api.error', { route: 'equipments/[id]', method: 'DELETE', error: error.message });
         return Response.json(
             {
                 error: "Erro ao excluir equipamento.",

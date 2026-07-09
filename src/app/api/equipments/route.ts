@@ -1,4 +1,6 @@
 import { getUser } from "@/lib/auth";
+import { checkRateLimit } from "@/lib/rate-limit";
+import { logger } from "@/lib/logger";
 
 export const dynamic = "force-dynamic";
 
@@ -55,7 +57,7 @@ export async function GET(request: Request) {
     .range(offset, offset + limit - 1);
 
   if (error) {
-    console.error("Erro ao buscar equipamentos:", error);
+    logger('error', 'api.error', { route: 'equipments', method: 'GET', error: error.message });
     return Response.json(
       {
         error: "Erro ao buscar equipamentos.",
@@ -78,6 +80,18 @@ export async function GET(request: Request) {
 export async function POST(request: Request) {
   const { user, supabase, error: authError } = await getUser();
   if (authError) return authError;
+
+  const { allowed, remaining } = checkRateLimit(`equipments:post:${user.id}`);
+  if (!allowed) {
+    logger('warn', 'rate_limit.exceeded', { userId: user.id, route: 'equipments', method: 'POST' });
+    return Response.json(
+      { error: 'Muitas requisições. Tente novamente mais tarde.' },
+      {
+        status: 429,
+        headers: { 'X-RateLimit-Remaining': String(remaining) },
+      },
+    );
+  }
   let body: CreateEquipmentBody;
 
   try {
@@ -206,7 +220,7 @@ export async function POST(request: Request) {
       );
     }
 
-    console.error("Erro ao cadastrar equipamento:", error);
+    logger('error', 'api.error', { route: 'equipments', method: 'POST', error: error.message });
     return Response.json(
       {
         error: "Erro ao cadastrar equipamento.",

@@ -18,6 +18,7 @@ type EquipmentListProps = {
     isLoading: boolean;
     errorMessage: string;
     onRefresh: () => Promise<void>;
+    onEditEquipment: (equipment: Equipment) => void;
 };
 
 export function EquipmentList({
@@ -28,6 +29,7 @@ export function EquipmentList({
     isLoading,
     errorMessage,
     onRefresh,
+    onEditEquipment,
 }: EquipmentListProps) {
 
     const [deletingEquipmentId, setDeletingEquipmentId] = useState("");
@@ -238,6 +240,13 @@ export function EquipmentList({
                                 >
                                     {equipmentStatusLabels[equipment.status]}
                                 </span>
+                                <button
+                                    type="button"
+                                    onClick={() => onEditEquipment(equipment)}
+                                    className="rounded-full border border-sky-500/30 px-2.5 py-1 text-[11px] font-medium text-sky-300 transition hover:bg-sky-500/10 sm:px-3 sm:py-1 sm:text-xs"
+                                >
+                                    Editar
+                                </button>
                                 <Link
                                     href={`/equipamentos/${equipment.id}`}
                                     className="rounded-full border border-teal-500/30 px-2.5 py-1 text-[11px] font-medium text-teal-300 transition hover:bg-teal-500/10 sm:px-3 sm:py-1 sm:text-xs"

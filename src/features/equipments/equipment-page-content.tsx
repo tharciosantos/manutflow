@@ -23,6 +23,12 @@ export function EquipmentPageContent() {
     const [searchTerm, setSearchTerm] = useState("");
     const [selectedStatus, setSelectedStatus] =
         useState<EquipmentStatusFilterValue>("all");
+    const [editingEquipment, setEditingEquipment] = useState<Equipment | null>(null);
+
+    async function handleEquipmentSaved() {
+        setEditingEquipment(null);
+        await loadEquipments();
+    }
 
     async function loadEquipments() {
         setIsLoading(true);
@@ -128,7 +134,12 @@ export function EquipmentPageContent() {
                 />
             </div>
 
-            <EquipmentForm onEquipmentCreated={loadEquipments} />
+            <EquipmentForm
+                key={editingEquipment?.id ?? 'create'}
+                onEquipmentCreated={handleEquipmentSaved}
+                editingEquipment={editingEquipment}
+                onEditCancel={() => setEditingEquipment(null)}
+            />
 
             <EquipmentList
                 equipments={filteredEquipments}
@@ -138,6 +149,7 @@ export function EquipmentPageContent() {
                 isLoading={isLoading}
                 errorMessage={errorMessage}
                 onRefresh={loadEquipments}
+                onEditEquipment={setEditingEquipment}
             />
         </>
     );

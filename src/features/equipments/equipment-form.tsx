@@ -1,25 +1,30 @@
 "use client";
 
 import { FormEvent, useState } from "react";
+import type { Equipment } from "@/types/equipment";
 
 type EquipmentFormProps = {
   onEquipmentCreated: () => void;
+  editingEquipment?: Equipment | null;
+  onEditCancel?: () => void;
 };
 
-type CreateEquipmentResponse = {
+type ApiResponse = {
   equipment?: unknown;
   error?: string;
 };
 
-export function EquipmentForm({ onEquipmentCreated }: EquipmentFormProps) {
-  const [name, setName] = useState("");
-  const [patrimonyCode, setPatrimonyCode] = useState("");
-  const [location, setLocation] = useState("");
-  const [status, setStatus] = useState("active");
+export function EquipmentForm({ onEquipmentCreated, editingEquipment, onEditCancel }: EquipmentFormProps) {
+  const [name, setName] = useState(editingEquipment?.name ?? "");
+  const [patrimonyCode, setPatrimonyCode] = useState(editingEquipment?.patrimony_code ?? "");
+  const [location, setLocation] = useState(editingEquipment?.location ?? "");
+  const [status, setStatus] = useState(editingEquipment?.status ?? "active");
 
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [successMessage, setSuccessMessage] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
+
+  const isEditing = !!editingEquipment;
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -29,8 +34,13 @@ export function EquipmentForm({ onEquipmentCreated }: EquipmentFormProps) {
     setErrorMessage("");
 
     try {
-      const response = await fetch("/api/equipments", {
-        method: "POST",
+      const url = isEditing
+        ? `/api/equipments/${editingEquipment!.id}`
+        : "/api/equipments";
+      const method = isEditing ? "PATCH" : "POST";
+
+      const response = await fetch(url, {
+        method,
         headers: {
           "Content-Type": "application/json",
         },
@@ -42,29 +52,47 @@ export function EquipmentForm({ onEquipmentCreated }: EquipmentFormProps) {
         }),
       });
 
-      const result = (await response.json()) as CreateEquipmentResponse;
+      const result = (await response.json()) as ApiResponse;
 
       if (!response.ok) {
-        throw new Error(result.error ?? "Erro ao cadastrar equipamento.");
+        throw new Error(result.error ?? `Erro ao ${isEditing ? 'atualizar' : 'cadastrar'} equipamento.`);
       }
 
-      setName("");
-      setPatrimonyCode("");
-      setLocation("");
-      setStatus("active");
-      setSuccessMessage("Equipamento cadastrado com sucesso.");
+      if (!isEditing) {
+        setName("");
+        setPatrimonyCode("");
+        setLocation("");
+        setStatus("active");
+      }
+
+      setSuccessMessage(
+        isEditing
+          ? "Equipamento atualizado com sucesso."
+          : "Equipamento cadastrado com sucesso.",
+      );
 
       onEquipmentCreated();
     } catch (error) {
       const message =
         error instanceof Error
           ? error.message
-          : "Erro inesperado ao cadastrar equipamento.";
+          : `Erro inesperado ao ${isEditing ? 'atualizar' : 'cadastrar'} equipamento.`;
 
       setErrorMessage(message);
     } finally {
       setIsSubmitting(false);
     }
+  }
+
+  function handleCancel() {
+    if (!isEditing) return;
+    setName("");
+    setPatrimonyCode("");
+    setLocation("");
+    setStatus("active");
+    setSuccessMessage("");
+    setErrorMessage("");
+    onEditCancel?.();
   }
 
   return (
@@ -75,15 +103,17 @@ export function EquipmentForm({ onEquipmentCreated }: EquipmentFormProps) {
     >
       <div>
         <span className="rounded-full border border-teal-500/30 bg-teal-500/10 px-3 py-1 text-xs font-medium text-teal-300">
-          Novo equipamento
+          {isEditing ? "Editar equipamento" : "Novo equipamento"}
         </span>
 
         <h2 className="mt-3 text-xl font-semibold text-white">
-          Cadastrar equipamento
+          {isEditing ? "Editar equipamento" : "Cadastrar equipamento"}
         </h2>
 
         <p className="mt-1 text-sm text-slate-400">
-          Preencha os dados abaixo para adicionar um novo equipamento.
+          {isEditing
+            ? `Editando: ${editingEquipment?.name}`
+            : "Preencha os dados abaixo para adicionar um novo equipamento."}
         </p>
       </div>
 
@@ -156,7 +186,7 @@ export function EquipmentForm({ onEquipmentCreated }: EquipmentFormProps) {
           <select
             id="status"
             value={status}
-            onChange={(event) => setStatus(event.target.value)}
+            onChange={(event) => setStatus(event.target.value as Equipment['status'])}
             className="w-full rounded-xl border border-slate-700 bg-slate-950 px-4 py-3 text-slate-100 outline-none transition focus:border-teal-500"
           >
             <option value="active">Ativo</option>
@@ -178,13 +208,26 @@ export function EquipmentForm({ onEquipmentCreated }: EquipmentFormProps) {
         </p>
       )}
 
-      <div className="mt-5 flex justify-end">
+      <div className="mt-5 flex items-center justify-end gap-3">
+        {isEditing && (
+          <button
+            type="button"
+            onClick={handleCancel}
+            disabled={isSubmitting}
+            className="rounded-xl border border-slate-700 px-4 py-2.5 text-sm font-medium text-slate-300 transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-60"
+          >
+            Cancelar
+          </button>
+        )}
+
         <button
           type="submit"
           disabled={isSubmitting}
           className="rounded-xl bg-teal-600 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-teal-500 disabled:cursor-not-allowed disabled:opacity-60"
         >
-          {isSubmitting ? 'Cadastrando...' : 'Cadastrar equipamento'}
+          {isSubmitting
+            ? (isEditing ? "Salvando..." : "Cadastrando...")
+            : (isEditing ? "Salvar alterações" : "Cadastrar equipamento")}
         </button>
       </div>
     </form>

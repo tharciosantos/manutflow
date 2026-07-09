@@ -112,12 +112,12 @@ export function Modal({
       </div>
 
       {!children && (
-        <div className="flex flex-row items-center justify-center gap-3 border-t border-slate-800 bg-slate-950/50 px-6 py-4">
+        <div className="flex flex-col-reverse gap-3 border-t border-slate-800 bg-slate-950/50 p-4 sm:flex-row sm:items-center sm:justify-center sm:px-6 sm:py-4">
           <button
             type="button"
             onClick={onClose}
             disabled={isLoading}
-            className="rounded-2xl border border-slate-700 bg-slate-800 px-4 py-2.5 text-sm font-medium text-slate-300 transition hover:bg-slate-700 active:scale-95 disabled:cursor-not-allowed disabled:opacity-60"
+            className="rounded-2xl border border-slate-700 bg-slate-800 px-5 py-2.5 text-sm font-medium text-slate-300 transition hover:bg-slate-700 active:scale-95 disabled:cursor-not-allowed disabled:opacity-60"
           >
             {cancelLabel}
           </button>
@@ -125,7 +125,7 @@ export function Modal({
             type="button"
             onClick={onConfirm}
             disabled={isLoading}
-            className={`rounded-2xl px-4 py-2.5 text-sm font-medium text-white transition hover:opacity-90 active:scale-95 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-slate-900 disabled:cursor-not-allowed disabled:opacity-60 ${styles.confirmButton}`}
+            className={`rounded-2xl px-5 py-2.5 text-sm font-medium text-white transition hover:opacity-90 active:scale-95 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-slate-900 disabled:cursor-not-allowed disabled:opacity-60 ${styles.confirmButton}`}
           >
             {isLoading ? (
               <span className="flex items-center gap-2">

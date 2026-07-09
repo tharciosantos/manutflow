@@ -126,7 +126,7 @@ export function DashboardOverview() {
     if (isLoading) {
         return (
             <div className="mt-6 space-y-6">
-                <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+                <div className="grid grid-cols-3 gap-4">
                     {[1, 2, 3].map((i) => (
                         <div key={i} className="animate-pulse rounded-2xl border border-slate-800 bg-slate-950/70 p-6">
                             <div className="h-4 w-20 rounded bg-slate-800" />
@@ -156,7 +156,7 @@ export function DashboardOverview() {
     return (
         <div className="mt-6 space-y-6 sm:mt-10">
             {/* Cards de status */}
-            <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+            <div className="grid grid-cols-3 gap-4">
                 <StatusCard
                     title="Equipamentos"
                     value={String(s.totalEquipments)}

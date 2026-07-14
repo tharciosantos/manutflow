@@ -4,6 +4,7 @@ import { Suspense, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
+import { getSafeRedirectPath } from "@/lib/safe-redirect";
 
 // ============================================================
 //  LoginPage (Página principal)
@@ -65,7 +66,7 @@ function LoginForm() {
     const router = useRouter();
     const supabase = createClient();
     const searchParams = useSearchParams();
-    const redirectTo = searchParams.get("redirect") || "/";
+    const redirectTo = getSafeRedirectPath(searchParams.get("redirect"));
 
 
     const handleLogin = async (e: React.FormEvent) => {

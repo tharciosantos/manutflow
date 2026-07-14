@@ -5,10 +5,18 @@ type ToolbarOption = {
   label: string;
 };
 
+type ToolbarFilter = {
+  label: string;
+  value: string;
+  options: ToolbarOption[];
+  onChange: (value: string) => void;
+};
+
 type ToolbarProps = {
   searchPlaceholder?: string;
   searchValue?: string;
   onSearchChange?: (value: string) => void;
+  filters?: ToolbarFilter[];
   filterOptions?: ToolbarOption[];
   filterValue?: string;
   onFilterChange?: (value: string) => void;
@@ -19,11 +27,23 @@ export function Toolbar({
   searchPlaceholder = "Buscar...",
   searchValue,
   onSearchChange,
+  filters,
   filterOptions,
   filterValue,
   onFilterChange,
   filterLabel,
 }: ToolbarProps) {
+  const activeFilters = filters ?? (
+    filterOptions && filterValue !== undefined && onFilterChange
+      ? [{
+          label: filterLabel ?? "Filtrar",
+          value: filterValue,
+          options: filterOptions,
+          onChange: onFilterChange,
+        }]
+      : []
+  );
+
   return (
     <div className="flex flex-col gap-3 rounded-2xl border border-slate-800 bg-slate-950/70 p-4 shadow-sm sm:flex-row sm:items-center sm:p-4">
       {/* Busca (opcional: só renderiza se houver searchPlaceholder) */}
@@ -57,26 +77,27 @@ export function Toolbar({
         </div>
       )}
 
-      {/* Filtro */}
-      {filterOptions && filterValue !== undefined && onFilterChange && (
-        <div className="flex items-center gap-2">
-          {filterLabel && (
-            <span className="hidden text-xs text-slate-500 sm:inline">
-              {filterLabel}:
-            </span>
-          )}
-          <select
-            value={filterValue}
-            onChange={(event) => onFilterChange(event.target.value)}
-            className="rounded-xl border border-slate-700 bg-slate-950 px-3 py-2.5 text-sm text-slate-100 outline-none transition focus:border-teal-500"
-            aria-label={filterLabel ?? "Filtrar"}
-          >
-            {filterOptions.map((option) => (
-              <option key={option.value} value={option.value} className="bg-slate-950 text-slate-100">
-                {option.label}
-              </option>
-            ))}
-          </select>
+      {activeFilters.length > 0 && (
+        <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
+          {activeFilters.map((filter) => (
+            <div key={filter.label} className="flex items-center gap-2">
+              <span className="hidden text-xs text-slate-500 sm:inline">
+                {filter.label}:
+              </span>
+              <select
+                value={filter.value}
+                onChange={(event) => filter.onChange(event.target.value)}
+                className="w-full rounded-xl border border-slate-700 bg-slate-950 px-3 py-2.5 text-sm text-slate-100 outline-none transition focus:border-teal-500 sm:w-auto"
+                aria-label={filter.label}
+              >
+                {filter.options.map((option) => (
+                  <option key={option.value} value={option.value} className="bg-slate-950 text-slate-100">
+                    {option.label}
+                  </option>
+                ))}
+              </select>
+            </div>
+          ))}
         </div>
       )}
     </div>

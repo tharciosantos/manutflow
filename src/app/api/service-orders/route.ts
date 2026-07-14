@@ -19,6 +19,7 @@ export async function GET(request: Request) {
     const searchQuery = url.searchParams.get("q")?.trim() || "";
     const statusFilter = url.searchParams.get("status") || "";
     const priorityFilter = url.searchParams.get("priority") || "";
+    const sort = url.searchParams.get("sort") || "created_desc";
 
     // Construir query com filtros
     let query = supabase
@@ -59,7 +60,7 @@ export async function GET(request: Request) {
     }
 
     const { data, error, count } = await query
-        .order('created_at', { ascending: false })
+        .order('created_at', { ascending: sort === "created_asc" })
         .range(offset, offset + limit - 1);
 
     if (error) {

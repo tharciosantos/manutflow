@@ -29,6 +29,16 @@ type ServiceOrderPageContentProps = {
   setIsFormModalOpen: (open: boolean) => void;
 };
 
+type ServiceOrderSortValue = 'created_desc' | 'created_asc';
+
+const serviceOrderSortOptions: Array<{
+    value: ServiceOrderSortValue;
+    label: string;
+}> = [
+        { value: 'created_desc', label: 'Mais recentes' },
+        { value: 'created_asc', label: 'Mais antigas' },
+    ];
+
 export function ServiceOrderPageContent({ isFormModalOpen, setIsFormModalOpen }: ServiceOrderPageContentProps) {
     const [orders, setOrders] = useState<ServiceOrder[]>([]);
     const [total, setTotal] = useState(0);
@@ -41,6 +51,8 @@ export function ServiceOrderPageContent({ isFormModalOpen, setIsFormModalOpen }:
         useState<ServiceOrderStatusFilterValue>('all');
     const [selectedPriority, setSelectedPriority] =
         useState<ServiceOrderPriorityFilterValue>('all');
+    const [selectedSort, setSelectedSort] =
+        useState<ServiceOrderSortValue>('created_desc');
     const [searchTerm, setSearchTerm] = useState('');
 
     const buildUrl = useCallback(() => {
@@ -50,8 +62,9 @@ export function ServiceOrderPageContent({ isFormModalOpen, setIsFormModalOpen }:
       if (searchTerm.trim()) params.set("q", searchTerm.trim());
       if (selectedStatus !== "all") params.set("status", selectedStatus);
       if (selectedPriority !== "all") params.set("priority", selectedPriority);
+      if (selectedSort !== "created_desc") params.set("sort", selectedSort);
       return `/api/service-orders?${params.toString()}`;
-    }, [page, limit, searchTerm, selectedStatus, selectedPriority]);
+    }, [page, limit, searchTerm, selectedStatus, selectedPriority, selectedSort]);
 
     const loadServiceOrders = useCallback(async () => {
         try {
@@ -125,6 +138,11 @@ export function ServiceOrderPageContent({ isFormModalOpen, setIsFormModalOpen }:
         setPage(1);
     }
 
+    function handleSortChange(value: string) {
+        setSelectedSort(value as ServiceOrderSortValue);
+        setPage(1);
+    }
+
     async function handleFormCreated() {
         setIsFormModalOpen(false);
         await loadServiceOrders();
@@ -136,28 +154,36 @@ export function ServiceOrderPageContent({ isFormModalOpen, setIsFormModalOpen }:
                 searchPlaceholder="Buscar ordens..."
                 searchValue={searchTerm}
                 onSearchChange={handleSearchChange}
-                filterOptions={[
-                    { value: "all", label: "Todos os status" },
-                    ...serviceOrderStatusFilterOptions
-                        .filter((opt) => opt.value !== "all")
-                        .map((opt) => ({ value: opt.value, label: opt.label })),
+                filters={[
+                    {
+                        label: "Status",
+                        value: selectedStatus,
+                        onChange: handleStatusChange,
+                        options: [
+                            { value: "all", label: "Todos os status" },
+                            ...serviceOrderStatusFilterOptions
+                                .filter((opt) => opt.value !== "all")
+                                .map((opt) => ({ value: opt.value, label: opt.label })),
+                        ],
+                    },
+                    {
+                        label: "Prioridade",
+                        value: selectedPriority,
+                        onChange: handlePriorityChange,
+                        options: [
+                            { value: "all", label: "Todas as prioridades" },
+                            ...serviceOrderPriorityFilterOptions
+                                .filter((opt) => opt.value !== "all")
+                                .map((opt) => ({ value: opt.value, label: opt.label })),
+                        ],
+                    },
+                    {
+                        label: "Ordenar",
+                        value: selectedSort,
+                        onChange: handleSortChange,
+                        options: serviceOrderSortOptions,
+                    },
                 ]}
-                filterValue={selectedStatus}
-                onFilterChange={handleStatusChange}
-                filterLabel="Status"
-            />
-
-            {/* Filtro de prioridade */}
-            <Toolbar
-                filterOptions={[
-                    { value: "all", label: "Todas as prioridades" },
-                    ...serviceOrderPriorityFilterOptions
-                        .filter((opt) => opt.value !== "all")
-                        .map((opt) => ({ value: opt.value, label: opt.label })),
-                ]}
-                filterValue={selectedPriority}
-                onFilterChange={handlePriorityChange}
-                filterLabel="Prioridade"
             />
 
             <ServiceOrderList
@@ -175,6 +201,7 @@ export function ServiceOrderPageContent({ isFormModalOpen, setIsFormModalOpen }:
                     setLimit(newLimit);
                     setPage(1);
                 }}
+                onCreateOrder={() => setIsFormModalOpen(true)}
             />
 
             {/* Modal de criação */}

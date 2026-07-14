@@ -27,6 +27,7 @@ type ServiceOrderListProps = {
     limit: number;
     onPageChange: (page: number) => void;
     onLimitChange: (limit: number) => void;
+    onCreateOrder: () => void;
 };
 
 export function ServiceOrderList({
@@ -41,6 +42,7 @@ export function ServiceOrderList({
     limit,
     onPageChange,
     onLimitChange,
+    onCreateOrder,
 }: ServiceOrderListProps) {
     const [deletingOrderId, setDeletingOrderId] = useState('');
     const [updatingStatusOrderId, setUpdatingStatusOrderId] = useState('');
@@ -196,15 +198,16 @@ export function ServiceOrderList({
                 )}
 
                 {!hasOrders && (
-                    <a
-                        href="#service-order-form"
+                    <button
+                        type="button"
+                        onClick={onCreateOrder}
                         className="mt-6 inline-flex items-center gap-2 rounded-xl bg-teal-600 px-5 py-2.5 text-sm font-medium text-white transition hover:bg-teal-500"
                     >
                         <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                             <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
                         </svg>
                         Criar Ordem de Serviço
-                    </a>
+                    </button>
                 )}
             </div>
         );

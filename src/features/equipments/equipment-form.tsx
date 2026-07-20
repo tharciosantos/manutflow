@@ -15,6 +15,11 @@ type ApiResponse = {
   error?: string;
 };
 
+type UploadedPhoto = {
+  url: string | null;
+  path: string | null;
+};
+
 export function EquipmentForm({ onEquipmentCreated, editingEquipment, onEditCancel, inModal }: EquipmentFormProps) {
   const [name, setName] = useState(editingEquipment?.name ?? "");
   const [patrimonyCode, setPatrimonyCode] = useState(editingEquipment?.patrimony_code ?? "");
@@ -65,8 +70,8 @@ export function EquipmentForm({ onEquipmentCreated, editingEquipment, onEditCanc
     }
   }
 
-  async function uploadPhoto(): Promise<string | null> {
-    if (!selectedFile) return previewUrl;
+  async function uploadPhoto(): Promise<UploadedPhoto> {
+    if (!selectedFile) return { url: previewUrl, path: null };
 
     setIsUploading(true);
 
@@ -79,16 +84,27 @@ export function EquipmentForm({ onEquipmentCreated, editingEquipment, onEditCanc
         body: formData,
       });
 
-      const result = await response.json() as { url?: string; error?: string };
+      const result = await response.json() as { url?: string; path?: string; error?: string };
 
       if (!response.ok) {
         throw new Error(result.error ?? 'Erro ao fazer upload da imagem.');
       }
 
-      return result.url ?? null;
+      return {
+        url: result.url ?? null,
+        path: result.path ?? null,
+      };
     } finally {
       setIsUploading(false);
     }
+  }
+
+  async function rollbackUploadedPhoto(path: string) {
+    await fetch('/api/upload', {
+      method: 'DELETE',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ path }),
+    }).catch(() => undefined);
   }
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
@@ -97,10 +113,13 @@ export function EquipmentForm({ onEquipmentCreated, editingEquipment, onEditCanc
     setIsSubmitting(true);
     setSuccessMessage("");
     setErrorMessage("");
+    let uploadedPhotoPath: string | null = null;
 
     try {
       // Faz upload da foto primeiro, se houver
-      const photoUrl = await uploadPhoto();
+      const uploadedPhoto = await uploadPhoto();
+      const photoUrl = uploadedPhoto.url;
+      uploadedPhotoPath = uploadedPhoto.path;
 
       const url = isEditing
         ? `/api/equipments/${editingEquipment!.id}`
@@ -133,6 +152,8 @@ export function EquipmentForm({ onEquipmentCreated, editingEquipment, onEditCanc
         throw new Error(result.error ?? `Erro ao ${isEditing ? 'atualizar' : 'cadastrar'} equipamento.`);
       }
 
+      uploadedPhotoPath = null;
+
       if (!isEditing) {
         setName("");
         setPatrimonyCode("");
@@ -150,6 +171,10 @@ export function EquipmentForm({ onEquipmentCreated, editingEquipment, onEditCanc
 
       onEquipmentCreated();
     } catch (error) {
+      if (uploadedPhotoPath) {
+        await rollbackUploadedPhoto(uploadedPhotoPath);
+      }
+
       const message =
         error instanceof Error
           ? error.message

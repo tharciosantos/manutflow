@@ -1,6 +1,7 @@
 import { getUser } from "@/lib/auth";
 import { checkRateLimit } from "@/lib/rate-limit";
 import { logger } from "@/lib/logger";
+import { removeEquipmentPhotoByUrl } from '@/lib/equipment-photo-storage';
 
 export const dynamic = "force-dynamic";
 
@@ -106,7 +107,7 @@ export async function PATCH(request: Request, { params }: RouteParams) {
   // Verificar se o equipamento existe e pertence ao usuário
   const { data: existing, error: fetchError } = await supabase
     .from("equipments")
-    .select("id, patrimony_code")
+    .select("id, patrimony_code, photo_url")
     .eq("id", id)
     .eq("user_id", user.id)
     .maybeSingle();
@@ -267,6 +268,23 @@ export async function PATCH(request: Request, { params }: RouteParams) {
     );
   }
 
+  if (
+    body.photo_url !== undefined
+    && existing.photo_url
+    && existing.photo_url !== updateData.photo_url
+  ) {
+    const removalResult = await removeEquipmentPhotoByUrl(existing.photo_url, user.id);
+
+    if (removalResult && !removalResult.ok) {
+      logger('error', 'equipment.photo_cleanup_error', {
+        userId: user.id,
+        equipmentId: id,
+        reason: removalResult.reason,
+        error: removalResult.message,
+      });
+    }
+  }
+
   return Response.json({ equipment: updatedEquipment });
 }
 
@@ -336,7 +354,7 @@ export async function DELETE(_request: Request, { params }: RouteParams) {
         .delete()
         .eq("id", id)
         .eq("user_id", user.id)
-        .select("id")
+        .select("id, photo_url")
         .maybeSingle();
 
     if (error) {
@@ -361,6 +379,19 @@ export async function DELETE(_request: Request, { params }: RouteParams) {
                 status: 403,
             },
         );
+    }
+
+    if (deletedEquipment.photo_url) {
+        const removalResult = await removeEquipmentPhotoByUrl(deletedEquipment.photo_url, user.id);
+
+        if (removalResult && !removalResult.ok) {
+            logger('error', 'equipment.photo_cleanup_error', {
+                userId: user.id,
+                equipmentId: id,
+                reason: removalResult.reason,
+                error: removalResult.message,
+            });
+        }
     }
 
     return Response.json({

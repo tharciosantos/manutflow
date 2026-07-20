@@ -3,11 +3,20 @@ import { getUser } from "@/lib/auth";
 import { checkRateLimit } from "@/lib/rate-limit";
 import { logger } from "@/lib/logger";
 import { createClient } from "@supabase/supabase-js";
+import {
+    EQUIPMENT_PHOTOS_BUCKET,
+    removeEquipmentPhotoByPath,
+} from '@/lib/equipment-photo-storage';
 
 export const dynamic = "force-dynamic";
 
 const ALLOWED_MIME_TYPES = ['image/jpeg', 'image/png', 'image/webp'];
 const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
+const FILE_EXTENSIONS: Record<string, string> = {
+    'image/jpeg': 'jpg',
+    'image/png': 'png',
+    'image/webp': 'webp',
+};
 
 export async function POST(request: Request) {
     const { user, error: authError } = await getUser();
@@ -73,7 +82,7 @@ export async function POST(request: Request) {
     }
 
     // Gerar nome único: userId/timestamp-random.ext
-    const extension = file.name.split('.').pop() ?? 'jpg';
+    const extension = FILE_EXTENSIONS[file.type];
     const fileName = `${user.id}/${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${extension}`;
 
     // Criar client do Supabase com service role para ter permissão de escrita no storage
@@ -93,7 +102,7 @@ export async function POST(request: Request) {
 
     const { error: uploadError } = await serviceClient
         .storage
-        .from('equipment-photos')
+        .from(EQUIPMENT_PHOTOS_BUCKET)
         .upload(fileName, buffer, {
             contentType: file.type,
             upsert: false,
@@ -110,11 +119,47 @@ export async function POST(request: Request) {
     // Obter URL pública
     const { data: { publicUrl } } = serviceClient
         .storage
-        .from('equipment-photos')
+        .from(EQUIPMENT_PHOTOS_BUCKET)
         .getPublicUrl(fileName);
 
     return NextResponse.json({
         url: publicUrl,
         path: fileName,
     });
+}
+
+export async function DELETE(request: Request) {
+    const { user, error: authError } = await getUser();
+    if (authError) return authError;
+
+    const { allowed, remaining } = checkRateLimit(`upload:delete:${user.id}`, 10, 60_000);
+    if (!allowed) {
+        logger('warn', 'rate_limit.exceeded', { userId: user.id, route: 'upload', method: 'DELETE' });
+        return NextResponse.json(
+            { error: 'Muitas requisições. Tente novamente mais tarde.' },
+            {
+                status: 429,
+                headers: { 'X-RateLimit-Remaining': String(remaining) },
+            },
+        );
+    }
+
+    const body = await request.json().catch(() => null) as { path?: unknown } | null;
+    const path = typeof body?.path === 'string' ? body.path : '';
+    const result = await removeEquipmentPhotoByPath(path, user.id);
+
+    if (!result.ok) {
+        if (result.reason === 'invalid_path') {
+            return NextResponse.json({ error: 'Caminho da imagem inválido.' }, { status: 400 });
+        }
+
+        logger('error', 'upload.delete_error', {
+            userId: user.id,
+            reason: result.reason,
+            error: result.message,
+        });
+        return NextResponse.json({ error: 'Erro ao excluir a imagem.' }, { status: 500 });
+    }
+
+    return NextResponse.json({ message: 'Imagem excluída com sucesso.' });
 }

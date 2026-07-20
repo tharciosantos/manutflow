@@ -12,7 +12,12 @@ vi.mock('@/lib/logger', () => ({
     logger: vi.fn(),
 }));
 
+vi.mock('@/lib/equipment-photo-storage', () => ({
+    removeEquipmentPhotoByUrl: vi.fn(),
+}));
+
 import { getUser } from '@/lib/auth';
+import { removeEquipmentPhotoByUrl } from '@/lib/equipment-photo-storage';
 import { checkRateLimit } from '@/lib/rate-limit';
 import { DELETE, GET, PATCH } from '../route';
 
@@ -85,6 +90,7 @@ describe('Equipments Details API', () => {
     beforeEach(() => {
         vi.clearAllMocks();
         vi.mocked(checkRateLimit).mockReturnValue({ allowed: true, remaining: 29 });
+        vi.mocked(removeEquipmentPhotoByUrl).mockResolvedValue({ ok: true });
     });
 
     describe('GET', () => {
@@ -308,6 +314,23 @@ describe('Equipments Details API', () => {
             expect(supabase.from).toHaveBeenCalledTimes(2);
         });
 
+        it('remove a foto anterior depois de atualizar o equipamento', async () => {
+            const oldPhotoUrl = 'https://project.supabase.co/storage/v1/object/public/equipment-photos/user-1/old.jpg';
+            const newPhotoUrl = 'https://project.supabase.co/storage/v1/object/public/equipment-photos/user-1/new.jpg';
+            authenticateWith(createSupabaseMock(
+                createQuery({ data: { ...existingEquipment, photo_url: oldPhotoUrl } }),
+                createQuery({ data: { ...existingEquipment, photo_url: newPhotoUrl } }),
+            ));
+
+            const response = await PATCH(
+                request('PATCH', { photo_url: newPhotoUrl }),
+                routeContext(),
+            );
+
+            expect(response.status).toBe(200);
+            expect(removeEquipmentPhotoByUrl).toHaveBeenCalledWith(oldPhotoUrl, 'user-1');
+        });
+
         it('retorna 409 quando o banco identifica patrimônio duplicado no update', async () => {
             authenticateWith(createSupabaseMock(
                 createQuery({ data: existingEquipment }),
@@ -384,7 +407,8 @@ describe('Equipments Details API', () => {
 
         it('exclui o equipamento aplicando isolamento por usuário', async () => {
             const linkedOrdersQuery = createQuery({ data: [] });
-            const deleteQuery = createQuery({ data: { id: 'equipment-1' } });
+            const photoUrl = 'https://project.supabase.co/storage/v1/object/public/equipment-photos/user-1/photo.jpg';
+            const deleteQuery = createQuery({ data: { id: 'equipment-1', photo_url: photoUrl } });
             const supabase = createSupabaseMock(linkedOrdersQuery, deleteQuery);
             authenticateWith(supabase);
 
@@ -398,6 +422,7 @@ describe('Equipments Details API', () => {
             expect(deleteQuery.delete).toHaveBeenCalledOnce();
             expect(deleteQuery.eq).toHaveBeenCalledWith('id', 'equipment-1');
             expect(deleteQuery.eq).toHaveBeenCalledWith('user_id', 'user-1');
+            expect(removeEquipmentPhotoByUrl).toHaveBeenCalledWith(photoUrl, 'user-1');
         });
 
         it('retorna 500 quando a exclusão falha', async () => {

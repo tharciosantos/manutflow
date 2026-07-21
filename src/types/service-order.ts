@@ -20,6 +20,7 @@ export type ServiceOrder = {
     priority: ServiceOrderPriority;
     equipment_id: string;
     user_id: string;
+    due_date: string | null;
     created_at: string;
     equipment: ServiceOrderEquipment;
     history: ServiceOrderHistory[];

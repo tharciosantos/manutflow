@@ -108,6 +108,7 @@ describe('Service Orders Details API', () => {
                 title: 'Troca de rolamento',
                 status: 'open',
                 priority: 'high',
+                due_date: '2026-07-30',
             };
             const history = [{ id: 'history-1', event_type: 'created' }];
             const orderQuery = createQuery({ data: serviceOrder });
@@ -181,7 +182,18 @@ describe('Service Orders Details API', () => {
             expect(response.headers.get('X-RateLimit-Remaining')).toBe('0');
         });
 
-        it.each([{}, { status: 'invalid' }, { status: 10 }])(
+        it('retorna 400 quando nenhum campo atualizável é enviado', async () => {
+            authenticateWith(createSupabaseMock());
+
+            const response = await PATCH(request('PATCH', {}), routeContext());
+
+            expect(response.status).toBe(400);
+            await expect(response.json()).resolves.toEqual({
+                error: 'Nenhum campo válido para atualizar.',
+            });
+        });
+
+        it.each([{ status: 'invalid' }, { status: 10 }])(
             'retorna 400 para um status inválido: %j',
             async (body) => {
                 authenticateWith(createSupabaseMock());
@@ -192,6 +204,21 @@ describe('Service Orders Details API', () => {
                 await expect(response.json()).resolves.toEqual({ error: 'Status inválido.' });
             },
         );
+
+        it.each([
+            { due_date: '2026-02-30' },
+            { due_date: '30/07/2026' },
+            { due_date: 123 },
+        ])('retorna 400 para um prazo inválido: %j', async (body) => {
+            authenticateWith(createSupabaseMock());
+
+            const response = await PATCH(request('PATCH', body), routeContext());
+
+            expect(response.status).toBe(400);
+            await expect(response.json()).resolves.toEqual({
+                error: 'Prazo inválido. Use uma data no formato AAAA-MM-DD.',
+            });
+        });
 
         it('retorna 404 quando a ordem atual não existe para o usuário', async () => {
             authenticateWith(createSupabaseMock(createQuery()));
@@ -228,6 +255,7 @@ describe('Service Orders Details API', () => {
                 description: 'Status alterado de open para closed.',
             });
             expect(updateQuery.update).toHaveBeenCalledWith({ status: 'closed' });
+            expect(updateQuery.eq).toHaveBeenCalledWith('user_id', 'user-1');
         });
 
         it('não cria histórico quando o status permanece igual', async () => {
@@ -243,6 +271,79 @@ describe('Service Orders Details API', () => {
             expect(supabase.from).not.toHaveBeenCalledWith('service_order_history');
         });
 
+        it('registra no histórico a alteração do prazo', async () => {
+            const currentQuery = createQuery({
+                data: { id: 'order-1', status: 'open', due_date: '2026-07-20' },
+            });
+            const historyQuery = createQuery();
+            const updatedOrder = { id: 'order-1', status: 'open', due_date: '2026-07-30' };
+            const updateQuery = createQuery({ data: updatedOrder });
+            const supabase = createSupabaseMock(currentQuery, historyQuery, updateQuery);
+            authenticateWith(supabase);
+
+            const response = await PATCH(
+                request('PATCH', { due_date: '2026-07-30' }),
+                routeContext(),
+            );
+
+            expect(response.status).toBe(200);
+            expect(historyQuery.insert).toHaveBeenCalledWith({
+                service_order_id: 'order-1',
+                user_id: 'user-1',
+                event_type: 'due_date_changed',
+                previous_status: null,
+                new_status: null,
+                description: 'Prazo alterado de 20/07/2026 para 30/07/2026.',
+            });
+            expect(updateQuery.update).toHaveBeenCalledWith({ due_date: '2026-07-30' });
+        });
+
+        it('permite remover o prazo da ordem', async () => {
+            const currentQuery = createQuery({
+                data: { id: 'order-1', status: 'open', due_date: '2026-07-30' },
+            });
+            const historyQuery = createQuery();
+            const updateQuery = createQuery({ data: { id: 'order-1', due_date: null } });
+            const supabase = createSupabaseMock(currentQuery, historyQuery, updateQuery);
+            authenticateWith(supabase);
+
+            const response = await PATCH(request('PATCH', { due_date: null }), routeContext());
+
+            expect(response.status).toBe(200);
+            expect(historyQuery.insert).toHaveBeenCalledWith(expect.objectContaining({
+                event_type: 'due_date_changed',
+                description: 'Prazo alterado de 30/07/2026 para sem prazo.',
+            }));
+            expect(updateQuery.update).toHaveBeenCalledWith({ due_date: null });
+        });
+
+        it('registra status e prazo em uma única inserção de histórico', async () => {
+            const currentQuery = createQuery({
+                data: { id: 'order-1', status: 'open', due_date: null },
+            });
+            const historyQuery = createQuery();
+            const updateQuery = createQuery({
+                data: { id: 'order-1', status: 'in_progress', due_date: '2026-08-01' },
+            });
+            const supabase = createSupabaseMock(currentQuery, historyQuery, updateQuery);
+            authenticateWith(supabase);
+
+            const response = await PATCH(request('PATCH', {
+                status: 'in_progress',
+                due_date: '2026-08-01',
+            }), routeContext());
+
+            expect(response.status).toBe(200);
+            expect(historyQuery.insert).toHaveBeenCalledWith([
+                expect.objectContaining({ event_type: 'status_changed' }),
+                expect.objectContaining({ event_type: 'due_date_changed' }),
+            ]);
+            expect(updateQuery.update).toHaveBeenCalledWith({
+                status: 'in_progress',
+                due_date: '2026-08-01',
+            });
+        });
+
         it('não atualiza o status quando o histórico falha', async () => {
             const currentQuery = createQuery({ data: { id: 'order-1', status: 'open' } });
             const historyQuery = createQuery({ error: { message: 'History error' } });
@@ -254,7 +355,7 @@ describe('Service Orders Details API', () => {
             expect(response.status).toBe(500);
             expect(supabase.from).toHaveBeenCalledTimes(2);
             await expect(response.json()).resolves.toEqual({
-                error: 'Erro ao registrar histórico. Status não foi alterado.',
+                error: 'Erro ao registrar histórico. Alterações não foram aplicadas.',
             });
         });
 
@@ -269,7 +370,7 @@ describe('Service Orders Details API', () => {
 
             expect(response.status).toBe(500);
             await expect(response.json()).resolves.toEqual({
-                error: 'Erro ao atualizar status da ordem de serviço.',
+                error: 'Erro ao atualizar ordem de serviço.',
             });
         });
     });

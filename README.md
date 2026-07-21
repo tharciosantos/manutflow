@@ -130,14 +130,23 @@ Sistema de Controle de Manutenção e Ordens de Serviço — full stack com Next
 | `GET` | `/api/equipments/[id]` | Detalhes do equipamento + ordens vinculadas |
 | `PATCH` | `/api/equipments/[id]` | Edita equipamento (parcial) |
 | `DELETE` | `/api/equipments/[id]` | Exclui equipamento (bloqueia se houver ordens) |
-| `GET` | `/api/service-orders` | Lista ordens (paginado, busca, filtros) |
-| `POST` | `/api/service-orders` | Cadastra ordem |
+| `GET` | `/api/service-orders` | Lista ordens (paginado, busca, filtros e ordenação) |
+| `POST` | `/api/service-orders` | Cadastra ordem com prazo opcional |
 | `GET` | `/api/service-orders/[id]` | Detalhes da ordem + equipamento + histórico |
-| `PATCH` | `/api/service-orders/[id]` | Altera status com registro de histórico |
+| `PATCH` | `/api/service-orders/[id]` | Altera status e/ou prazo com registro de histórico |
 | `DELETE` | `/api/service-orders/[id]` | Exclui ordem |
 | `GET` | `/api/profile` | Dados do perfil |
 | `PATCH` | `/api/profile` | Atualiza perfil (nome, cargo, telefone) |
 | `POST` | `/api/upload` | Upload de imagem (valida MIME, 5MB, rate limit 10/min) |
+
+### Filtros e ordenação de ordens
+
+| Parâmetro | Valores |
+|-----------|---------|
+| `status` | `open / in_progress / closed` |
+| `priority` | `low / medium / high / critical` |
+| `deadline` | `overdue / today / next_7_days / without_due_date` |
+| `sort` | `created_desc / created_asc / due_asc / due_desc` |
 
 ## Banco de Dados
 
@@ -176,6 +185,7 @@ Sistema de Controle de Manutenção e Ordens de Serviço — full stack com Next
 | `priority` | text | `low / medium / high / critical` |
 | `equipment_id` | UUID FK | → equipments |
 | `user_id` | UUID FK | |
+| `due_date` | date \| null | Prazo opcional da ordem |
 | `created_at` | timestamptz | |
 
 ### `service_order_history`
@@ -184,7 +194,7 @@ Sistema de Controle de Manutenção e Ordens de Serviço — full stack com Next
 | `id` | UUID PK | |
 | `service_order_id` | UUID FK | → service_orders |
 | `user_id` | UUID FK | |
-| `event_type` | text | Ex: `status_changed` |
+| `event_type` | text | Ex: `status_changed / due_date_changed` |
 | `previous_status` | text \| null | |
 | `new_status` | text \| null | |
 | `description` | text \| null | |
@@ -226,6 +236,7 @@ Scripts de referência em `scripts/` (pasta gitignored):
 - `02-rls-profiles.sql` — políticas RLS
 - `03-add-profile-fields.sql` — colunas phone e role
 - `04-upload-imagens.sql` — bucket storage + photo_url
+- `05-add-service-order-due-date.sql` — prazo opcional e índice de vencimento
 
 Execute cada um no SQL Editor do Supabase conforme necessário.
 

@@ -13,6 +13,12 @@ function createMockSupabase(data?: unknown, error: unknown = null) {
   const chainableMock = {
     select: vi.fn().mockReturnThis(),
     eq: vi.fn().mockReturnThis(),
+    neq: vi.fn().mockReturnThis(),
+    lt: vi.fn().mockReturnThis(),
+    gt: vi.fn().mockReturnThis(),
+    lte: vi.fn().mockReturnThis(),
+    is: vi.fn().mockReturnThis(),
+    or: vi.fn().mockReturnThis(),
     order: vi.fn().mockReturnThis(),
     range: vi.fn().mockResolvedValue(resultWithCount),
     insert: vi.fn().mockReturnThis(),
@@ -63,6 +69,7 @@ describe('Service Orders API', () => {
           status: 'open',
           priority: 'high',
           equipment_id: 'eq-1',
+          due_date: '2026-07-30',
           created_at: '2024-01-01T00:00:00Z',
           equipment: {
             id: 'eq-1',
@@ -95,6 +102,63 @@ describe('Service Orders API', () => {
       expect(body.totalPages).toBe(1);
     });
 
+    it('deve combinar filtro de atraso com isolamento de ordens fechadas', async () => {
+      const mockSupabase = createMockSupabase([]);
+      const mockGetUser = getUser as ReturnType<typeof vi.fn>;
+      mockGetUser.mockResolvedValue({
+        user: { id: 'user-1' },
+        supabase: mockSupabase,
+        error: null,
+      });
+
+      const response = await GET(new Request(
+        'http://localhost/api/service-orders?deadline=overdue&status=open&priority=high',
+      ));
+
+      expect(response.status).toBe(200);
+      expect(mockSupabase.eq).toHaveBeenCalledWith('status', 'open');
+      expect(mockSupabase.eq).toHaveBeenCalledWith('priority', 'high');
+      expect(mockSupabase.lt).toHaveBeenCalledWith('due_date', expect.stringMatching(/^\d{4}-\d{2}-\d{2}$/));
+      expect(mockSupabase.neq).toHaveBeenCalledWith('status', 'closed');
+    });
+
+    it('deve filtrar os próximos sete dias e ordenar por prazo', async () => {
+      const mockSupabase = createMockSupabase([]);
+      const mockGetUser = getUser as ReturnType<typeof vi.fn>;
+      mockGetUser.mockResolvedValue({
+        user: { id: 'user-1' },
+        supabase: mockSupabase,
+        error: null,
+      });
+
+      const response = await GET(new Request(
+        'http://localhost/api/service-orders?deadline=next_7_days&sort=due_asc',
+      ));
+
+      expect(response.status).toBe(200);
+      expect(mockSupabase.gt).toHaveBeenCalledWith('due_date', expect.any(String));
+      expect(mockSupabase.lte).toHaveBeenCalledWith('due_date', expect.any(String));
+      expect(mockSupabase.order).toHaveBeenCalledWith('due_date', {
+        ascending: true,
+        nullsFirst: false,
+      });
+      expect(mockSupabase.order).toHaveBeenCalledWith('created_at', { ascending: false });
+    });
+
+    it('deve filtrar ordens sem prazo', async () => {
+      const mockSupabase = createMockSupabase([]);
+      const mockGetUser = getUser as ReturnType<typeof vi.fn>;
+      mockGetUser.mockResolvedValue({
+        user: { id: 'user-1' },
+        supabase: mockSupabase,
+        error: null,
+      });
+
+      await GET(new Request('http://localhost/api/service-orders?deadline=without_due_date'));
+
+      expect(mockSupabase.is).toHaveBeenCalledWith('due_date', null);
+    });
+
     it('deve retornar 500 quando o banco falha', async () => {
       const mockSupabase = createMockSupabase(null, { message: 'DB error' });
       const mockGetUser = getUser as ReturnType<typeof vi.fn>;
@@ -116,6 +180,7 @@ describe('Service Orders API', () => {
       description: 'Consertar fonte',
       equipment_id: 'eq-1',
       priority: 'high',
+      due_date: '2026-07-30',
     };
 
     it('deve criar ordem com dados válidos', async () => {
@@ -147,6 +212,58 @@ describe('Service Orders API', () => {
       expect(response.status).toBe(201);
       expect(body.serviceOrder.title).toBe('Manutenção corretiva');
       expect(body.serviceOrder.status).toBe('open');
+      expect(mockSupabase.insert).toHaveBeenCalledWith(expect.objectContaining({
+        due_date: '2026-07-30',
+      }));
+    });
+
+    it.each([
+      '2026-02-30',
+      '30/07/2026',
+      123,
+    ])('deve rejeitar prazo inválido: %s', async (dueDate) => {
+      const mockGetUser = getUser as ReturnType<typeof vi.fn>;
+      mockGetUser.mockResolvedValue({
+        user: { id: 'user-1' },
+        supabase: createMockSupabase(),
+        error: null,
+      });
+
+      const response = await POST(new Request('http://localhost/api/service-orders', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ ...validBody, due_date: dueDate }),
+      }));
+
+      expect(response.status).toBe(400);
+      await expect(response.json()).resolves.toEqual({
+        error: 'Prazo inválido. Use uma data no formato AAAA-MM-DD.',
+      });
+    });
+
+    it('deve criar ordem sem prazo quando o campo não é enviado', async () => {
+      const bodyWithoutDueDate = {
+        title: validBody.title,
+        description: validBody.description,
+        equipment_id: validBody.equipment_id,
+        priority: validBody.priority,
+      };
+      const mockSupabase = createMockSupabase({ id: '1', ...bodyWithoutDueDate });
+      const mockGetUser = getUser as ReturnType<typeof vi.fn>;
+      mockGetUser.mockResolvedValue({
+        user: { id: 'user-1' },
+        supabase: mockSupabase,
+        error: null,
+      });
+
+      const response = await POST(new Request('http://localhost/api/service-orders', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(bodyWithoutDueDate),
+      }));
+
+      expect(response.status).toBe(201);
+      expect(mockSupabase.insert).toHaveBeenCalledWith(expect.objectContaining({ due_date: null }));
     });
 
     it('deve rejeitar título vazio', async () => {

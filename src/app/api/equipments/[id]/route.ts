@@ -58,7 +58,7 @@ export async function GET(_request: Request, { params }: RouteParams) {
 
     const { data: serviceOrders, error: serviceOrdersError } = await supabase
         .from("service_orders")
-        .select("id, title, description, status, priority, equipment_id, created_at")
+        .select("id, title, description, status, priority, equipment_id, due_date, created_at")
         .eq("equipment_id", id)
         .eq("user_id", user.id)
         .order("created_at", { ascending: false });

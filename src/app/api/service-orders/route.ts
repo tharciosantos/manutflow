@@ -2,10 +2,16 @@ import { NextResponse } from 'next/server';
 import { getUser } from "@/lib/auth";
 import { checkRateLimit } from "@/lib/rate-limit";
 import { logger } from "@/lib/logger";
+import {
+    addDaysToDateOnly,
+    getDateOnlyInTimeZone,
+    isValidDateOnly,
+} from '@/features/service-orders/service-order-deadline';
 
 export const dynamic = "force-dynamic";
 
 const allowedOrderStatuses = ['open', 'in_progress', 'closed'];
+const allowedDeadlineFilters = ['overdue', 'today', 'next_7_days', 'without_due_date'];
 
 export async function GET(request: Request) {
     const { user, supabase, error: authError } = await getUser();
@@ -19,6 +25,7 @@ export async function GET(request: Request) {
     const searchQuery = url.searchParams.get("q")?.trim() || "";
     const statusFilter = url.searchParams.get("status") || "";
     const priorityFilter = url.searchParams.get("priority") || "";
+    const deadlineFilter = url.searchParams.get("deadline") || "";
     const sort = url.searchParams.get("sort") || "created_desc";
 
     // Construir query com filtros
@@ -31,6 +38,7 @@ export async function GET(request: Request) {
       status,
       priority,
       equipment_id,
+      due_date,
       created_at,
       equipment:equipments (
         id,
@@ -52,6 +60,23 @@ export async function GET(request: Request) {
         query = query.eq('priority', priorityFilter);
     }
 
+    if (allowedDeadlineFilters.includes(deadlineFilter)) {
+        const today = getDateOnlyInTimeZone();
+
+        if (deadlineFilter === 'overdue') {
+            query = query.lt('due_date', today).neq('status', 'closed');
+        } else if (deadlineFilter === 'today') {
+            query = query.eq('due_date', today).neq('status', 'closed');
+        } else if (deadlineFilter === 'next_7_days') {
+            query = query
+                .gt('due_date', today)
+                .lte('due_date', addDaysToDateOnly(today, 7))
+                .neq('status', 'closed');
+        } else {
+            query = query.is('due_date', null);
+        }
+    }
+
     // Filtro por busca textual
     if (searchQuery) {
         query = query.or(
@@ -59,9 +84,15 @@ export async function GET(request: Request) {
         );
     }
 
-    const { data, error, count } = await query
-        .order('created_at', { ascending: sort === "created_asc" })
-        .range(offset, offset + limit - 1);
+    if (sort === 'due_asc' || sort === 'due_desc') {
+        query = query
+            .order('due_date', { ascending: sort === 'due_asc', nullsFirst: false })
+            .order('created_at', { ascending: false });
+    } else {
+        query = query.order('created_at', { ascending: sort === 'created_asc' });
+    }
+
+    const { data, error, count } = await query.range(offset, offset + limit - 1);
 
     if (error) {
         logger('error', 'api.error', { route: 'service-orders', method: 'GET', error: error.message });
@@ -112,6 +143,12 @@ export async function POST(request: Request) {
     const description = typeof body?.description === 'string' ? body.description.trim() : null;
     const equipmentId = typeof body?.equipment_id === 'string' ? body.equipment_id : '';
     const priority = typeof body?.priority === 'string' ? body.priority : 'medium';
+    const hasDueDate = body !== null && Object.prototype.hasOwnProperty.call(body, 'due_date');
+    const dueDate = body?.due_date === null || body?.due_date === ''
+        ? null
+        : typeof body?.due_date === 'string'
+            ? body.due_date
+            : undefined;
 
     if (title.length > 255) {
         return NextResponse.json(
@@ -148,6 +185,13 @@ export async function POST(request: Request) {
         );
     }
 
+    if (hasDueDate && (dueDate === undefined || (dueDate !== null && !isValidDateOnly(dueDate)))) {
+        return NextResponse.json(
+            { error: 'Prazo inválido. Use uma data no formato AAAA-MM-DD.' },
+            { status: 400 },
+        );
+    }
+
     const { data, error } = await supabase
         .from('service_orders')
         .insert({
@@ -156,6 +200,7 @@ export async function POST(request: Request) {
             equipment_id: equipmentId,
             priority,
             status: 'open',
+            due_date: dueDate ?? null,
             user_id: user.id,
         })
         .select()

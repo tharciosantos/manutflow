@@ -2,6 +2,10 @@ import { NextResponse } from 'next/server';
 import { getUser } from "@/lib/auth";
 import { checkRateLimit } from "@/lib/rate-limit";
 import { logger } from "@/lib/logger";
+import {
+    formatDateOnlyPtBr,
+    isValidDateOnly,
+} from '@/features/service-orders/service-order-deadline';
 
 export const dynamic = "force-dynamic";
 
@@ -34,6 +38,7 @@ export async function GET(_request: Request, { params }: RouteParams) {
             status,
             priority,
             equipment_id,
+            due_date,
             created_at,
             equipment:equipments (
                 id,
@@ -121,11 +126,30 @@ export async function PATCH(request: Request, { params }: RouteParams) {
 
     const body = await request.json().catch(() => null);
 
-    const status = typeof body?.status === 'string' ? body.status : '';
+    const hasStatus = body !== null && Object.prototype.hasOwnProperty.call(body, 'status');
+    const hasDueDate = body !== null && Object.prototype.hasOwnProperty.call(body, 'due_date');
 
-    if (!allowedStatuses.includes(status)) {
+    if (!hasStatus && !hasDueDate) {
         return NextResponse.json(
-            { error: 'Status inválido.' },
+            { error: 'Nenhum campo válido para atualizar.' },
+            { status: 400 },
+        );
+    }
+
+    const status = hasStatus && typeof body.status === 'string' ? body.status : null;
+    if (hasStatus && (!status || !allowedStatuses.includes(status))) {
+        return NextResponse.json({ error: 'Status inválido.' }, { status: 400 });
+    }
+
+    const dueDate = hasDueDate && (body.due_date === null || body.due_date === '')
+        ? null
+        : hasDueDate && typeof body.due_date === 'string'
+            ? body.due_date
+            : undefined;
+
+    if (hasDueDate && dueDate !== null && (dueDate === undefined || !isValidDateOnly(dueDate))) {
+        return NextResponse.json(
+            { error: 'Prazo inválido. Use uma data no formato AAAA-MM-DD.' },
             { status: 400 },
         );
     }
@@ -133,7 +157,7 @@ export async function PATCH(request: Request, { params }: RouteParams) {
     const { data: currentServiceOrder, error: currentServiceOrderError } =
         await supabase
             .from('service_orders')
-            .select('id, status')
+            .select('id, status, due_date')
             .eq('id', id)
             .eq("user_id", user.id)
             .maybeSingle();
@@ -154,12 +178,21 @@ export async function PATCH(request: Request, { params }: RouteParams) {
         );
     }
 
-    // Inserir histórico PRIMEIRO para garantir atomicidade
-    // Se o histórico falhar, o status permanece inalterado
-    if (currentServiceOrder.status !== status) {
-        const { error: historyError } = await supabase
-            .from('service_order_history')
-            .insert({
+    const updateData: { status?: string; due_date?: string | null } = {};
+    const historyEntries: Array<{
+        service_order_id: string;
+        user_id: string;
+        event_type: string;
+        previous_status: string | null;
+        new_status: string | null;
+        description: string;
+    }> = [];
+
+    if (status !== null) {
+        updateData.status = status;
+
+        if (currentServiceOrder.status !== status) {
+            historyEntries.push({
                 service_order_id: id,
                 user_id: user.id,
                 event_type: 'status_changed',
@@ -167,22 +200,46 @@ export async function PATCH(request: Request, { params }: RouteParams) {
                 new_status: status,
                 description: `Status alterado de ${currentServiceOrder.status} para ${status}.`,
             });
+        }
+    }
+
+    if (hasDueDate) {
+        updateData.due_date = dueDate ?? null;
+        const currentDueDate = currentServiceOrder.due_date ?? null;
+
+        if (currentDueDate !== dueDate) {
+            historyEntries.push({
+                service_order_id: id,
+                user_id: user.id,
+                event_type: 'due_date_changed',
+                previous_status: null,
+                new_status: null,
+                description: `Prazo alterado de ${formatDateOnlyPtBr(currentDueDate)} para ${formatDateOnlyPtBr(dueDate ?? null)}.`,
+            });
+        }
+    }
+
+    // Inserir histórico primeiro para não aplicar mudanças sem rastreabilidade.
+    if (historyEntries.length > 0) {
+        const { error: historyError } = await supabase
+            .from('service_order_history')
+            .insert(historyEntries.length === 1 ? historyEntries[0] : historyEntries);
 
         if (historyError) {
             logger('error', 'api.error', { route: 'service-orders/[id]', method: 'PATCH', error: historyError.message });
 
             return NextResponse.json(
-                { error: 'Erro ao registrar histórico. Status não foi alterado.' },
+                { error: 'Erro ao registrar histórico. Alterações não foram aplicadas.' },
                 { status: 500 },
             );
         }
     }
 
-    // Atualizar status DEPOIS de inserir o histórico
     const { data, error } = await supabase
         .from('service_orders')
-        .update({ status })
+        .update(updateData)
         .eq('id', id)
+        .eq('user_id', user.id)
         .select()
         .maybeSingle();
 
@@ -190,7 +247,7 @@ export async function PATCH(request: Request, { params }: RouteParams) {
         logger('error', 'api.error', { route: 'service-orders/[id]', method: 'PATCH', error: error.message });
 
         return NextResponse.json(
-            { error: 'Erro ao atualizar status da ordem de serviço.' },
+            { error: 'Erro ao atualizar ordem de serviço.' },
             { status: 500 },
         );
     }

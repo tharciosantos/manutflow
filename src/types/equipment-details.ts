@@ -11,6 +11,7 @@ export type EquipmentDetailsServiceOrder = {
     status: ServiceOrderStatus;
     priority: ServiceOrderPriority;
     equipment_id: string;
+    due_date: string | null;
     created_at: string;
 };
 

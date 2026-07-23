@@ -14,11 +14,14 @@ import type {
 } from '@/types/service-order';
 import { Modal } from '@/components/ui/modal';
 import { Pagination } from '@/components/ui/pagination';
+import { ServiceOrderDeadlineBadge } from './service-order-deadline-badge';
+import { formatDateOnlyPtBr } from './service-order-deadline';
 
 type ServiceOrderListProps = {
     orders: ServiceOrder[];
     totalOrders: number;
     searchTerm: string;
+    hasActiveFilters: boolean;
     isLoading: boolean;
     errorMessage: string;
     onRefresh: () => Promise<void>;
@@ -34,6 +37,7 @@ export function ServiceOrderList({
     orders,
     totalOrders,
     searchTerm,
+    hasActiveFilters,
     isLoading,
     errorMessage,
     onRefresh,
@@ -158,7 +162,6 @@ export function ServiceOrderList({
     }
 
     if (orders.length === 0) {
-        const hasOrders = totalOrders > 0;
         const hasSearch = searchTerm.trim().length > 0;
 
         return (
@@ -180,24 +183,24 @@ export function ServiceOrderList({
                 </svg>
 
                 <p className="text-base font-medium text-slate-300">
-                    {hasOrders
+                    {hasActiveFilters
                         ? 'Nenhuma ordem encontrada'
                         : 'Nenhuma ordem de serviço cadastrada'}
                 </p>
 
                 <p className="mt-1 text-sm text-slate-500">
-                    {hasOrders
+                    {hasActiveFilters
                         ? 'Tente alterar os filtros ou buscar por outro termo.'
                         : 'Crie sua primeira ordem de serviço para começar.'}
                 </p>
 
-                {hasOrders && hasSearch && (
+                {hasActiveFilters && hasSearch && (
                     <p className="mt-3 text-xs text-slate-600">
                         Busca: &ldquo;{searchTerm.trim()}&rdquo;
                     </p>
                 )}
 
-                {!hasOrders && (
+                {!hasActiveFilters && (
                     <button
                         type="button"
                         onClick={onCreateOrder}
@@ -271,6 +274,13 @@ export function ServiceOrderList({
                                             {order.equipment.location}
                                         </span>
                                     </p>
+
+                                    <p className="truncate">
+                                        <span className="text-slate-500">Prazo:</span>{' '}
+                                        <span className="text-slate-300">
+                                            {order.due_date ? formatDateOnlyPtBr(order.due_date) : 'Não definido'}
+                                        </span>
+                                    </p>
                                 </div>
                             </div>
 
@@ -303,6 +313,10 @@ export function ServiceOrderList({
                                 >
                                     {serviceOrderPriorityLabels[order.priority]}
                                 </span>
+                                <ServiceOrderDeadlineBadge
+                                    dueDate={order.due_date}
+                                    status={order.status}
+                                />
                                 <Link
                                     href={`/ordens/${order.id}`}
                                     className="rounded-full border border-teal-500/30 px-2.5 py-1 text-[11px] font-medium text-teal-300 transition hover:bg-teal-500/10 sm:px-3 sm:py-1 sm:text-xs"

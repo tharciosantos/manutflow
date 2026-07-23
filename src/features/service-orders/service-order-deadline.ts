@@ -1,4 +1,13 @@
+import type { ServiceOrderStatus } from '@/types/service-order';
+
 export const SERVICE_ORDER_TIME_ZONE = 'America/Sao_Paulo';
+
+export type ServiceOrderDeadlineState = 'none' | 'overdue' | 'today' | 'upcoming' | 'closed';
+
+export type ServiceOrderDeadlineInfo = {
+    state: ServiceOrderDeadlineState;
+    label: string;
+};
 
 const DATE_ONLY_PATTERN = /^(\d{4})-(\d{2})-(\d{2})$/;
 
@@ -42,4 +51,40 @@ export function formatDateOnlyPtBr(value: string | null): string {
 
     const [year, month, day] = value.split('-');
     return `${day}/${month}/${year}`;
+}
+
+export function getServiceOrderDeadlineInfo(
+    dueDate: string | null,
+    status: ServiceOrderStatus,
+    now = new Date(),
+): ServiceOrderDeadlineInfo {
+    if (!dueDate) {
+        return { state: 'none', label: 'Sem prazo' };
+    }
+
+    if (status === 'closed') {
+        return { state: 'closed', label: `Prazo ${formatDateOnlyPtBr(dueDate)}` };
+    }
+
+    const today = getDateOnlyInTimeZone(now);
+    const dueTime = Date.parse(`${dueDate}T00:00:00Z`);
+    const todayTime = Date.parse(`${today}T00:00:00Z`);
+    const daysUntilDue = Math.round((dueTime - todayTime) / 86_400_000);
+
+    if (daysUntilDue < 0) {
+        const overdueDays = Math.abs(daysUntilDue);
+        return {
+            state: 'overdue',
+            label: `Atrasada há ${overdueDays} ${overdueDays === 1 ? 'dia' : 'dias'}`,
+        };
+    }
+
+    if (daysUntilDue === 0) {
+        return { state: 'today', label: 'Vence hoje' };
+    }
+
+    return {
+        state: 'upcoming',
+        label: `Vence em ${daysUntilDue} ${daysUntilDue === 1 ? 'dia' : 'dias'}`,
+    };
 }

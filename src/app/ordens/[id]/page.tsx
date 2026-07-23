@@ -15,6 +15,8 @@ import {
     equipmentStatusLabels,
     equipmentStatusStyles,
 } from '@/features/equipments/equipment-status-config';
+import { ServiceOrderDeadlineBadge } from '@/features/service-orders/service-order-deadline-badge';
+import { formatDateOnlyPtBr } from '@/features/service-orders/service-order-deadline';
 
 type ServiceOrderDetailsPageProps = {
     params: Promise<{
@@ -32,7 +34,7 @@ function getHistoryDescription(item: ServiceOrder['history'][number]) {
         return `Status alterado de ${serviceOrderStatusLabels[item.previous_status]} para ${serviceOrderStatusLabels[item.new_status]}.`;
     }
 
-    return item.description ?? 'Alteração de status registrada.';
+    return item.description ?? 'Alteração registrada.';
 }
 
 export default function ServiceOrderDetailsPage({
@@ -42,6 +44,10 @@ export default function ServiceOrderDetailsPage({
     const [serviceOrder, setServiceOrder] = useState<ServiceOrder | null>(null);
     const [isLoading, setIsLoading] = useState(true);
     const [errorMessage, setErrorMessage] = useState('');
+    const [dueDateDraft, setDueDateDraft] = useState('');
+    const [isUpdatingDeadline, setIsUpdatingDeadline] = useState(false);
+    const [deadlineError, setDeadlineError] = useState('');
+    const [deadlineSuccess, setDeadlineSuccess] = useState('');
 
     useEffect(() => {
         let ignore = false;
@@ -85,7 +91,9 @@ export default function ServiceOrderDetailsPage({
                     return;
                 }
 
-                setServiceOrder(result.serviceOrder ?? null);
+                const loadedServiceOrder = result.serviceOrder ?? null;
+                setServiceOrder(loadedServiceOrder);
+                setDueDateDraft(loadedServiceOrder?.due_date ?? '');
                 setErrorMessage('');
             } catch (error) {
                 if (ignore) {
@@ -111,6 +119,50 @@ export default function ServiceOrderDetailsPage({
             ignore = true;
         };
     }, [serviceOrderId]);
+
+    async function updateDeadline(nextDueDate: string | null) {
+        if (!serviceOrderId) return;
+
+        setIsUpdatingDeadline(true);
+        setDeadlineError('');
+        setDeadlineSuccess('');
+
+        try {
+            const updateResponse = await fetch(`/api/service-orders/${serviceOrderId}`, {
+                method: 'PATCH',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ due_date: nextDueDate }),
+            });
+            const updateResult = (await updateResponse.json()) as { error?: string };
+
+            if (!updateResponse.ok) {
+                throw new Error(updateResult.error ?? 'Erro ao atualizar o prazo.');
+            }
+
+            const detailsResponse = await fetch(`/api/service-orders/${serviceOrderId}`);
+            const detailsResult = (await detailsResponse.json()) as ServiceOrderDetailsResponse;
+
+            if (!detailsResponse.ok || !detailsResult.serviceOrder) {
+                throw new Error(detailsResult.error ?? 'Erro ao recarregar a ordem de serviço.');
+            }
+
+            setServiceOrder(detailsResult.serviceOrder);
+            setDueDateDraft(detailsResult.serviceOrder.due_date ?? '');
+            setDeadlineSuccess(
+                nextDueDate
+                    ? 'Prazo atualizado com sucesso.'
+                    : 'Prazo removido com sucesso.',
+            );
+        } catch (error) {
+            setDeadlineError(
+                error instanceof Error
+                    ? error.message
+                    : 'Não foi possível atualizar o prazo.',
+            );
+        } finally {
+            setIsUpdatingDeadline(false);
+        }
+    }
 
     return (
         <AppShell>
@@ -170,6 +222,11 @@ export default function ServiceOrderDetailsPage({
                                     >
                                         {serviceOrderPriorityLabels[serviceOrder.priority]}
                                     </span>
+
+                                    <ServiceOrderDeadlineBadge
+                                        dueDate={serviceOrder.due_date}
+                                        status={serviceOrder.status}
+                                    />
                                 </div>
                             </div>
 
@@ -205,13 +262,71 @@ export default function ServiceOrderDetailsPage({
 
                                 <div className="rounded-xl border border-slate-800 bg-slate-950 p-3 sm:p-4">
                                     <p className="text-[10px] uppercase tracking-wide text-slate-500 sm:text-xs">
-                                        ID da ordem
+                                        Prazo
                                     </p>
-                                    <p className="mt-1 break-all text-xs font-medium text-slate-200 sm:text-sm">
-                                        {serviceOrder.id}
+                                    <p className="mt-1 text-xs font-medium text-slate-200 sm:text-sm">
+                                        {serviceOrder.due_date
+                                            ? formatDateOnlyPtBr(serviceOrder.due_date)
+                                            : 'Não definido'}
                                     </p>
                                 </div>
                             </div>
+
+                            <form
+                                className="mt-5 border-t border-slate-800 pt-5"
+                                onSubmit={(event) => {
+                                    event.preventDefault();
+                                    void updateDeadline(dueDateDraft || null);
+                                }}
+                            >
+                                <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+                                    <div className="w-full sm:max-w-xs">
+                                        <label
+                                            htmlFor="service-order-due-date"
+                                            className="mb-1.5 block text-sm font-medium text-slate-300"
+                                        >
+                                            Ajustar prazo
+                                        </label>
+                                        <input
+                                            id="service-order-due-date"
+                                            type="date"
+                                            value={dueDateDraft}
+                                            onChange={(event) => setDueDateDraft(event.target.value)}
+                                            disabled={isUpdatingDeadline}
+                                            className="w-full rounded-xl border border-slate-700 bg-slate-950 px-3 py-2.5 text-sm text-slate-100 outline-none transition focus:border-teal-500 disabled:opacity-60 [color-scheme:dark]"
+                                        />
+                                    </div>
+
+                                    <div className="flex flex-wrap gap-2">
+                                        {serviceOrder.due_date && (
+                                            <button
+                                                type="button"
+                                                onClick={() => void updateDeadline(null)}
+                                                disabled={isUpdatingDeadline}
+                                                className="rounded-xl border border-slate-700 px-4 py-2.5 text-sm font-medium text-slate-300 transition hover:bg-slate-800 disabled:opacity-60"
+                                            >
+                                                Remover prazo
+                                            </button>
+                                        )}
+
+                                        <button
+                                            type="submit"
+                                            disabled={isUpdatingDeadline}
+                                            className="rounded-xl bg-teal-600 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-teal-500 disabled:opacity-60"
+                                        >
+                                            {isUpdatingDeadline ? 'Salvando...' : 'Salvar prazo'}
+                                        </button>
+                                    </div>
+                                </div>
+
+                                {deadlineError && (
+                                    <p className="mt-3 text-sm text-red-300">{deadlineError}</p>
+                                )}
+
+                                {deadlineSuccess && (
+                                    <p className="mt-3 text-sm text-emerald-300">{deadlineSuccess}</p>
+                                )}
+                            </form>
                         </div>
                         <section className="mt-6 rounded-2xl border border-slate-800 bg-slate-950/70 p-4 sm:mt-8 sm:p-6">
                             <div>
@@ -224,14 +339,14 @@ export default function ServiceOrderDetailsPage({
                                 </h2>
 
                                 <p className="mt-1 text-xs text-slate-400 sm:text-sm">
-                                    Registro das mudanças de status realizadas nesta ordem de serviço.
+                                    Registro das mudanças de status e prazo desta ordem de serviço.
                                 </p>
                             </div>
 
                             {serviceOrder.history.length === 0 ? (
                                 <div className="mt-4 rounded-xl border border-slate-800 bg-slate-950 p-3 sm:mt-6 sm:p-4">
                                     <p className="text-xs text-slate-400 sm:text-sm">
-                                        Nenhuma alteração de status registrada até o momento.
+                                        Nenhuma alteração registrada até o momento.
                                     </p>
                                 </div>
                             ) : (
@@ -254,25 +369,23 @@ export default function ServiceOrderDetailsPage({
                                                     </p>
                                                 </div>
 
-                                                <div className="flex flex-wrap items-center gap-1.5 sm:gap-2">
-                                                    {item.previous_status && (
+                                                {item.previous_status && item.new_status && (
+                                                    <div className="flex flex-wrap items-center gap-1.5 sm:gap-2">
                                                         <span
                                                             className={`rounded-full border px-2 py-0.5 text-[11px] font-medium sm:px-3 sm:py-1 sm:text-xs ${serviceOrderStatusStyles[item.previous_status]}`}
                                                         >
                                                             {serviceOrderStatusLabels[item.previous_status]}
                                                         </span>
-                                                    )}
 
-                                                    <span className="text-[11px] text-slate-500 sm:text-xs">→</span>
+                                                        <span className="text-[11px] text-slate-500 sm:text-xs">→</span>
 
-                                                    {item.new_status && (
                                                         <span
                                                             className={`rounded-full border px-2 py-0.5 text-[11px] font-medium sm:px-3 sm:py-1 sm:text-xs ${serviceOrderStatusStyles[item.new_status]}`}
                                                         >
                                                             {serviceOrderStatusLabels[item.new_status]}
                                                         </span>
-                                                    )}
-                                                </div>
+                                                    </div>
+                                                )}
                                             </div>
                                         </article>
                                     ))}

@@ -1,7 +1,14 @@
 'use client';
 
+import Link from 'next/link';
 import { useEffect, useState } from 'react';
 import { StatusCard } from '@/components/ui/status-card';
+import { ServiceOrderDeadlineBadge } from '@/features/service-orders/service-order-deadline-badge';
+import { serviceOrderPriorityLabels } from '@/features/service-orders/service-order-config';
+import type {
+    ServiceOrderPriority,
+    ServiceOrderStatus,
+} from '@/types/service-order';
 import {
     BarChart,
     Bar,
@@ -34,6 +41,15 @@ type MonthlyData = {
     count: number;
 };
 
+type UrgentOrder = {
+    id: string;
+    title: string;
+    status: ServiceOrderStatus;
+    priority: ServiceOrderPriority;
+    due_date: string;
+    equipment: { name: string } | { name: string }[];
+};
+
 type DashboardSummary = {
     totalEquipments: number;
     totalServiceOrders: number;
@@ -44,9 +60,13 @@ type DashboardSummary = {
     mediumPriorityServiceOrders: number;
     highPriorityServiceOrders: number;
     criticalPriorityServiceOrders: number;
+    overdueServiceOrders: number;
+    dueTodayServiceOrders: number;
+    dueNextSevenDaysServiceOrders: number;
     completionRate: number;
     recentOrders: RecentOrder[];
     recentEquipments: RecentEquipment[];
+    urgentOrders: UrgentOrder[];
     ordersByMonth: MonthlyData[];
 };
 
@@ -201,6 +221,59 @@ export function DashboardOverview() {
                 />
             </div>
 
+            <section>
+                <div className="mb-4 flex items-end justify-between gap-4">
+                    <div>
+                        <h2 className="text-lg font-semibold text-white">Prazos das ordens</h2>
+                        <p className="mt-1 text-sm text-slate-400">
+                            Acompanhe vencimentos que exigem atenção.
+                        </p>
+                    </div>
+
+                    <Link
+                        href="/ordens"
+                        className="shrink-0 text-xs font-medium text-teal-300 transition hover:text-teal-200 sm:text-sm"
+                    >
+                        Ver todas
+                    </Link>
+                </div>
+
+                <div className="grid gap-3 sm:grid-cols-3 sm:gap-4">
+                    <Link
+                        href="/ordens?deadline=overdue"
+                        className="group rounded-2xl border border-red-500/25 bg-red-500/5 p-4 transition hover:border-red-400/50 hover:bg-red-500/10"
+                    >
+                        <p className="text-xs font-medium text-red-300 sm:text-sm">Atrasadas</p>
+                        <strong className="mt-2 block text-2xl font-bold text-red-200 sm:text-3xl">
+                            {s.overdueServiceOrders}
+                        </strong>
+                        <p className="mt-1 text-xs text-slate-400">Prazo já vencido</p>
+                    </Link>
+
+                    <Link
+                        href="/ordens?deadline=today"
+                        className="group rounded-2xl border border-amber-500/25 bg-amber-500/5 p-4 transition hover:border-amber-400/50 hover:bg-amber-500/10"
+                    >
+                        <p className="text-xs font-medium text-amber-300 sm:text-sm">Vencem hoje</p>
+                        <strong className="mt-2 block text-2xl font-bold text-amber-200 sm:text-3xl">
+                            {s.dueTodayServiceOrders}
+                        </strong>
+                        <p className="mt-1 text-xs text-slate-400">Atenção imediata</p>
+                    </Link>
+
+                    <Link
+                        href="/ordens?deadline=next_7_days"
+                        className="group rounded-2xl border border-sky-500/25 bg-sky-500/5 p-4 transition hover:border-sky-400/50 hover:bg-sky-500/10"
+                    >
+                        <p className="text-xs font-medium text-sky-300 sm:text-sm">Próximos 7 dias</p>
+                        <strong className="mt-2 block text-2xl font-bold text-sky-200 sm:text-3xl">
+                            {s.dueNextSevenDaysServiceOrders}
+                        </strong>
+                        <p className="mt-1 text-xs text-slate-400">Planejamento próximo</p>
+                    </Link>
+                </div>
+            </section>
+
             {/* Grid: Gráfico + Prioridades */}
             <div className="grid gap-6 lg:grid-cols-3">
                 {/* Gráfico de ordens por mês */}
@@ -273,6 +346,62 @@ export function DashboardOverview() {
                     </div>
                 </section>
             </div>
+
+            <section className="rounded-2xl border border-slate-800 bg-slate-950/70 p-5">
+                <div className="flex items-end justify-between gap-4">
+                    <div>
+                        <h3 className="text-sm font-medium text-slate-300">Ordens com prazo mais urgente</h3>
+                        <p className="mt-1 text-xs text-slate-500">
+                            Atrasadas e vencimentos dos próximos 7 dias.
+                        </p>
+                    </div>
+
+                    <Link
+                        href="/ordens?sort=due_asc"
+                        className="shrink-0 text-xs font-medium text-teal-300 transition hover:text-teal-200"
+                    >
+                        Ver por prazo
+                    </Link>
+                </div>
+
+                <div className="mt-4 space-y-2">
+                    {s.urgentOrders.length === 0 ? (
+                        <p className="rounded-xl border border-dashed border-slate-800 px-4 py-6 text-center text-sm text-slate-500">
+                            Nenhum prazo urgente no momento.
+                        </p>
+                    ) : (
+                        s.urgentOrders.map((order) => {
+                            const equipmentName = Array.isArray(order.equipment)
+                                ? order.equipment[0]?.name
+                                : order.equipment?.name;
+
+                            return (
+                                <Link
+                                    key={order.id}
+                                    href={`/ordens/${order.id}`}
+                                    className="flex flex-col gap-3 rounded-xl border border-slate-800/70 bg-slate-900/30 p-3 transition hover:border-slate-700 sm:flex-row sm:items-center sm:justify-between"
+                                >
+                                    <div className="min-w-0">
+                                        <p className="truncate text-sm font-medium text-slate-200">
+                                            {order.title}
+                                        </p>
+                                        <p className="mt-0.5 truncate text-xs text-slate-500">
+                                            {equipmentName ?? 'Equipamento não informado'}
+                                            {' · '}
+                                            {serviceOrderPriorityLabels[order.priority]}
+                                        </p>
+                                    </div>
+
+                                    <ServiceOrderDeadlineBadge
+                                        dueDate={order.due_date}
+                                        status={order.status}
+                                    />
+                                </Link>
+                            );
+                        })
+                    )}
+                </div>
+            </section>
 
             {/* Grid: Atividades Recentes */}
             <div className="grid gap-6 lg:grid-cols-2">

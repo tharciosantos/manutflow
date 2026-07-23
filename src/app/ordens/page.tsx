@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { Suspense, useState } from 'react';
 import { AppShell } from '@/components/layout/app-shell';
 import { ServiceOrderPageContent } from '@/features/service-orders/service-order-page-content';
 
@@ -28,10 +28,18 @@ export default function OrdensPage() {
             Nova Ordem de Serviço
           </button>
         </div>
-        <ServiceOrderPageContent
-          isFormModalOpen={isFormModalOpen}
-          setIsFormModalOpen={setIsFormModalOpen}
-        />
+        <Suspense
+          fallback={(
+            <div className="rounded-2xl border border-slate-800 bg-slate-950/70 p-6">
+              <p className="text-sm text-slate-400">Carregando ordens de serviço...</p>
+            </div>
+          )}
+        >
+          <ServiceOrderPageContent
+            isFormModalOpen={isFormModalOpen}
+            setIsFormModalOpen={setIsFormModalOpen}
+          />
+        </Suspense>
       </section>
     </AppShell>
   );

@@ -1,6 +1,7 @@
 'use client';
 
 import { useCallback, useEffect, useState } from 'react';
+import { useSearchParams } from 'next/navigation';
 import type { ServiceOrder } from '@/types/service-order';
 
 import { ServiceOrderForm } from './service-order-form';
@@ -44,6 +45,19 @@ const serviceOrderSortOptions: Array<{
     ];
 
 export function ServiceOrderPageContent({ isFormModalOpen, setIsFormModalOpen }: ServiceOrderPageContentProps) {
+    const searchParams = useSearchParams();
+    const requestedDeadline = searchParams.get('deadline');
+    const requestedSort = searchParams.get('sort');
+    const initialDeadline = serviceOrderDeadlineFilterOptions.some(
+        (option) => option.value === requestedDeadline && option.value !== 'all',
+    )
+        ? requestedDeadline as ServiceOrderDeadlineFilterValue
+        : 'all';
+    const initialSort = serviceOrderSortOptions.some(
+        (option) => option.value === requestedSort && option.value !== 'created_desc',
+    )
+        ? requestedSort as ServiceOrderSortValue
+        : 'created_desc';
     const [orders, setOrders] = useState<ServiceOrder[]>([]);
     const [total, setTotal] = useState(0);
     const [page, setPage] = useState(1);
@@ -56,9 +70,9 @@ export function ServiceOrderPageContent({ isFormModalOpen, setIsFormModalOpen }:
     const [selectedPriority, setSelectedPriority] =
         useState<ServiceOrderPriorityFilterValue>('all');
     const [selectedDeadline, setSelectedDeadline] =
-        useState<ServiceOrderDeadlineFilterValue>('all');
+        useState<ServiceOrderDeadlineFilterValue>(initialDeadline);
     const [selectedSort, setSelectedSort] =
-        useState<ServiceOrderSortValue>('created_desc');
+        useState<ServiceOrderSortValue>(initialSort);
     const [searchTerm, setSearchTerm] = useState('');
 
     const buildUrl = useCallback(() => {

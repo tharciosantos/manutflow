@@ -1,5 +1,9 @@
 import { NextResponse } from 'next/server';
 import { getUser } from "@/lib/auth";
+import {
+    addDaysToDateOnly,
+    getDateOnlyInTimeZone,
+} from '@/features/service-orders/service-order-deadline';
 
 export const dynamic = "force-dynamic";
 
@@ -7,6 +11,9 @@ export async function GET() {
 
     const { user, supabase, error: authError } = await getUser();
     if (authError) return authError;
+
+    const today = getDateOnlyInTimeZone();
+    const nextSevenDays = addDaysToDateOnly(today, 7);
 
     const [
         equipmentsResult,
@@ -21,6 +28,10 @@ export async function GET() {
         recentOrdersResult,
         recentEquipmentsResult,
         ordersByMonthResult,
+        overdueOrdersResult,
+        dueTodayOrdersResult,
+        dueNextSevenDaysOrdersResult,
+        urgentOrdersResult,
     ] = await Promise.all([
         supabase
             .from('equipments')
@@ -104,6 +115,44 @@ export async function GET() {
             .eq("user_id", user.id)
             .gte('created_at', new Date(Date.now() - 180 * 24 * 60 * 60 * 1000).toISOString())
             .order('created_at', { ascending: true }),
+
+        supabase
+            .from('service_orders')
+            .select('*', { count: 'exact', head: true })
+            .eq('user_id', user.id)
+            .neq('status', 'closed')
+            .lt('due_date', today),
+
+        supabase
+            .from('service_orders')
+            .select('*', { count: 'exact', head: true })
+            .eq('user_id', user.id)
+            .neq('status', 'closed')
+            .eq('due_date', today),
+
+        supabase
+            .from('service_orders')
+            .select('*', { count: 'exact', head: true })
+            .eq('user_id', user.id)
+            .neq('status', 'closed')
+            .gt('due_date', today)
+            .lte('due_date', nextSevenDays),
+
+        supabase
+            .from('service_orders')
+            .select(`
+                id,
+                title,
+                status,
+                priority,
+                due_date,
+                equipment:equipments ( name )
+            `)
+            .eq('user_id', user.id)
+            .neq('status', 'closed')
+            .lte('due_date', nextSevenDays)
+            .order('due_date', { ascending: true })
+            .limit(5),
     ]);
 
     const hasError =
@@ -118,7 +167,11 @@ export async function GET() {
         criticalPriorityOrdersResult.error ||
         recentOrdersResult.error ||
         recentEquipmentsResult.error ||
-        ordersByMonthResult.error;
+        ordersByMonthResult.error ||
+        overdueOrdersResult.error ||
+        dueTodayOrdersResult.error ||
+        dueNextSevenDaysOrdersResult.error ||
+        urgentOrdersResult.error;
 
     // Processar ordens por mês (últimos 6 meses)
     const monthNames = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'];
@@ -159,9 +212,13 @@ export async function GET() {
         mediumPriorityServiceOrders: mediumPriorityOrdersResult.count ?? 0,
         highPriorityServiceOrders: highPriorityOrdersResult.count ?? 0,
         criticalPriorityServiceOrders: criticalPriorityOrdersResult.count ?? 0,
+        overdueServiceOrders: overdueOrdersResult.count ?? 0,
+        dueTodayServiceOrders: dueTodayOrdersResult.count ?? 0,
+        dueNextSevenDaysServiceOrders: dueNextSevenDaysOrdersResult.count ?? 0,
         completionRate,
         recentOrders: recentOrdersResult.data ?? [],
         recentEquipments: recentEquipmentsResult.data ?? [],
+        urgentOrders: urgentOrdersResult.data ?? [],
         ordersByMonth: monthlyData,
     };
 
@@ -179,6 +236,10 @@ export async function GET() {
             recentOrdersError: recentOrdersResult.error,
             recentEquipmentsError: recentEquipmentsResult.error,
             ordersByMonthError: ordersByMonthResult.error,
+            overdueOrdersError: overdueOrdersResult.error,
+            dueTodayOrdersError: dueTodayOrdersResult.error,
+            dueNextSevenDaysOrdersError: dueNextSevenDaysOrdersResult.error,
+            urgentOrdersError: urgentOrdersResult.error,
         });
 
         return NextResponse.json(

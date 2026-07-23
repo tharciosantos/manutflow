@@ -16,6 +16,10 @@ vi.mock('@/components/ui/modal', () => ({
     Modal: () => null,
 }));
 
+vi.mock('next/navigation', () => ({
+    useSearchParams: () => new URLSearchParams(window.location.search),
+}));
+
 const emptyResponse = {
     serviceOrders: [],
     total: 0,
@@ -25,6 +29,7 @@ const emptyResponse = {
 
 describe('ServiceOrderPageContent', () => {
     beforeEach(() => {
+        window.history.replaceState({}, '', '/ordens');
         vi.stubGlobal(
             'fetch',
             vi.fn().mockResolvedValue({
@@ -60,6 +65,29 @@ describe('ServiceOrderPageContent', () => {
         await waitFor(() => {
             expect(fetch).toHaveBeenLastCalledWith(
                 '/api/service-orders?page=1&limit=10&q=compressor&status=in_progress&priority=critical&deadline=overdue',
+            );
+        });
+    });
+
+    it('aplica o filtro de prazo recebido pelo atalho do dashboard', async () => {
+        window.history.replaceState(
+            {},
+            '',
+            '/ordens?deadline=today&sort=due_asc',
+        );
+
+        render(
+            <ServiceOrderPageContent
+                isFormModalOpen={false}
+                setIsFormModalOpen={vi.fn()}
+            />,
+        );
+
+        await waitFor(() => {
+            expect(screen.getByLabelText('Prazo')).toHaveValue('today');
+            expect(screen.getByLabelText('Ordenar')).toHaveValue('due_asc');
+            expect(fetch).toHaveBeenLastCalledWith(
+                '/api/service-orders?page=1&limit=10&deadline=today&sort=due_asc',
             );
         });
     });

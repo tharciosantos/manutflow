@@ -10,10 +10,12 @@ import { Modal } from '@/components/ui/modal';
 import type {
     ServiceOrderStatusFilterValue,
     ServiceOrderPriorityFilterValue,
+    ServiceOrderDeadlineFilterValue,
 } from './service-order-config';
 import {
     serviceOrderStatusFilterOptions,
     serviceOrderPriorityFilterOptions,
+    serviceOrderDeadlineFilterOptions,
 } from './service-order-config';
 
 type ServiceOrdersApiResponse = {
@@ -29,7 +31,7 @@ type ServiceOrderPageContentProps = {
   setIsFormModalOpen: (open: boolean) => void;
 };
 
-type ServiceOrderSortValue = 'created_desc' | 'created_asc';
+type ServiceOrderSortValue = 'created_desc' | 'created_asc' | 'due_asc' | 'due_desc';
 
 const serviceOrderSortOptions: Array<{
     value: ServiceOrderSortValue;
@@ -37,6 +39,8 @@ const serviceOrderSortOptions: Array<{
 }> = [
         { value: 'created_desc', label: 'Mais recentes' },
         { value: 'created_asc', label: 'Mais antigas' },
+        { value: 'due_asc', label: 'Prazo mais próximo' },
+        { value: 'due_desc', label: 'Prazo mais distante' },
     ];
 
 export function ServiceOrderPageContent({ isFormModalOpen, setIsFormModalOpen }: ServiceOrderPageContentProps) {
@@ -51,6 +55,8 @@ export function ServiceOrderPageContent({ isFormModalOpen, setIsFormModalOpen }:
         useState<ServiceOrderStatusFilterValue>('all');
     const [selectedPriority, setSelectedPriority] =
         useState<ServiceOrderPriorityFilterValue>('all');
+    const [selectedDeadline, setSelectedDeadline] =
+        useState<ServiceOrderDeadlineFilterValue>('all');
     const [selectedSort, setSelectedSort] =
         useState<ServiceOrderSortValue>('created_desc');
     const [searchTerm, setSearchTerm] = useState('');
@@ -62,9 +68,10 @@ export function ServiceOrderPageContent({ isFormModalOpen, setIsFormModalOpen }:
       if (searchTerm.trim()) params.set("q", searchTerm.trim());
       if (selectedStatus !== "all") params.set("status", selectedStatus);
       if (selectedPriority !== "all") params.set("priority", selectedPriority);
+      if (selectedDeadline !== "all") params.set("deadline", selectedDeadline);
       if (selectedSort !== "created_desc") params.set("sort", selectedSort);
       return `/api/service-orders?${params.toString()}`;
-    }, [page, limit, searchTerm, selectedStatus, selectedPriority, selectedSort]);
+    }, [page, limit, searchTerm, selectedStatus, selectedPriority, selectedDeadline, selectedSort]);
 
     const loadServiceOrders = useCallback(async () => {
         try {
@@ -138,6 +145,11 @@ export function ServiceOrderPageContent({ isFormModalOpen, setIsFormModalOpen }:
         setPage(1);
     }
 
+    function handleDeadlineChange(value: string) {
+        setSelectedDeadline(value as ServiceOrderDeadlineFilterValue);
+        setPage(1);
+    }
+
     function handleSortChange(value: string) {
         setSelectedSort(value as ServiceOrderSortValue);
         setPage(1);
@@ -178,6 +190,12 @@ export function ServiceOrderPageContent({ isFormModalOpen, setIsFormModalOpen }:
                         ],
                     },
                     {
+                        label: "Prazo",
+                        value: selectedDeadline,
+                        onChange: handleDeadlineChange,
+                        options: serviceOrderDeadlineFilterOptions,
+                    },
+                    {
                         label: "Ordenar",
                         value: selectedSort,
                         onChange: handleSortChange,
@@ -190,6 +208,12 @@ export function ServiceOrderPageContent({ isFormModalOpen, setIsFormModalOpen }:
                 orders={orders}
                 totalOrders={total}
                 searchTerm={searchTerm}
+                hasActiveFilters={
+                    searchTerm.trim().length > 0
+                    || selectedStatus !== 'all'
+                    || selectedPriority !== 'all'
+                    || selectedDeadline !== 'all'
+                }
                 isLoading={isLoading}
                 errorMessage={errorMessage}
                 onRefresh={loadServiceOrders}

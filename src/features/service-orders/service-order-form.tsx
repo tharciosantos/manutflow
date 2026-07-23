@@ -20,6 +20,7 @@ export function ServiceOrderForm({ onCreated }: ServiceOrderFormProps) {
     const [description, setDescription] = useState('');
     const [equipmentId, setEquipmentId] = useState('');
     const [priority, setPriority] = useState('medium');
+    const [dueDate, setDueDate] = useState('');
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [errorMessage, setErrorMessage] = useState('');
     const [successMessage, setSuccessMessage] = useState('');
@@ -73,6 +74,7 @@ export function ServiceOrderForm({ onCreated }: ServiceOrderFormProps) {
                     description,
                     equipment_id: equipmentId,
                     priority,
+                    due_date: dueDate || null,
                 }),
             });
 
@@ -86,6 +88,7 @@ export function ServiceOrderForm({ onCreated }: ServiceOrderFormProps) {
             setDescription('');
             setEquipmentId('');
             setPriority('medium');
+            setDueDate('');
             setSuccessMessage('Ordem de serviço cadastrada com sucesso.');
 
             await onCreated();
@@ -143,7 +146,7 @@ export function ServiceOrderForm({ onCreated }: ServiceOrderFormProps) {
                     />
                 </div>
 
-                <div className="grid gap-3 sm:gap-4 sm:grid-cols-2">
+                <div className="grid gap-3 sm:gap-4 sm:grid-cols-2 lg:grid-cols-3">
                     <div>
                         <label
                             htmlFor="equipment"
@@ -189,6 +192,23 @@ export function ServiceOrderForm({ onCreated }: ServiceOrderFormProps) {
                                 </option>
                             ))}
                         </select>
+                    </div>
+
+                    <div>
+                        <label
+                            htmlFor="due-date"
+                            className="mb-1.5 block text-sm font-medium text-slate-300"
+                        >
+                            Prazo <span className="font-normal text-slate-500">(opcional)</span>
+                        </label>
+
+                        <input
+                            id="due-date"
+                            type="date"
+                            value={dueDate}
+                            onChange={(event) => setDueDate(event.target.value)}
+                            className="w-full rounded-xl border border-slate-700 bg-slate-950 px-3 py-2.5 text-sm text-slate-100 outline-none transition focus:border-teal-500 [color-scheme:dark]"
+                        />
                     </div>
                 </div>
 

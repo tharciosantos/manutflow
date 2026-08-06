@@ -1,7 +1,8 @@
 "use client";
 
-import { FormEvent, useState, useRef } from "react";
+import { FormEvent, useEffect, useState, useRef } from "react";
 import type { Equipment } from "@/types/equipment";
+import { EquipmentPhoto } from "@/components/ui/equipment-photo";
 
 type EquipmentFormProps = {
   onEquipmentCreated: () => void;
@@ -39,6 +40,13 @@ export function EquipmentForm({ onEquipmentCreated, editingEquipment, onEditCanc
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const isEditing = !!editingEquipment;
+  const isBusy = isSubmitting || isUploading;
+
+  useEffect(() => {
+    return () => {
+      if (previewUrl?.startsWith("blob:")) URL.revokeObjectURL(previewUrl);
+    };
+  }, [previewUrl]);
 
   function handleFileSelect(event: React.ChangeEvent<HTMLInputElement>) {
     const file = event.target.files?.[0];
@@ -204,6 +212,7 @@ export function EquipmentForm({ onEquipmentCreated, editingEquipment, onEditCanc
       id="equipment-form"
       onSubmit={handleSubmit}
       className={`rounded-2xl border border-slate-800 bg-slate-950/70 p-4 shadow-sm sm:p-5 ${inModal ? '' : 'mt-6 scroll-mt-24 sm:mt-8'}`}
+      aria-describedby="equipment-form-help equipment-form-feedback"
     >
       <div>
         <span className="rounded-full border border-teal-500/30 bg-teal-500/10 px-3 py-1 text-xs font-medium text-teal-300">
@@ -219,6 +228,9 @@ export function EquipmentForm({ onEquipmentCreated, editingEquipment, onEditCanc
             ? `Editando: ${editingEquipment?.name}`
             : "Preencha os dados abaixo para adicionar um novo equipamento."}
         </p>
+        <p id="equipment-form-help" className="mt-1 text-xs text-slate-500">
+          Campos marcados com * são obrigatórios. A foto deve ser JPEG, PNG ou WebP de até 5 MB.
+        </p>
       </div>
 
       <div className="mt-5 grid gap-4 sm:mt-6 sm:grid-cols-2">
@@ -227,16 +239,20 @@ export function EquipmentForm({ onEquipmentCreated, editingEquipment, onEditCanc
             htmlFor="name"
             className="mb-2 block text-sm font-medium text-slate-300"
           >
-            Nome do equipamento
+            Nome do equipamento *
           </label>
 
           <input
             id="name"
+            name="name"
+            autoComplete="off"
+            maxLength={255}
             type="text"
             value={name}
             onChange={(event) => setName(event.target.value)}
             placeholder="Ex: Motor Elétrico"
             required
+            disabled={isBusy}
             className="w-full rounded-xl border border-slate-700 bg-slate-950 px-4 py-3 text-slate-100 outline-none transition placeholder:text-slate-500 focus:border-teal-500"
           />
         </div>
@@ -246,16 +262,20 @@ export function EquipmentForm({ onEquipmentCreated, editingEquipment, onEditCanc
             htmlFor="patrimonyCode"
             className="mb-2 block text-sm font-medium text-slate-300"
           >
-            Código de patrimônio
+            Código de patrimônio *
           </label>
 
           <input
             id="patrimonyCode"
+            name="patrimony_code"
+            autoComplete="off"
+            maxLength={100}
             type="text"
             value={patrimonyCode}
             onChange={(event) => setPatrimonyCode(event.target.value)}
             placeholder="Ex: MOTOR-001"
             required
+            disabled={isBusy}
             className="w-full rounded-xl border border-slate-700 bg-slate-950 px-4 py-3 text-slate-100 outline-none transition placeholder:text-slate-500 focus:border-teal-500"
           />
         </div>
@@ -265,16 +285,20 @@ export function EquipmentForm({ onEquipmentCreated, editingEquipment, onEditCanc
             htmlFor="location"
             className="mb-2 block text-sm font-medium text-slate-300"
           >
-            Localização
+            Localização *
           </label>
 
           <input
             id="location"
+            name="location"
+            autoComplete="organization"
+            maxLength={255}
             type="text"
             value={location}
             onChange={(event) => setLocation(event.target.value)}
             placeholder="Ex: Setor C"
             required
+            disabled={isBusy}
             className="w-full rounded-xl border border-slate-700 bg-slate-950 px-4 py-3 text-slate-100 outline-none transition placeholder:text-slate-500 focus:border-teal-500"
           />
         </div>
@@ -289,7 +313,9 @@ export function EquipmentForm({ onEquipmentCreated, editingEquipment, onEditCanc
 
           <select
             id="status"
+            name="status"
             value={status}
+            disabled={isBusy}
             onChange={(event) => setStatus(event.target.value as Equipment['status'])}
             className="w-full rounded-xl border border-slate-700 bg-slate-950 px-4 py-3 text-slate-100 outline-none transition focus:border-teal-500"
           >
@@ -307,15 +333,16 @@ export function EquipmentForm({ onEquipmentCreated, editingEquipment, onEditCanc
 
           {previewUrl ? (
             <div className="relative inline-block">
-              <img
+              <EquipmentPhoto
                 src={previewUrl}
-                alt="Preview"
+                alt={`Prévia da foto de ${name || "equipamento"}`}
                 className="h-32 w-32 rounded-xl border border-slate-700 object-cover"
               />
               <button
                 type="button"
                 onClick={handleRemovePhoto}
-                disabled={isUploading}
+                disabled={isBusy}
+                aria-label="Remover foto do equipamento"
                 className="absolute -right-2 -top-2 flex h-6 w-6 items-center justify-center rounded-full bg-red-600 text-xs text-white transition hover:bg-red-500 disabled:opacity-60"
               >
                 ✕
@@ -331,8 +358,11 @@ export function EquipmentForm({ onEquipmentCreated, editingEquipment, onEditCanc
               </span>
               <input
                 ref={fileInputRef}
+                id="equipment-photo"
+                name="photo"
                 type="file"
                 accept="image/jpeg,image/png,image/webp"
+                disabled={isBusy}
                 onChange={handleFileSelect}
                 className="hidden"
               />
@@ -341,6 +371,7 @@ export function EquipmentForm({ onEquipmentCreated, editingEquipment, onEditCanc
         </div>
       </div>
 
+      <div id="equipment-form-feedback" aria-live="polite" aria-atomic="true">
       {successMessage && (
         <p className="mt-4 rounded-xl border border-emerald-500/30 bg-emerald-500/10 p-3 text-sm text-emerald-300">
           {successMessage}
@@ -348,17 +379,18 @@ export function EquipmentForm({ onEquipmentCreated, editingEquipment, onEditCanc
       )}
 
       {errorMessage && (
-        <p className="mt-4 rounded-xl border border-red-500/30 bg-red-500/10 p-3 text-sm text-red-300">
+        <p role="alert" className="mt-4 rounded-xl border border-red-500/30 bg-red-500/10 p-3 text-sm text-red-300">
           {errorMessage}
         </p>
       )}
+      </div>
 
       <div className="mt-5 flex items-center justify-end gap-3">
         {isEditing && (
           <button
             type="button"
             onClick={handleCancel}
-            disabled={isSubmitting}
+            disabled={isBusy}
             className="rounded-xl border border-slate-700 px-4 py-2.5 text-sm font-medium text-slate-300 transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-60"
           >
             Cancelar
@@ -367,7 +399,7 @@ export function EquipmentForm({ onEquipmentCreated, editingEquipment, onEditCanc
 
         <button
           type="submit"
-          disabled={isSubmitting || isUploading}
+          disabled={isBusy}
           className="rounded-xl bg-teal-600 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-teal-500 disabled:cursor-not-allowed disabled:opacity-60"
         >
           {isUploading

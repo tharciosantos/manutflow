@@ -10,6 +10,7 @@ import {
 import type { Equipment } from "@/types/equipment";
 import { Modal } from "@/components/ui/modal";
 import { Pagination } from "@/components/ui/pagination";
+import { EquipmentPhoto } from "@/components/ui/equipment-photo";
 
 type EquipmentListProps = {
     equipments: Equipment[];
@@ -47,6 +48,8 @@ export function EquipmentList({
     const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
     const [isErrorModalOpen, setIsErrorModalOpen] = useState(false);
     const [errorMessageModal, setErrorMessageModal] = useState("");
+    const [isDeleting, setIsDeleting] = useState(false);
+    const [statusMessage, setStatusMessage] = useState("");
 
     function openDeleteModal(equipmentId: string) {
         setDeletingEquipmentId(equipmentId);
@@ -59,6 +62,9 @@ export function EquipmentList({
     }
 
     async function handleDelete() {
+        if (isDeleting) return;
+        setIsDeleting(true);
+        setStatusMessage("");
         try {
             const response = await fetch(`/api/equipments/${deletingEquipmentId}`, {
                 method: "DELETE",
@@ -72,6 +78,7 @@ export function EquipmentList({
 
             closeDeleteModal();
             await onRefresh();
+            setStatusMessage("Equipamento excluído com sucesso.");
         } catch (error) {
             const message =
                 error instanceof Error
@@ -81,6 +88,8 @@ export function EquipmentList({
             setErrorMessageModal(message);
             setIsErrorModalOpen(true);
             closeDeleteModal();
+        } finally {
+            setIsDeleting(false);
         }
     }
 
@@ -198,6 +207,7 @@ export function EquipmentList({
 
     return (
         <>
+        <p className="sr-only" aria-live="polite">{statusMessage}</p>
         <section className="mt-6 space-y-4">
             <div className="flex flex-col gap-1 sm:flex-row sm:items-end sm:justify-between">
                 <div>
@@ -230,7 +240,7 @@ export function EquipmentList({
 
                                 <div className="flex items-start gap-3">
                             {equipment.photo_url && (
-                                <img
+                                <EquipmentPhoto
                                     src={equipment.photo_url}
                                     alt={equipment.name}
                                     className="mt-1 h-12 w-12 shrink-0 rounded-lg border border-slate-700 object-cover sm:h-14 sm:w-14"
@@ -308,6 +318,7 @@ export function EquipmentList({
             confirmLabel="Excluir"
             cancelLabel="Cancelar"
             variant="danger"
+            isLoading={isDeleting}
         />
 
         <Modal

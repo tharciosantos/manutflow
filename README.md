@@ -2,6 +2,8 @@
 
 Sistema de Controle de Manutenção e Ordens de Serviço — full stack com Next.js, Supabase e TypeScript.
 
+O ManutFlow foi pensado para pequenas equipes e profissionais de manutenção que precisam cadastrar ativos, localizar equipamentos e acompanhar ordens de serviço sem depender de planilhas dispersas. O fluxo principal é: autenticar-se, cadastrar o equipamento, abrir ordens vinculadas e acompanhar status e prazos pelo dashboard.
+
 ## Funcionalidades
 
 ### 📊 Dashboard
@@ -53,6 +55,12 @@ Sistema de Controle de Manutenção e Ordens de Serviço — full stack com Next
 - Validação de campos no servidor (tamanho máximo, tipos)
 - Respostas de erro seguras (sem expor detalhes internos)
 - Row Level Security (RLS) no Supabase
+- Validação de UUID nas rotas de detalhe, edição e exclusão de equipamentos
+- Fotos aceitas pela API somente quando pertencem ao diretório do usuário autenticado no bucket configurado
+
+### Permissões
+
+O modelo atual é de propriedade individual; não existem organizações nem papéis administrativos. Todo usuário autenticado pode criar equipamentos e ordens e pode listar, consultar, editar ou excluir somente os próprios registros. O campo `profiles.role` é apenas uma informação de perfil e não concede permissões. As APIs aplicam `user_id` e as policies RLS fornecem uma segunda camada de isolamento.
 
 ### 📝 Logging
 - Logger estruturado em JSON (`logger('level', 'event', data)`)
@@ -220,6 +228,8 @@ NEXT_PUBLIC_SUPABASE_ANON_KEY=
 SUPABASE_SERVICE_ROLE_KEY=        # Necessário no servidor para upload/remoção de imagens
 ```
 
+As fotos são JPEG, PNG ou WebP de até 5 MB. O servidor gera o caminho `user_id/arquivo`, persiste uma URL pública e rejeita URLs externas ou pertencentes a outro usuário. A service role nunca deve usar o prefixo `NEXT_PUBLIC_` nem ser enviada ao navegador.
+
 ## Como rodar localmente
 
 ```bash
@@ -240,7 +250,7 @@ npm run lint       # ESLint (flat config)
 npm run build      # Next build (standalone)
 ```
 
-Cobertura atual: 13 arquivos de teste, incluindo APIs, autenticação, armazenamento de fotos, regras de prazo e componentes do dashboard/listagem.
+Cobertura atual: 15 arquivos e 161 testes, incluindo APIs, autenticação, armazenamento de fotos, validação de identificadores, regras de prazo e componentes do dashboard/listagem.
 
 | Área | Escopo |
 |------|--------|
@@ -304,6 +314,17 @@ src/
 - Configure `SUPABASE_SERVICE_ROLE_KEY` somente como variável server-side
 - Se for usar upload, configure o bucket e a coluna `photo_url`
 - Para prazos, garanta que a coluna `service_orders.due_date` e seu índice existam
+
+## Demonstração segura
+
+O repositório não inclui credenciais nem uma conta compartilhada. Para uma demonstração de portfólio, a opção recomendada é uma conta exclusiva do ambiente de demo, sem dados pessoais, preenchida apenas com registros fictícios identificáveis. Mantenha esse projeto Supabase separado de qualquer ambiente real e restaure os dados pelo fluxo normal da aplicação ou por um seed revisado. Não publique a service role e evite divulgar a senha no código ou nas capturas.
+
+## Limitações conhecidas
+
+- O rate limiter é local à instância e não oferece contagem compartilhada em deploy horizontal/serverless.
+- Não há organizações, matriz de papéis, recuperação de senha, testes E2E ou anexos além da foto do equipamento.
+- Os scripts SQL de referência ficam fora do versionamento; uma instalação nova ainda exige configurar schema e RLS no Supabase.
+- O bucket de fotos é público. O controle de escrita e remoção é por proprietário, mas quem conhece uma URL pode visualizar a imagem.
 
 ## Fases implementadas
 

@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { beforeEach, describe, expect, it, vi, type Mock } from 'vitest';
 
 const storageMocks = vi.hoisted(() => ({
     upload: vi.fn(),
@@ -34,6 +34,12 @@ import { removeEquipmentPhotoByPath } from '@/lib/equipment-photo-storage';
 import { checkRateLimit } from '@/lib/rate-limit';
 import { DELETE, POST } from '../route';
 
+type AuthMockResult =
+    | { user: { id: string }; supabase: null; error: null }
+    | { user: null; supabase: null; error: Response };
+
+const getUserMock = vi.mocked(getUser) as Mock<() => Promise<AuthMockResult>>;
+
 function request(body: unknown) {
     return new Request('http://localhost/api/upload', {
         method: 'DELETE',
@@ -57,19 +63,19 @@ describe('Upload API DELETE', () => {
             upload: storageMocks.upload,
             getPublicUrl: storageMocks.getPublicUrl,
         });
-        vi.mocked(getUser).mockResolvedValue({
+        getUserMock.mockResolvedValue({
             user: { id: 'user-1' },
             supabase: null,
             error: null,
-        } as unknown as Awaited<ReturnType<typeof getUser>>);
+        });
     });
 
     it('retorna 401 quando o usuário não está autenticado', async () => {
-        vi.mocked(getUser).mockResolvedValue({
+        getUserMock.mockResolvedValue({
             user: null,
             supabase: null,
             error: new Response(JSON.stringify({ error: 'Não autorizado' }), { status: 401 }),
-        } as unknown as Awaited<ReturnType<typeof getUser>>);
+        });
 
         const response = await DELETE(request({ path: 'user-1/photo.jpg' }));
 

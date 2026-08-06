@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { beforeEach, describe, expect, it, vi, type Mock } from 'vitest';
 
 vi.mock('@/lib/auth', () => ({
     getUser: vi.fn(),
@@ -13,11 +13,12 @@ vi.mock('@/lib/logger', () => ({
 }));
 
 vi.mock('@/lib/equipment-photo-storage', () => ({
+    isOwnedEquipmentPhotoUrl: vi.fn(),
     removeEquipmentPhotoByUrl: vi.fn(),
 }));
 
 import { getUser } from '@/lib/auth';
-import { removeEquipmentPhotoByUrl } from '@/lib/equipment-photo-storage';
+import { isOwnedEquipmentPhotoUrl, removeEquipmentPhotoByUrl } from '@/lib/equipment-photo-storage';
 import { checkRateLimit } from '@/lib/rate-limit';
 import { DELETE, GET, PATCH } from '../route';
 
@@ -55,7 +56,9 @@ function createSupabaseMock(...queries: ReturnType<typeof createQuery>[]) {
     };
 }
 
-function routeContext(id = 'equipment-1') {
+const EQUIPMENT_ID = '8df99c9e-5058-4b0f-8f40-4e4b94c28980';
+
+function routeContext(id = EQUIPMENT_ID) {
     return { params: Promise.resolve({ id }) };
 }
 
@@ -67,29 +70,36 @@ function request(method = 'GET', body?: unknown) {
     });
 }
 
+type AuthMockResult =
+    | { user: { id: string }; supabase: ReturnType<typeof createSupabaseMock>; error: null }
+    | { user: null; supabase: null; error: Response };
+
+const getUserMock = vi.mocked(getUser) as Mock<() => Promise<AuthMockResult>>;
+
 function authenticateWith(supabase: ReturnType<typeof createSupabaseMock>) {
-    vi.mocked(getUser).mockResolvedValue({
-    user: { id: 'user-1' },
-    supabase,
-    error: null,
-} as unknown as Awaited<ReturnType<typeof getUser>>);
+    getUserMock.mockResolvedValue({
+        user: { id: 'user-1' },
+        supabase,
+        error: null,
+    });
 }
 
 function rejectAuthentication() {
-    vi.mocked(getUser).mockResolvedValue({
+    getUserMock.mockResolvedValue({
         user: null,
         supabase: null,
         error: new Response(JSON.stringify({ error: 'Não autorizado' }), {
             status: 401,
             headers: { 'content-type': 'application/json' },
         }),
-    } as unknown as Awaited<ReturnType<typeof getUser>>);
+    });
 }
 
 describe('Equipments Details API', () => {
     beforeEach(() => {
         vi.clearAllMocks();
         vi.mocked(checkRateLimit).mockReturnValue({ allowed: true, remaining: 29 });
+        vi.mocked(isOwnedEquipmentPhotoUrl).mockReturnValue(true);
         vi.mocked(removeEquipmentPhotoByUrl).mockResolvedValue({ ok: true });
     });
 
@@ -109,7 +119,7 @@ describe('Equipments Details API', () => {
 
             expect(response.status).toBe(400);
             await expect(response.json()).resolves.toEqual({
-                error: 'ID do equipamento é obrigatório.',
+                error: 'ID do equipamento inválido.',
             });
         });
 
@@ -132,10 +142,10 @@ describe('Equipments Details API', () => {
             expect(response.status).toBe(200);
             await expect(response.json()).resolves.toEqual({ equipment, serviceOrders });
             expect(supabase.from).toHaveBeenNthCalledWith(1, 'equipments');
-            expect(equipmentQuery.eq).toHaveBeenCalledWith('id', 'equipment-1');
+            expect(equipmentQuery.eq).toHaveBeenCalledWith('id', EQUIPMENT_ID);
             expect(equipmentQuery.eq).toHaveBeenCalledWith('user_id', 'user-1');
             expect(supabase.from).toHaveBeenNthCalledWith(2, 'service_orders');
-            expect(ordersQuery.eq).toHaveBeenCalledWith('equipment_id', 'equipment-1');
+            expect(ordersQuery.eq).toHaveBeenCalledWith('equipment_id', EQUIPMENT_ID);
             expect(ordersQuery.eq).toHaveBeenCalledWith('user_id', 'user-1');
             expect(ordersQuery.order).toHaveBeenCalledWith('created_at', { ascending: false });
         });
@@ -293,7 +303,7 @@ describe('Equipments Details API', () => {
                 status: 'maintenance',
                 photo_url: null,
             });
-            expect(updateQuery.eq).toHaveBeenCalledWith('id', 'equipment-1');
+            expect(updateQuery.eq).toHaveBeenCalledWith('id', EQUIPMENT_ID);
             expect(updateQuery.eq).toHaveBeenCalledWith('user_id', 'user-1');
         });
 
@@ -329,6 +339,22 @@ describe('Equipments Details API', () => {
 
             expect(response.status).toBe(200);
             expect(removeEquipmentPhotoByUrl).toHaveBeenCalledWith(oldPhotoUrl, 'user-1');
+        });
+
+        it('rejeita URL de foto que não pertence ao usuário', async () => {
+            authenticateWith(createSupabaseMock(createQuery({ data: existingEquipment })));
+            vi.mocked(isOwnedEquipmentPhotoUrl).mockReturnValue(false);
+
+            const response = await PATCH(
+                request('PATCH', { photo_url: 'https://example.com/foreign.jpg' }),
+                routeContext(),
+            );
+
+            expect(response.status).toBe(400);
+            expect(isOwnedEquipmentPhotoUrl).toHaveBeenCalledWith(
+                'https://example.com/foreign.jpg',
+                'user-1',
+            );
         });
 
         it('retorna 409 quando o banco identifica patrimônio duplicado no update', async () => {
@@ -420,7 +446,7 @@ describe('Equipments Details API', () => {
             });
             expect(linkedOrdersQuery.eq).toHaveBeenCalledWith('user_id', 'user-1');
             expect(deleteQuery.delete).toHaveBeenCalledOnce();
-            expect(deleteQuery.eq).toHaveBeenCalledWith('id', 'equipment-1');
+            expect(deleteQuery.eq).toHaveBeenCalledWith('id', EQUIPMENT_ID);
             expect(deleteQuery.eq).toHaveBeenCalledWith('user_id', 'user-1');
             expect(removeEquipmentPhotoByUrl).toHaveBeenCalledWith(photoUrl, 'user-1');
         });
@@ -437,12 +463,12 @@ describe('Equipments Details API', () => {
             await expect(response.json()).resolves.toEqual({ error: 'Erro ao excluir equipamento.' });
         });
 
-        it('retorna 403 quando nenhum equipamento é excluído', async () => {
+        it('retorna 404 quando nenhum equipamento é excluído', async () => {
             authenticateWith(createSupabaseMock(createQuery({ data: [] }), createQuery()));
 
             const response = await DELETE(request('DELETE'), routeContext());
 
-            expect(response.status).toBe(403);
+            expect(response.status).toBe(404);
         });
     });
 });

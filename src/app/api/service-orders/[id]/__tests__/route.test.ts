@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { beforeEach, describe, expect, it, vi, type Mock } from 'vitest';
 
 vi.mock('@/lib/auth', () => ({
     getUser: vi.fn(),
@@ -56,23 +56,29 @@ function request(method = 'GET', body?: unknown) {
     });
 }
 
+type AuthMockResult =
+    | { user: { id: string }; supabase: ReturnType<typeof createSupabaseMock>; error: null }
+    | { user: null; supabase: null; error: Response };
+
+const getUserMock = vi.mocked(getUser) as Mock<() => Promise<AuthMockResult>>;
+
 function authenticateWith(supabase: ReturnType<typeof createSupabaseMock>) {
-    vi.mocked(getUser).mockResolvedValue({
+    getUserMock.mockResolvedValue({
         user: { id: 'user-1' },
         supabase,
         error: null,
-} as unknown as Awaited<ReturnType<typeof getUser>>);
+    });
 }
 
 function rejectAuthentication() {
-    vi.mocked(getUser).mockResolvedValue({
+    getUserMock.mockResolvedValue({
         user: null,
         supabase: null,
         error: new Response(JSON.stringify({ error: 'Não autorizado' }), {
             status: 401,
             headers: { 'content-type': 'application/json' },
         }),
-    } as unknown as Awaited<ReturnType<typeof getUser>>);
+    });
 }
 
 describe('Service Orders Details API', () => {

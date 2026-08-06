@@ -54,7 +54,7 @@ export function AppHeader() {
         </div>
 
         {/* Desktop Navigation */}
-        <nav className="hidden items-center gap-1 text-sm text-slate-300 md:flex">
+        <nav className="hidden items-center gap-1 text-sm text-slate-300 lg:flex">
           {navLinks.map((link) => (
             <Link
               key={link.href}
@@ -71,8 +71,8 @@ export function AppHeader() {
         </nav>
 
         {/* Desktop User Area */}
-        <div className="hidden items-center gap-3 md:flex">
-          <span className={`hidden truncate text-sm text-slate-400 sm:block max-w-[120px] lg:max-w-none ${userEmail ? 'visible' : 'invisible'}`}>
+        <div className="hidden items-center gap-3 lg:flex">
+          <span className={`hidden max-w-[120px] truncate text-sm text-slate-400 sm:block xl:max-w-none ${userEmail ? 'visible' : 'invisible'}`}>
             {userEmail || 'email@exemplo.com'}
           </span>
           <Link
@@ -94,7 +94,7 @@ export function AppHeader() {
         <button
           type="button"
           onClick={() => setMenuOpen(!menuOpen)}
-          className="flex items-center justify-center rounded-lg border border-slate-700 p-2 text-slate-300 transition hover:bg-slate-800 md:hidden"
+          className="flex items-center justify-center rounded-lg border border-slate-700 p-2 text-slate-300 transition hover:bg-slate-800 lg:hidden"
           aria-label={menuOpen ? "Fechar menu" : "Abrir menu"}
           aria-expanded={menuOpen}
         >
@@ -112,7 +112,7 @@ export function AppHeader() {
 
       {/* Mobile Menu Dropdown */}
       {menuOpen && (
-        <div className="border-t border-slate-800 bg-slate-950/95 backdrop-blur-md md:hidden">
+        <div className="border-t border-slate-800 bg-slate-950/95 backdrop-blur-md lg:hidden">
           <nav className="mx-auto max-w-5xl space-y-1 px-4 py-3">
             {navLinks.map((link) => (
               <Link

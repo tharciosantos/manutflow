@@ -45,7 +45,7 @@ export function Toolbar({
   );
 
   return (
-    <div className="flex flex-col gap-3 rounded-2xl border border-slate-800 bg-slate-950/70 p-4 shadow-sm sm:flex-row sm:flex-wrap sm:items-center sm:p-4 lg:flex-nowrap">
+    <div className="flex flex-col gap-3 rounded-2xl border border-slate-800 bg-slate-950/70 p-4 shadow-sm sm:flex-row sm:flex-wrap sm:items-center sm:p-4">
       {/* Busca (opcional: só renderiza se houver searchPlaceholder) */}
       {searchPlaceholder && searchValue !== undefined && onSearchChange && (
         <div className="relative flex-1 sm:min-w-64">
@@ -78,9 +78,9 @@ export function Toolbar({
       )}
 
       {activeFilters.length > 0 && (
-        <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center lg:flex-nowrap">
+        <div className="flex min-w-0 flex-1 flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center sm:justify-end">
           {activeFilters.map((filter) => (
-            <div key={filter.label} className="flex items-center gap-2">
+            <div key={filter.label} className="flex min-w-0 items-center gap-2">
               <span className="hidden text-xs text-slate-500 sm:inline">
                 {filter.label}:
               </span>

@@ -1,6 +1,7 @@
 import { getUser } from "@/lib/auth";
 import { checkRateLimit } from "@/lib/rate-limit";
 import { logger } from "@/lib/logger";
+import { isOwnedEquipmentPhotoUrl } from "@/lib/equipment-photo-storage";
 
 export const dynamic = "force-dynamic";
 
@@ -117,6 +118,17 @@ export async function POST(request: Request) {
   const photoUrl =
     typeof body.photo_url === "string" ? body.photo_url.trim() : null;
 
+  if (body.photo_url !== undefined && body.photo_url !== null && !photoUrl) {
+    return Response.json({ error: "URL da foto inválida." }, { status: 400 });
+  }
+
+  if (photoUrl && !isOwnedEquipmentPhotoUrl(photoUrl, user.id)) {
+    return Response.json(
+      { error: "A foto informada não pertence ao usuário autenticado." },
+      { status: 400 },
+    );
+  }
+
   if (name.length > 255) {
     return Response.json(
       { error: "Nome deve ter no máximo 255 caracteres." },
@@ -183,12 +195,17 @@ export async function POST(request: Request) {
   }
 
   // Verifica se o patrimônio já existe SOMENTE para este usuário
-  const { data: existingEquipment } = await supabase
+  const { data: existingEquipment, error: existingEquipmentError } = await supabase
     .from("equipments")
     .select("id")
     .eq("user_id", user.id)
     .eq("patrimony_code", patrimonyCode)
     .maybeSingle();
+
+  if (existingEquipmentError) {
+    logger('error', 'api.error', { route: 'equipments', method: 'POST', error: existingEquipmentError.message });
+    return Response.json({ error: "Erro ao validar o código de patrimônio." }, { status: 500 });
+  }
 
   if (existingEquipment) {
     return Response.json(

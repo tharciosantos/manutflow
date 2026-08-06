@@ -4,7 +4,7 @@
 
 | Camada | Tecnologia | Versão |
 |--------|-----------|--------|
-| Framework | Next.js (App Router) | 16.2.6 |
+| Framework | Next.js (App Router) | 16.3.0 |
 | UI | React | 19.2.4 |
 | Estilos | Tailwind CSS | 4.x (@tailwindcss/postcss) |
 | Banco/Auth | Supabase (SSR) | ^0.12.0 / ^2.106.2 |
@@ -19,7 +19,7 @@
 
 | Pacote | Versão | Finalidade |
 |--------|--------|-----------|
-| next | 16.2.6 | Framework |
+| next | 16.3.0 | Framework |
 | react / react-dom | 19.2.4 | UI |
 | @supabase/ssr | ^0.12.0 | Supabase SSR (client + server) |
 | @supabase/supabase-js | ^2.106.2 | Supabase core |
@@ -32,7 +32,7 @@
 | @testing-library/jest-dom | ^6.9.1 | Matchers DOM para testes |
 | jsdom | ^29.1.1 | Ambiente DOM para testes |
 | eslint | ^9 | Linter (flat config) |
-| eslint-config-next | 16.2.6 | Regras Next.js para ESLint |
+| eslint-config-next | 16.3.0 | Regras Next.js para ESLint |
 
 ## Comandos
 
@@ -72,7 +72,7 @@ docs/                     Planos de implementação (gitignored)
 
 ## Convenções não-óbvias
 
-- **Todas as páginas são `"use client"`** — não há React Server Components neste projeto.
+- **Todas as páginas são `"use client"`** — não há React Server Components de domínio neste projeto.
 - **Toda API route exporta `export const dynamic = "force-dynamic"`** — nenhuma usa geração estática.
 - **Respostas da API são sempre `wrapadas`** em objeto nomeado:
   - `GET list` → `{ equipments: [...], total, page, totalPages }` / `{ serviceOrders: [...], ... }`
@@ -101,19 +101,12 @@ docs/                     Planos de implementação (gitignored)
 
 ## Testes
 
-**5 arquivos de teste (24 testes no total):**
-```
-src/app/api/health/__tests__/route.test.ts
-src/app/api/equipments/__tests__/route.test.ts
-src/app/api/service-orders/__tests__/route.test.ts
-src/app/api/dashboard-summary/__tests__/route.test.ts
-src/lib/__tests__/auth.test.ts
-```
+**15 arquivos de teste (161 testes no total):**
+As suítes cobrem health, autenticação, redirects, armazenamento de fotos, validação, dashboard, equipamentos, upload, ordens de serviço, regras de prazo e componentes de dashboard/listagem.
 
-- Apenas **1 suíte de teste** para a API `dashboard-summary` — as demais APIs **não têm cobertura**.
 - Mocks do Supabase são manuais (objeto `from()` encadeado com `.eq()`, `.order()`, `.limit()`).
 - Setup em `src/__tests__/setup.ts` importa `@testing-library/jest-dom/vitest`.
-- Sem testes E2E ou de componente no momento.
+- Há testes de componentes com Testing Library; testes E2E ainda não existem.
 
 ## Banco de Dados
 
@@ -163,7 +156,7 @@ service_order_history
 ## Limitações / Gotchas
 
 - **Rate limiter**: em memória, perdido no restart. Não escala horizontalmente. `setInterval` de cleanup roda apenas em ambiente Node.js tradicional, não em serverless.
-- **Sem middleware.ts**: não existe arquivo middleware — a SPA gerencia sessão via `createClient()` do lado do cliente.
+- **Proxy de sessão**: `src/proxy.ts` usa a convenção do Next.js 16 para renovar a sessão SSR e proteger páginas; as APIs continuam validando a autenticação por conta própria.
 - **`scripts/` e `docs/` estão no `.gitignore`**: migrations SQL e planos ficam só em disco como referência.
 - **Migration manual necessária**: para ativar `phone` e `role` na tabela `profiles`, execute no SQL Editor do Supabase:
   ```sql
@@ -189,3 +182,13 @@ refactor: padronizar respostas da API de service-orders para formato wrapado
 refactor: otimizar getUser() para retornar client Supabase e evitar criação dupla
 docs: atualizar README com menções a segurança e acessibilidade
 ```
+
+<!-- BEGIN:nextjs-agent-rules -->
+
+# This is NOT the Next.js you know
+
+This version has breaking changes — APIs, conventions, and file structure may all differ from your training data. Read the relevant guide in `node_modules/next/dist/docs/` (resolved from this file's directory; in monorepos the `next` package may not be visible from the repo root) before writing any code. Heed deprecation notices.
+
+This block is written and re-added by `next dev` — verify at `node_modules/next/dist/server/lib/generate-agent-files.js`. Removing it from a diff only re-creates the uncommitted change; committing it with your work keeps the tree clean.
+
+<!-- END:nextjs-agent-rules -->

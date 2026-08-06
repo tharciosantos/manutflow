@@ -234,5 +234,25 @@ describe('Equipments API', () => {
       expect(response.status).toBe(409);
       expect(body.error).toContain('patrimônio');
     });
+
+    it('deve rejeitar URL de foto externa enviada por requisição manipulada', async () => {
+      const mockGetUser = getUser as ReturnType<typeof vi.fn>;
+      mockGetUser.mockResolvedValue({
+        user: { id: 'user-1' },
+        supabase: createMockSupabase(),
+        error: null,
+      });
+
+      const response = await POST(new Request('http://localhost/api/equipments', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ ...validBody, photo_url: 'https://example.com/foreign.jpg' }),
+      }));
+
+      expect(response.status).toBe(400);
+      await expect(response.json()).resolves.toEqual({
+        error: 'A foto informada não pertence ao usuário autenticado.',
+      });
+    });
   });
 });

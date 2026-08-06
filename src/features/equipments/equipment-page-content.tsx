@@ -138,13 +138,10 @@ export function EquipmentPageContent({ isFormModalOpen, setIsFormModalOpen }: Eq
                 searchPlaceholder="Buscar equipamentos..."
                 searchValue={searchTerm}
                 onSearchChange={handleSearchChange}
-                filterOptions={[
-                    { value: "all", label: "Todos os status" },
-                    ...equipmentStatusFilterOptions.map((opt) => ({
+                filterOptions={equipmentStatusFilterOptions.map((opt) => ({
                         value: opt.value,
-                        label: opt.label,
-                    })),
-                ]}
+                        label: opt.value === "all" ? "Todos os status" : opt.label,
+                    }))}
                 filterValue={selectedStatus}
                 onFilterChange={handleStatusChange}
                 filterLabel="Status"

@@ -1,7 +1,8 @@
 import { getUser } from "@/lib/auth";
 import { checkRateLimit } from "@/lib/rate-limit";
 import { logger } from "@/lib/logger";
-import { removeEquipmentPhotoByUrl } from '@/lib/equipment-photo-storage';
+import { isOwnedEquipmentPhotoUrl, removeEquipmentPhotoByUrl } from '@/lib/equipment-photo-storage';
+import { isUuid } from '@/lib/validation';
 
 export const dynamic = "force-dynamic";
 
@@ -15,10 +16,10 @@ export async function GET(_request: Request, { params }: RouteParams) {
 
     const { id } = await params;
 
-    if (!id) {
+    if (!isUuid(id)) {
         return Response.json(
             {
-                error: "ID do equipamento é obrigatório.",
+                error: "ID do equipamento inválido.",
             },
             {
                 status: 400,
@@ -97,9 +98,9 @@ export async function PATCH(request: Request, { params }: RouteParams) {
 
   const { id } = await params;
 
-  if (!id) {
+  if (!isUuid(id)) {
     return Response.json(
-      { error: "ID do equipamento é obrigatório." },
+      { error: "ID do equipamento inválido." },
       { status: 400 },
     );
   }
@@ -235,6 +236,18 @@ export async function PATCH(request: Request, { params }: RouteParams) {
 
   if (body.photo_url !== undefined) {
     const photoUrl = typeof body.photo_url === "string" ? body.photo_url.trim() : null;
+
+    if (body.photo_url !== null && !photoUrl) {
+      return Response.json({ error: "URL da foto inválida." }, { status: 400 });
+    }
+
+    if (photoUrl && !isOwnedEquipmentPhotoUrl(photoUrl, user.id)) {
+      return Response.json(
+        { error: "A foto informada não pertence ao usuário autenticado." },
+        { status: 400 },
+      );
+    }
+
     updateData.photo_url = photoUrl;
   }
 
@@ -306,10 +319,10 @@ export async function DELETE(_request: Request, { params }: RouteParams) {
 
     const { id } = await params;
 
-    if (!id) {
+    if (!isUuid(id)) {
         return Response.json(
             {
-                error: "ID do equipamento é obrigatório.",
+                error: "ID do equipamento inválido.",
             },
             {
                 status: 400,
@@ -376,7 +389,7 @@ export async function DELETE(_request: Request, { params }: RouteParams) {
                     "Equipamento não foi excluído. Verifique se ele existe ou se há permissão para exclusão.",
             },
             {
-                status: 403,
+            status: 404,
             },
         );
     }

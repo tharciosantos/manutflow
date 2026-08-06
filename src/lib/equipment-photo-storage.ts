@@ -35,6 +35,15 @@ export function getEquipmentPhotoPath(
     }
 }
 
+export function isOwnedEquipmentPhotoUrl(photoUrl: string, userId: string): boolean {
+    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+
+    return Boolean(
+        supabaseUrl
+        && getEquipmentPhotoPath(photoUrl, userId, supabaseUrl),
+    );
+}
+
 export async function removeEquipmentPhotoByPath(
     path: string,
     userId: string,

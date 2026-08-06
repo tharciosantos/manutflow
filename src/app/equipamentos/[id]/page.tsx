@@ -1,9 +1,11 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Link from "next/link";
 
 import { AppShell } from "@/components/layout/app-shell";
 import { Breadcrumbs } from "@/components/ui/breadcrumbs";
+import { EquipmentPhoto } from "@/components/ui/equipment-photo";
 import {
     equipmentStatusLabels,
     equipmentStatusStyles,
@@ -110,10 +112,18 @@ export default function EquipmentDetailsPage({
                 />
 
                 {isLoading && (
-                    <div className="mt-6 rounded-2xl border border-slate-800 bg-slate-950/70 p-6">
-                        <p className="text-sm text-slate-400">
-                            Carregando detalhes do equipamento...
-                        </p>
+                    <div aria-label="Carregando detalhes do equipamento" className="mt-6 animate-pulse rounded-2xl border border-slate-800 bg-slate-950/70 p-6">
+                        <div className="flex gap-4">
+                            <div className="h-24 w-24 rounded-xl bg-slate-800" />
+                            <div className="flex-1 space-y-3">
+                                <div className="h-5 w-32 rounded bg-slate-800" />
+                                <div className="h-8 w-64 max-w-full rounded bg-slate-800" />
+                                <div className="h-4 w-80 max-w-full rounded bg-slate-800/70" />
+                            </div>
+                        </div>
+                        <div className="mt-6 grid grid-cols-2 gap-4">
+                            {[1, 2, 3, 4].map((item) => <div key={item} className="h-20 rounded-xl bg-slate-800/70" />)}
+                        </div>
                     </div>
                 )}
 
@@ -124,6 +134,9 @@ export default function EquipmentDetailsPage({
                         </h1>
 
                         <p className="mt-2 text-sm text-red-300">{errorMessage}</p>
+                        <Link href="/equipamentos" className="mt-4 inline-flex rounded-xl border border-red-400/30 px-4 py-2 text-sm font-medium text-red-200 hover:bg-red-500/10">
+                            Voltar para equipamentos
+                        </Link>
                     </div>
                 )}
 
@@ -133,7 +146,7 @@ export default function EquipmentDetailsPage({
                             <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
                                 <div className="flex gap-4">
                                     {details.equipment.photo_url && (
-                                        <img
+                                        <EquipmentPhoto
                                             src={details.equipment.photo_url}
                                             alt={details.equipment.name}
                                             className="h-20 w-20 shrink-0 rounded-xl border border-slate-700 object-cover sm:h-24 sm:w-24"

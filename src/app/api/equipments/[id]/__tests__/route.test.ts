@@ -69,10 +69,10 @@ function request(method = 'GET', body?: unknown) {
 
 function authenticateWith(supabase: ReturnType<typeof createSupabaseMock>) {
     vi.mocked(getUser).mockResolvedValue({
-        user: { id: 'user-1' },
-        supabase,
-        error: null,
-    } as Awaited<ReturnType<typeof getUser>>);
+    user: { id: 'user-1' },
+    supabase,
+    error: null,
+} as unknown as Awaited<ReturnType<typeof getUser>>);
 }
 
 function rejectAuthentication() {

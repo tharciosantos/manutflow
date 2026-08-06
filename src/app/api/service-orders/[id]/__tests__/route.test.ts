@@ -61,7 +61,7 @@ function authenticateWith(supabase: ReturnType<typeof createSupabaseMock>) {
         user: { id: 'user-1' },
         supabase,
         error: null,
-    } as Awaited<ReturnType<typeof getUser>>);
+} as unknown as Awaited<ReturnType<typeof getUser>>);
 }
 
 function rejectAuthentication() {

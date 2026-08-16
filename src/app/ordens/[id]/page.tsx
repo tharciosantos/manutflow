@@ -17,18 +17,7 @@ import {
 } from '@/features/equipments/equipment-status-config';
 import { ServiceOrderDeadlineBadge } from '@/features/service-orders/service-order-deadline-badge';
 import { formatDateOnlyPtBr } from '@/features/service-orders/service-order-deadline';
-import { 
-    ClipboardList, 
-    History, 
-    Cpu, 
-    Tag, 
-    MapPin, 
-    ArrowUpRight, 
-    CalendarClock,
-    ArrowRight,
-    CheckCircle,
-    AlertCircle
-} from 'lucide-react';
+import { ArrowRight } from 'lucide-react';
 
 type ServiceOrderDetailsPageProps = {
     params: Promise<{
@@ -178,7 +167,7 @@ export default function ServiceOrderDetailsPage({
 
     return (
         <AppShell>
-            <section className="mx-auto max-w-5xl px-4 py-6 sm:px-6 sm:py-10">
+            <section className="mx-auto max-w-5xl px-4 py-6 sm:px-6 sm:py-8 space-y-6">
                 <Breadcrumbs
                     items={[
                         { label: "Ordens", href: "/ordens" },
@@ -187,53 +176,47 @@ export default function ServiceOrderDetailsPage({
                 />
 
                 {isLoading && (
-                    <div className="mt-6 rounded-2xl border border-slate-800 bg-slate-950/70 p-8 animate-pulse text-center">
-                        <p className="text-sm text-slate-400">
+                    <div className="rounded-xl border border-slate-800 bg-slate-900/40 p-8 animate-pulse text-center">
+                        <p className="text-xs text-slate-400 font-mono">
                             Carregando detalhes da ordem de serviço...
                         </p>
                     </div>
                 )}
 
                 {!isLoading && errorMessage && (
-                    <div className="mt-6 rounded-2xl border border-red-500/30 bg-red-500/10 p-6 flex items-start gap-3">
-                        <AlertCircle className="h-5 w-5 text-red-400 shrink-0 mt-0.5" />
-                        <div>
-                            <h1 className="text-base font-semibold text-red-300">
-                                Não foi possível carregar a ordem de serviço
-                            </h1>
-                            <p className="mt-1 text-sm text-red-300/80">{errorMessage}</p>
-                        </div>
+                    <div className="rounded-xl border border-red-500/30 bg-red-500/10 p-5">
+                        <h1 className="text-sm font-semibold text-red-300">
+                            Não foi possível carregar a ordem de serviço
+                        </h1>
+                        <p className="mt-1 text-xs text-red-300/80">{errorMessage}</p>
                     </div>
                 )}
 
                 {!isLoading && serviceOrder && (
                     <>
-                        <div className="mt-4 sm:mt-6 rounded-2xl border border-slate-800/90 bg-slate-950/80 p-5 sm:p-7 shadow-sm space-y-6">
-                            <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
-                                <div className="space-y-2">
-                                    <div className="inline-flex items-center gap-1.5 rounded-full border border-teal-500/30 bg-teal-500/10 px-3 py-0.5 text-xs font-semibold text-teal-300">
-                                        <ClipboardList className="h-3.5 w-3.5" />
-                                        <span>Ordem de Serviço</span>
-                                    </div>
-
-                                    <h1 className="text-2xl font-bold text-white sm:text-3xl tracking-tight">
+                        <div className="rounded-xl border border-slate-800 bg-slate-900/60 p-5 sm:p-6 space-y-5">
+                            <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between border-b border-slate-800 pb-5">
+                                <div className="space-y-1">
+                                    <h1 className="text-xl font-bold text-slate-100 tracking-tight sm:text-2xl">
                                         {serviceOrder.title}
                                     </h1>
 
-                                    <p className="text-sm text-slate-400 max-w-2xl leading-relaxed">
-                                        {serviceOrder.description || 'Sem descrição detalhada informada.'}
-                                    </p>
+                                    {serviceOrder.description && (
+                                        <p className="text-xs sm:text-sm text-slate-400 max-w-2xl leading-relaxed">
+                                            {serviceOrder.description}
+                                        </p>
+                                    )}
                                 </div>
 
                                 <div className="flex flex-wrap items-center gap-2 sm:justify-end">
                                     <span
-                                        className={`rounded-full border px-3 py-1 text-xs font-semibold ${serviceOrderStatusStyles[serviceOrder.status]}`}
+                                        className={`rounded-full border px-2.5 py-0.5 text-xs font-medium ${serviceOrderStatusStyles[serviceOrder.status]}`}
                                     >
                                         {serviceOrderStatusLabels[serviceOrder.status]}
                                     </span>
 
                                     <span
-                                        className={`rounded-full border px-3 py-1 text-xs font-semibold ${serviceOrderPriorityStyles[serviceOrder.priority]}`}
+                                        className={`rounded-full border px-2.5 py-0.5 text-xs font-medium ${serviceOrderPriorityStyles[serviceOrder.priority]}`}
                                     >
                                         {serviceOrderPriorityLabels[serviceOrder.priority]}
                                     </span>
@@ -245,40 +228,40 @@ export default function ServiceOrderDetailsPage({
                                 </div>
                             </div>
 
-                            {/* 4 Cards de Metadados */}
-                            <div className="grid grid-cols-2 gap-3 sm:grid-cols-4 sm:gap-4">
-                                <div className="rounded-xl border border-slate-800/80 bg-slate-900/40 p-3.5">
-                                    <p className="text-[11px] font-semibold uppercase tracking-wider text-slate-500">
+                            {/* 4 Métricas Técnicas */}
+                            <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+                                <div className="rounded-lg border border-slate-800/80 bg-slate-950/40 p-3">
+                                    <p className="text-[10px] font-semibold uppercase tracking-wider text-slate-500">
                                         Status
                                     </p>
-                                    <p className="mt-1 text-sm font-bold text-slate-200">
+                                    <p className="mt-1 text-xs sm:text-sm font-semibold text-slate-200">
                                         {serviceOrderStatusLabels[serviceOrder.status]}
                                     </p>
                                 </div>
 
-                                <div className="rounded-xl border border-slate-800/80 bg-slate-900/40 p-3.5">
-                                    <p className="text-[11px] font-semibold uppercase tracking-wider text-slate-500">
+                                <div className="rounded-lg border border-slate-800/80 bg-slate-950/40 p-3">
+                                    <p className="text-[10px] font-semibold uppercase tracking-wider text-slate-500">
                                         Prioridade
                                     </p>
-                                    <p className="mt-1 text-sm font-bold text-slate-200">
+                                    <p className="mt-1 text-xs sm:text-sm font-semibold text-slate-200">
                                         {serviceOrderPriorityLabels[serviceOrder.priority]}
                                     </p>
                                 </div>
 
-                                <div className="rounded-xl border border-slate-800/80 bg-slate-900/40 p-3.5">
-                                    <p className="text-[11px] font-semibold uppercase tracking-wider text-slate-500">
+                                <div className="rounded-lg border border-slate-800/80 bg-slate-950/40 p-3">
+                                    <p className="text-[10px] font-semibold uppercase tracking-wider text-slate-500">
                                         Criada em
                                     </p>
-                                    <p className="mt-1 text-sm font-bold text-slate-200">
+                                    <p className="mt-1 font-mono text-xs sm:text-sm text-slate-200">
                                         {new Date(serviceOrder.created_at).toLocaleDateString('pt-BR')}
                                     </p>
                                 </div>
 
-                                <div className="rounded-xl border border-slate-800/80 bg-slate-900/40 p-3.5">
-                                    <p className="text-[11px] font-semibold uppercase tracking-wider text-slate-500">
+                                <div className="rounded-lg border border-slate-800/80 bg-slate-950/40 p-3">
+                                    <p className="text-[10px] font-semibold uppercase tracking-wider text-slate-500">
                                         Prazo Limite
                                     </p>
-                                    <p className="mt-1 text-sm font-bold text-slate-200">
+                                    <p className="mt-1 font-mono text-xs sm:text-sm font-semibold text-slate-200">
                                         {serviceOrder.due_date
                                             ? formatDateOnlyPtBr(serviceOrder.due_date)
                                             : 'Não definido'}
@@ -288,20 +271,19 @@ export default function ServiceOrderDetailsPage({
 
                             {/* Ajuste de Prazo */}
                             <form
-                                className="border-t border-slate-800/80 pt-5"
+                                className="border-t border-slate-800/80 pt-4"
                                 onSubmit={(event) => {
                                     event.preventDefault();
                                     void updateDeadline(dueDateDraft || null);
                                 }}
                             >
                                 <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
-                                    <div className="w-full sm:max-w-xs">
+                                    <div className="w-full sm:max-w-xs space-y-1">
                                         <label
                                             htmlFor="service-order-due-date"
-                                            className="mb-1.5 flex items-center gap-1.5 text-xs font-semibold text-slate-300"
+                                            className="text-xs font-semibold text-slate-300"
                                         >
-                                            <CalendarClock className="h-3.5 w-3.5 text-teal-400" />
-                                            <span>Ajustar prazo de execução</span>
+                                            Ajustar prazo de execução
                                         </label>
                                         <input
                                             id="service-order-due-date"
@@ -309,17 +291,17 @@ export default function ServiceOrderDetailsPage({
                                             value={dueDateDraft}
                                             onChange={(event) => setDueDateDraft(event.target.value)}
                                             disabled={isUpdatingDeadline}
-                                            className="w-full rounded-xl border border-slate-700 bg-slate-900 px-3.5 py-2 text-sm text-slate-100 outline-none transition focus:border-teal-500 disabled:opacity-60 [color-scheme:dark]"
+                                            className="w-full rounded-lg border border-slate-700 bg-slate-900 px-3 py-1.5 text-xs text-slate-100 outline-none transition focus:border-teal-500 disabled:opacity-60 [color-scheme:dark]"
                                         />
                                     </div>
 
-                                    <div className="flex flex-wrap gap-2">
+                                    <div className="flex items-center gap-2">
                                         {serviceOrder.due_date && (
                                             <button
                                                 type="button"
                                                 onClick={() => void updateDeadline(null)}
                                                 disabled={isUpdatingDeadline}
-                                                className="rounded-xl border border-slate-800 bg-slate-900/80 px-4 py-2 text-xs font-medium text-slate-300 transition hover:bg-slate-800 hover:text-white disabled:opacity-60"
+                                                className="rounded-lg border border-slate-700 px-3 py-1.5 text-xs font-medium text-slate-300 transition hover:bg-slate-800 disabled:opacity-60"
                                             >
                                                 Remover prazo
                                             </button>
@@ -328,7 +310,7 @@ export default function ServiceOrderDetailsPage({
                                         <button
                                             type="submit"
                                             disabled={isUpdatingDeadline}
-                                            className="rounded-xl bg-gradient-to-r from-teal-600 to-emerald-600 px-4 py-2 text-xs font-semibold text-white shadow-sm shadow-teal-900/30 transition-all hover:from-teal-500 hover:to-emerald-500 disabled:opacity-60"
+                                            className="rounded-lg bg-teal-500 px-3.5 py-1.5 text-xs font-bold text-slate-950 transition hover:bg-teal-400 disabled:opacity-60"
                                         >
                                             {isUpdatingDeadline ? 'Salvando...' : 'Salvar prazo'}
                                         </button>
@@ -336,125 +318,95 @@ export default function ServiceOrderDetailsPage({
                                 </div>
 
                                 {deadlineError && (
-                                    <p className="mt-3 text-xs text-red-400 bg-red-950/30 border border-red-900/50 p-2.5 rounded-lg flex items-center gap-2">
-                                        <AlertCircle className="h-4 w-4 shrink-0" />
-                                        <span>{deadlineError}</span>
+                                    <p className="mt-2 text-xs text-red-400">
+                                        {deadlineError}
                                     </p>
                                 )}
 
                                 {deadlineSuccess && (
-                                    <p className="mt-3 text-xs text-emerald-400 bg-emerald-950/30 border border-emerald-900/50 p-2.5 rounded-lg flex items-center gap-2">
-                                        <CheckCircle className="h-4 w-4 shrink-0" />
-                                        <span>{deadlineSuccess}</span>
+                                    <p className="mt-2 text-xs text-emerald-400">
+                                        {deadlineSuccess}
                                     </p>
                                 )}
                             </form>
                         </div>
 
                         {/* Seção do Equipamento Vinculado */}
-                        <section className="mt-6 rounded-2xl border border-slate-800/90 bg-slate-950/80 p-5 sm:p-6 shadow-sm space-y-4">
-                            <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+                        <section className="rounded-xl border border-slate-800 bg-slate-900/60 p-5 space-y-3">
+                            <div className="flex items-center justify-between border-b border-slate-800 pb-3">
                                 <div>
-                                    <div className="inline-flex items-center gap-1.5 rounded-full border border-teal-500/30 bg-teal-500/10 px-2.5 py-0.5 text-xs font-semibold text-teal-300 mb-1.5">
-                                        <Cpu className="h-3.5 w-3.5" />
-                                        <span>Equipamento Vinculado</span>
-                                    </div>
-
-                                    <h2 className="text-lg font-bold text-white sm:text-xl">
-                                        {serviceOrder.equipment.name}
+                                    <h2 className="text-sm font-bold uppercase tracking-wider text-slate-300">
+                                        Equipamento Vinculado
                                     </h2>
-
-                                    <p className="mt-0.5 text-xs text-slate-400">
-                                        Ativo e localização associados a esta solicitação.
-                                    </p>
                                 </div>
 
                                 <Link
                                     href={`/equipamentos/${serviceOrder.equipment.id}`}
-                                    className="inline-flex items-center gap-1.5 rounded-xl border border-teal-500/30 bg-teal-500/10 px-3 py-1.5 text-xs font-semibold text-teal-300 transition hover:bg-teal-500/20"
+                                    className="text-xs font-semibold text-teal-400 hover:underline"
                                 >
-                                    <span>Ver Equipamento</span>
-                                    <ArrowUpRight className="h-3.5 w-3.5" />
+                                    Ver Detalhes do Ativo
                                 </Link>
                             </div>
 
-                            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                                <div className="flex items-center gap-2.5 rounded-xl border border-slate-800/80 bg-slate-900/40 p-3">
-                                    <Tag className="h-4 w-4 text-teal-400 shrink-0" />
-                                    <div>
-                                        <p className="text-[10px] uppercase tracking-wider text-slate-500">Patrimônio</p>
-                                        <p className="font-mono text-xs font-bold text-slate-200">
-                                            {serviceOrder.equipment.patrimony_code}
-                                        </p>
-                                    </div>
+                            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs">
+                                <div className="rounded-lg border border-slate-800/80 bg-slate-950/40 p-3">
+                                    <p className="text-[10px] uppercase tracking-wider text-slate-500">Nome</p>
+                                    <p className="font-semibold text-slate-200 mt-0.5">{serviceOrder.equipment.name}</p>
                                 </div>
 
-                                <div className="flex items-center gap-2.5 rounded-xl border border-slate-800/80 bg-slate-900/40 p-3">
-                                    <MapPin className="h-4 w-4 text-teal-400 shrink-0" />
-                                    <div>
-                                        <p className="text-[10px] uppercase tracking-wider text-slate-500">Localização</p>
-                                        <p className="text-xs font-bold text-slate-200">
-                                            {serviceOrder.equipment.location}
-                                        </p>
-                                    </div>
+                                <div className="rounded-lg border border-slate-800/80 bg-slate-950/40 p-3">
+                                    <p className="text-[10px] uppercase tracking-wider text-slate-500">Patrimônio</p>
+                                    <p className="font-mono text-slate-200 mt-0.5">{serviceOrder.equipment.patrimony_code}</p>
                                 </div>
 
-                                <div className="flex items-center gap-2.5 rounded-xl border border-slate-800/80 bg-slate-900/40 p-3">
-                                    <Cpu className="h-4 w-4 text-teal-400 shrink-0" />
-                                    <div>
-                                        <p className="text-[10px] uppercase tracking-wider text-slate-500">Status Ativo</p>
-                                        <span className={`inline-flex rounded-full border px-2 py-0.5 text-[10px] font-semibold mt-0.5 ${equipmentStatusStyles[serviceOrder.equipment.status]}`}>
+                                <div className="rounded-lg border border-slate-800/80 bg-slate-950/40 p-3">
+                                    <p className="text-[10px] uppercase tracking-wider text-slate-500">Localização / Status</p>
+                                    <p className="text-slate-200 mt-0.5 flex items-center gap-1.5">
+                                        <span>{serviceOrder.equipment.location}</span>
+                                        <span>·</span>
+                                        <span className={equipmentStatusStyles[serviceOrder.equipment.status]}>
                                             {equipmentStatusLabels[serviceOrder.equipment.status]}
                                         </span>
-                                    </div>
+                                    </p>
                                 </div>
                             </div>
                         </section>
 
                         {/* Seção do Histórico da Ordem */}
-                        <section className="mt-6 rounded-2xl border border-slate-800/90 bg-slate-950/80 p-5 sm:p-6 shadow-sm space-y-4">
-                            <div>
-                                <div className="inline-flex items-center gap-1.5 rounded-full border border-teal-500/30 bg-teal-500/10 px-2.5 py-0.5 text-xs font-semibold text-teal-300 mb-1.5">
-                                    <History className="h-3.5 w-3.5" />
-                                    <span>Auditoria & Histórico</span>
-                                </div>
-
-                                <h2 className="text-lg font-bold text-white sm:text-xl">
-                                    Alterações Registradas
+                        <section className="rounded-xl border border-slate-800 bg-slate-900/60 p-5 space-y-3">
+                            <div className="border-b border-slate-800 pb-3">
+                                <h2 className="text-sm font-bold uppercase tracking-wider text-slate-300">
+                                    Histórico de Alterações ({serviceOrder.history.length})
                                 </h2>
-
-                                <p className="mt-0.5 text-xs text-slate-400">
-                                    Rastreabilidade das mudanças de status e prazos desta ordem.
-                                </p>
                             </div>
 
                             {serviceOrder.history.length === 0 ? (
-                                <div className="rounded-xl border border-dashed border-slate-800 p-6 text-center text-xs text-slate-500">
+                                <p className="text-xs text-slate-500 py-2">
                                     Nenhuma alteração registrada até o momento.
-                                </div>
+                                </p>
                             ) : (
-                                <div className="space-y-2.5">
+                                <div className="space-y-2">
                                     {serviceOrder.history.map((item) => (
                                         <article
                                             key={item.id}
-                                            className="rounded-xl border border-slate-800/70 bg-slate-900/40 p-3.5 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2"
+                                            className="rounded-lg border border-slate-800/70 bg-slate-950/40 p-3 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2"
                                         >
                                             <div>
-                                                <p className="text-xs sm:text-sm font-semibold text-slate-200">
+                                                <p className="text-xs font-semibold text-slate-200">
                                                     {getHistoryDescription(item)}
                                                 </p>
-                                                <p className="text-[11px] font-mono text-slate-500 mt-0.5">
+                                                <p className="text-[10px] font-mono text-slate-500 mt-0.5">
                                                     {new Date(item.created_at).toLocaleString('pt-BR')}
                                                 </p>
                                             </div>
 
                                             {item.previous_status && item.new_status && (
                                                 <div className="flex items-center gap-1.5 self-start sm:self-auto">
-                                                    <span className={`rounded-full border px-2 py-0.5 text-[10px] font-semibold ${serviceOrderStatusStyles[item.previous_status]}`}>
+                                                    <span className={`rounded-full border px-2 py-0.5 text-[10px] font-medium ${serviceOrderStatusStyles[item.previous_status]}`}>
                                                         {serviceOrderStatusLabels[item.previous_status]}
                                                     </span>
-                                                    <ArrowRight className="h-3 w-3 text-slate-500" />
-                                                    <span className={`rounded-full border px-2 py-0.5 text-[10px] font-semibold ${serviceOrderStatusStyles[item.new_status]}`}>
+                                                    <ArrowRight className="h-3 w-3 text-slate-600" />
+                                                    <span className={`rounded-full border px-2 py-0.5 text-[10px] font-medium ${serviceOrderStatusStyles[item.new_status]}`}>
                                                         {serviceOrderStatusLabels[item.new_status]}
                                                     </span>
                                                 </div>

@@ -69,6 +69,29 @@ function LoginForm() {
     const redirectTo = getSafeRedirectPath(searchParams.get("redirect"));
 
 
+    const handleDemoLogin = async () => {
+        const demoEmail = "demo@manutflow.com";
+        const demoPassword = "Demo@123456";
+        setEmail(demoEmail);
+        setPassword(demoPassword);
+        setLoading(true);
+        setError(null);
+
+        const { error } = await supabase.auth.signInWithPassword({
+            email: demoEmail,
+            password: demoPassword,
+        });
+
+        if (error) {
+            setError("Conta demo não encontrada ou credenciais inválidas. Verifique se o usuário foi criado no Supabase Auth.");
+            setLoading(false);
+            return;
+        }
+
+        router.push(redirectTo);
+        router.refresh();
+    };
+
     const handleLogin = async (e: React.FormEvent) => {
         e.preventDefault();
         setLoading(true);
@@ -96,11 +119,49 @@ function LoginForm() {
             {/* Card Principal */}
             <div className="relative w-full max-w-md p-8 bg-slate-900/80 backdrop-blur-md border border-slate-800 rounded-2xl shadow-2xl z-10">
 
-                <div className="space-y-2 text-center mb-8">
+                <div className="space-y-2 text-center mb-6">
                     <h1 className="text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-teal-400 to-emerald-300 tracking-tight">
                         ManutFlow
                     </h1>
                     <p className="text-slate-400 text-sm">Bem-vindo de volta! Entre na sua conta.</p>
+                </div>
+
+                {/* Demo Quick Access */}
+                <div className="mb-6 p-4 bg-teal-950/30 border border-teal-800/50 rounded-xl">
+                    <div className="flex items-center justify-between gap-2 mb-2">
+                        <span className="text-xs font-semibold uppercase tracking-wider text-teal-400 flex items-center gap-1.5">
+                            <span className="inline-block w-2 h-2 rounded-full bg-teal-500 animate-pulse" />
+                            Acesso de Demonstração (1-Clique)
+                        </span>
+                        <span className="text-[11px] px-2 py-0.5 rounded font-mono font-medium bg-teal-900/50 text-teal-300">
+                            Teste
+                        </span>
+                    </div>
+                    <p className="text-xs text-slate-300 mb-3">
+                        Acesse o dashboard com equipamentos e ordens de serviço pré-carregados:
+                    </p>
+                    <button
+                        type="button"
+                        disabled={loading}
+                        onClick={handleDemoLogin}
+                        className="w-full py-2.5 px-3 bg-slate-900/90 hover:bg-slate-800 border border-teal-500/50 hover:border-teal-400 rounded-lg text-teal-300 hover:text-teal-200 font-medium text-xs flex items-center justify-center gap-2 transition-all shadow-sm"
+                    >
+                        <svg
+                            className="w-4 h-4 text-teal-400"
+                            xmlns="http://www.w3.org/2000/svg"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            strokeWidth="2"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            aria-hidden="true"
+                        >
+                            <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2" />
+                            <circle cx="12" cy="7" r="4" />
+                        </svg>
+                        <span>Acessar como Gestor de Manutenção (Demo)</span>
+                    </button>
                 </div>
 
                 <form onSubmit={handleLogin} className="space-y-5">

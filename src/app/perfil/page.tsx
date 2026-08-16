@@ -2,18 +2,6 @@
 
 import { useEffect, useState, type FormEvent } from 'react';
 import { AppShell } from '@/components/layout/app-shell';
-import { 
-    User, 
-    Briefcase, 
-    Phone, 
-    Mail, 
-    Calendar, 
-    Save, 
-    CheckCircle, 
-    AlertCircle, 
-    Loader2, 
-    ShieldCheck 
-} from 'lucide-react';
 
 type Profile = {
     id: string;
@@ -110,18 +98,12 @@ export default function PerfilPage() {
     if (isLoading) {
         return (
             <AppShell>
-                <section className="mx-auto max-w-2xl px-4 py-8 sm:px-6 sm:py-12">
-                    <div className="animate-pulse space-y-6">
-                        <div className="h-8 w-40 rounded-lg bg-slate-800" />
-                        <div className="h-4 w-64 rounded bg-slate-800/60" />
-                        <div className="rounded-2xl border border-slate-800 bg-slate-950/70 p-6 space-y-5">
-                            {[1, 2, 3, 4, 5].map((i) => (
-                                <div key={i}>
-                                    <div className="mb-1.5 h-3 w-24 rounded bg-slate-800/60" />
-                                    <div className="h-10 rounded-xl bg-slate-800/40" />
-                                </div>
-                            ))}
-                        </div>
+                <section className="mx-auto max-w-xl px-4 py-6 sm:px-6 sm:py-8 space-y-4">
+                    <div className="h-6 w-32 rounded bg-slate-800 animate-pulse" />
+                    <div className="rounded-xl border border-slate-800 bg-slate-900/40 p-6 space-y-4">
+                        {[1, 2, 3].map((i) => (
+                            <div key={i} className="h-8 rounded bg-slate-800/40 animate-pulse" />
+                        ))}
                     </div>
                 </section>
             </AppShell>
@@ -131,10 +113,9 @@ export default function PerfilPage() {
     if (errorMessage && !profile) {
         return (
             <AppShell>
-                <section className="mx-auto max-w-2xl px-4 py-8 sm:px-6 sm:py-12">
-                    <div className="rounded-2xl border border-red-500/30 bg-red-500/10 p-6 flex items-start gap-3">
-                        <AlertCircle className="h-5 w-5 text-red-400 shrink-0 mt-0.5" />
-                        <p className="text-sm text-red-300">{errorMessage}</p>
+                <section className="mx-auto max-w-xl px-4 py-6 sm:px-6 sm:py-8">
+                    <div className="rounded-xl border border-red-500/30 bg-red-500/10 p-4">
+                        <p className="text-xs sm:text-sm text-red-300">{errorMessage}</p>
                     </div>
                 </section>
             </AppShell>
@@ -143,61 +124,54 @@ export default function PerfilPage() {
 
     return (
         <AppShell>
-            <section className="mx-auto max-w-2xl px-4 py-8 sm:px-6 sm:py-12">
-                {/* Header de Perfil com Avatar */}
-                <div className="mb-8 flex items-center gap-4">
-                    <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-teal-400 to-emerald-500 text-2xl font-extrabold text-slate-950 shadow-md shadow-teal-500/20">
+            <section className="mx-auto max-w-xl px-4 py-6 sm:px-6 sm:py-8 space-y-6">
+                {/* Header de Perfil */}
+                <div className="flex items-center gap-3 border-b border-slate-800 pb-5">
+                    <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-teal-500 text-lg font-bold text-slate-950 font-mono">
                         {userInitial}
                     </div>
                     <div>
-                        <div className="inline-flex items-center gap-1.5 rounded-full bg-teal-500/10 border border-teal-500/20 px-2.5 py-0.5 text-xs font-semibold text-teal-400 mb-1">
-                            <ShieldCheck className="h-3 w-3" />
-                            <span>Conta do Sistema</span>
-                        </div>
-                        <h1 className="text-2xl font-bold text-slate-100 sm:text-3xl tracking-tight">Meu Perfil</h1>
-                        <p className="text-xs sm:text-sm text-slate-400">Gerencie suas informações pessoais e credenciais.</p>
+                        <h1 className="text-xl font-bold text-slate-100 tracking-tight">Meu Perfil</h1>
+                        <p className="text-xs text-slate-400">Informações da sua conta e cargo.</p>
                     </div>
                 </div>
 
-                <form onSubmit={handleSubmit} className="rounded-2xl border border-slate-800/90 bg-slate-950/80 p-5 sm:p-7 shadow-sm">
-                    <div className="space-y-5">
+                <form onSubmit={handleSubmit} className="rounded-xl border border-slate-800 bg-slate-900/60 p-5 sm:p-6 space-y-4">
+                    <div className="space-y-4">
                         {/* Nome */}
                         <div>
-                            <label htmlFor="fullName" className="mb-1.5 flex items-center gap-1.5 text-xs font-semibold text-slate-300">
-                                <User className="h-3.5 w-3.5 text-teal-400" />
-                                <span>Nome completo</span>
+                            <label htmlFor="fullName" className="block text-xs font-medium text-slate-300 mb-1">
+                                Nome completo
                             </label>
                             <input
                                 id="fullName"
                                 type="text"
                                 value={fullName}
                                 onChange={(e) => setFullName(e.target.value)}
-                                placeholder="Seu nome completo"
-                                className="w-full rounded-xl border border-slate-700 bg-slate-900 px-4 py-2.5 text-sm text-slate-100 outline-none transition placeholder:text-slate-600 focus:border-teal-500 focus:ring-1 focus:ring-teal-500"
+                                placeholder="Seu nome"
+                                className="w-full rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-xs sm:text-sm text-slate-100 outline-none transition focus:border-teal-500"
                             />
                         </div>
 
                         {/* Cargo */}
                         <div>
-                            <label htmlFor="role" className="mb-1.5 flex items-center gap-1.5 text-xs font-semibold text-slate-300">
-                                <Briefcase className="h-3.5 w-3.5 text-teal-400" />
-                                <span>Cargo / Função</span>
+                            <label htmlFor="role" className="block text-xs font-medium text-slate-300 mb-1">
+                                Cargo / Função
                             </label>
                             <input
                                 id="role"
                                 type="text"
                                 value={role}
                                 onChange={(e) => setRole(e.target.value)}
-                                placeholder="Ex: Gestor de Manutenção / Técnico"
-                                className="w-full rounded-xl border border-slate-700 bg-slate-900 px-4 py-2.5 text-sm text-slate-100 outline-none transition placeholder:text-slate-600 focus:border-teal-500 focus:ring-1 focus:ring-teal-500"
+                                placeholder="Ex: Gestor de Manutenção"
+                                className="w-full rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-xs sm:text-sm text-slate-100 outline-none transition focus:border-teal-500"
                             />
                         </div>
 
                         {/* Telefone */}
                         <div>
-                            <label htmlFor="phone" className="mb-1.5 flex items-center gap-1.5 text-xs font-semibold text-slate-300">
-                                <Phone className="h-3.5 w-3.5 text-teal-400" />
-                                <span>Telefone</span>
+                            <label htmlFor="phone" className="block text-xs font-medium text-slate-300 mb-1">
+                                Telefone
                             </label>
                             <input
                                 id="phone"
@@ -205,77 +179,62 @@ export default function PerfilPage() {
                                 value={phone}
                                 onChange={(e) => setPhone(e.target.value)}
                                 placeholder="Ex: (11) 99999-8888"
-                                className="w-full rounded-xl border border-slate-700 bg-slate-900 px-4 py-2.5 text-sm text-slate-100 outline-none transition placeholder:text-slate-600 focus:border-teal-500 focus:ring-1 focus:ring-teal-500"
+                                className="w-full rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-xs sm:text-sm text-slate-100 outline-none transition focus:border-teal-500"
                             />
                         </div>
 
-                        {/* Divisória */}
-                        <hr className="border-slate-800/80 my-4" />
+                        <hr className="border-slate-800 my-2" />
 
                         {/* Email (read-only) */}
                         <div>
-                            <label htmlFor="email" className="mb-1.5 flex items-center gap-1.5 text-xs font-semibold text-slate-400">
-                                <Mail className="h-3.5 w-3.5 text-slate-500" />
-                                <span>Email da conta (autenticação)</span>
+                            <label htmlFor="email" className="block text-xs font-medium text-slate-400 mb-1">
+                                E-mail (autenticação)
                             </label>
                             <input
                                 id="email"
                                 type="text"
                                 value={profile?.email ?? ''}
                                 readOnly
-                                className="w-full rounded-xl border border-slate-800 bg-slate-900/40 px-4 py-2.5 text-sm text-slate-400 font-mono outline-none cursor-not-allowed"
+                                className="w-full rounded-lg border border-slate-800 bg-slate-950/50 px-3 py-2 text-xs sm:text-sm text-slate-400 font-mono outline-none cursor-not-allowed"
                             />
                         </div>
 
                         {/* Data de criação (read-only) */}
                         <div>
-                            <label htmlFor="createdAt" className="mb-1.5 flex items-center gap-1.5 text-xs font-semibold text-slate-400">
-                                <Calendar className="h-3.5 w-3.5 text-slate-500" />
-                                <span>Membro desde</span>
+                            <label htmlFor="createdAt" className="block text-xs font-medium text-slate-400 mb-1">
+                                Membro desde
                             </label>
                             <input
                                 id="createdAt"
                                 type="text"
                                 value={profile?.created_at ? formatDate(profile.created_at) : ''}
                                 readOnly
-                                className="w-full rounded-xl border border-slate-800 bg-slate-900/40 px-4 py-2.5 text-sm text-slate-400 outline-none cursor-not-allowed"
+                                className="w-full rounded-lg border border-slate-800 bg-slate-950/50 px-3 py-2 text-xs sm:text-sm text-slate-400 outline-none cursor-not-allowed"
                             />
                         </div>
                     </div>
 
                     {/* Mensagens de feedback */}
                     {successMessage && (
-                        <div className="mt-5 rounded-xl border border-emerald-500/30 bg-emerald-500/10 p-3 text-xs sm:text-sm text-emerald-300 flex items-center gap-2">
-                            <CheckCircle className="h-4 w-4 shrink-0" />
-                            <span>{successMessage}</span>
+                        <div className="rounded-lg border border-emerald-500/30 bg-emerald-500/10 p-3 text-xs text-emerald-300">
+                            {successMessage}
                         </div>
                     )}
 
                     {errorMessage && profile && (
-                        <div className="mt-5 rounded-xl border border-red-500/30 bg-red-500/10 p-3 text-xs sm:text-sm text-red-300 flex items-center gap-2">
-                            <AlertCircle className="h-4 w-4 shrink-0" />
-                            <span>{errorMessage}</span>
+                        <div className="rounded-lg border border-red-500/30 bg-red-500/10 p-3 text-xs text-red-300">
+                            {errorMessage}
                         </div>
                     )}
 
                     {/* Botão salvar */}
-                    <div className="mt-6 flex justify-end">
+                    <div className="pt-2 flex justify-end">
                         <button
                             type="submit"
                             disabled={isSaving}
-                            className="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-teal-600 to-emerald-600 px-5 py-2.5 text-sm font-semibold text-white shadow-md shadow-teal-900/30 transition-all hover:from-teal-500 hover:to-emerald-500 active:scale-95 disabled:cursor-not-allowed disabled:opacity-60"
+                            className="rounded-lg bg-teal-500 px-4 py-2 text-xs font-bold text-slate-950 transition hover:bg-teal-400 disabled:opacity-60"
                         >
-                            {isSaving ? (
-                                <>
-                                    <Loader2 className="h-4 w-4 animate-spin" />
-                                    <span>Salvando...</span>
-                                </>
-                            ) : (
-                                <>
-                                    <Save className="h-4 w-4 stroke-[2.2]" />
-                                    <span>Salvar alterações</span>
-                                </>
-                            )}
+                            {isSaving ? 'Salvando...' : 'Salvar Alterações'}
                         </button>
                     </div>
                 </form>
@@ -283,3 +242,4 @@ export default function PerfilPage() {
         </AppShell>
     );
 }
+

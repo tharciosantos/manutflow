@@ -18,6 +18,18 @@ import {
     Tooltip,
     ResponsiveContainer,
 } from 'recharts';
+import { 
+    Cpu, 
+    Clock, 
+    CheckCircle2, 
+    AlertOctagon, 
+    AlertTriangle, 
+    CalendarClock, 
+    ArrowUpRight, 
+    Layers,
+    BarChart3,
+    Activity
+} from 'lucide-react';
 
 type RecentOrder = {
     id: string;
@@ -80,11 +92,11 @@ async function fetchDashboardSummary(): Promise<DashboardSummary> {
     return response.json();
 }
 
-const priorityConfig: Record<string, { label: string; color: string; barColor: string }> = {
-    low: { label: 'Baixa', color: 'text-slate-400', barColor: '#94a3b8' },
-    medium: { label: 'Média', color: 'text-yellow-300', barColor: '#fbbf24' },
-    high: { label: 'Alta', color: 'text-orange-300', barColor: '#fb923c' },
-    critical: { label: 'Crítica', color: 'text-red-300', barColor: '#f87171' },
+const priorityConfig: Record<string, { label: string; color: string; barColor: string; bgBadge: string }> = {
+    low: { label: 'Baixa', color: 'text-slate-400', barColor: '#94a3b8', bgBadge: 'bg-slate-800/80 text-slate-300 border-slate-700' },
+    medium: { label: 'Média', color: 'text-amber-300', barColor: '#f59e0b', bgBadge: 'bg-amber-950/40 text-amber-300 border-amber-800/50' },
+    high: { label: 'Alta', color: 'text-orange-300', barColor: '#f97316', bgBadge: 'bg-orange-950/40 text-orange-300 border-orange-800/50' },
+    critical: { label: 'Crítica', color: 'text-red-300', barColor: '#ef4444', bgBadge: 'bg-red-950/50 text-red-300 border-red-800/60' },
 };
 
 function formatDate(dateStr: string) {
@@ -128,7 +140,6 @@ export function DashboardOverview() {
 
     void loadDashboardSummary();
 
-    // Auto-refresh ao voltar para a aba
     function handleVisibilityChange() {
       if (document.visibilityState === 'visible') {
         void loadDashboardSummary();
@@ -174,20 +185,16 @@ export function DashboardOverview() {
     const s = summary!;
 
     return (
-        <div className="mt-6 space-y-6 sm:mt-10">
-            {/* Cards de status */}
+        <div className="space-y-8">
+            {/* Cards de status principais */}
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
                 <StatusCard
                     title="Equipamentos"
                     value={String(s.totalEquipments)}
                     description="Máquinas e ativos cadastrados"
-                    cardClassName="border-teal-500/20 bg-gradient-to-br from-slate-900 to-slate-900/50"
+                    cardClassName="border-teal-500/25 bg-gradient-to-br from-slate-900/90 to-slate-950/80 hover:border-teal-500/40 hover:shadow-lg hover:shadow-teal-500/5 transition-all"
                     valueClassName="text-teal-300"
-                    icon={
-                        <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-                            <path strokeLinecap="round" strokeLinejoin="round" d="M9.53 16.122a3 3 0 00-5.78 1.128 2.25 2.25 0 01-2.4 2.245 4.5 4.5 0 008.4-2.245c0-.399-.078-.78-.22-1.128zm0 0a15.998 15.998 0 003.388-1.62m-5.043-.025a15.994 15.994 0 011.622-3.395m3.42 3.42a15.995 15.995 0 004.764-4.648l3.876-5.814a1.151 1.151 0 00-1.597-1.597L14.146 6.32a15.996 15.996 0 00-4.649 4.763m3.42 3.42a6.776 6.776 0 00-3.42-3.42" />
-                        </svg>
-                    }
+                    icon={<Cpu className="h-5 w-5 text-teal-400" />}
                 />
 
                 <StatusCard
@@ -196,13 +203,9 @@ export function DashboardOverview() {
                     description="Aguardando atendimento"
                     trend={s.criticalPriorityServiceOrders > 0 ? `${s.criticalPriorityServiceOrders} críticas` : ''}
                     trendUp={false}
-                    cardClassName="border-amber-500/20 bg-gradient-to-br from-slate-900 to-slate-900/50"
+                    cardClassName="border-amber-500/25 bg-gradient-to-br from-slate-900/90 to-slate-950/80 hover:border-amber-500/40 hover:shadow-lg hover:shadow-amber-500/5 transition-all"
                     valueClassName="text-amber-300"
-                    icon={
-                        <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-                            <path strokeLinecap="round" strokeLinejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" />
-                        </svg>
-                    }
+                    icon={<Clock className="h-5 w-5 text-amber-400" />}
                 />
 
                 <StatusCard
@@ -211,113 +214,150 @@ export function DashboardOverview() {
                     description={`${s.completionRate}% de conclusão`}
                     trend={s.totalServiceOrders > 0 ? `${s.totalServiceOrders} total` : ''}
                     trendUp
-                    cardClassName="border-emerald-500/20 bg-gradient-to-br from-slate-900 to-slate-900/50"
+                    cardClassName="border-emerald-500/25 bg-gradient-to-br from-slate-900/90 to-slate-950/80 hover:border-emerald-500/40 hover:shadow-lg hover:shadow-emerald-500/5 transition-all"
                     valueClassName="text-emerald-300"
-                    icon={
-                        <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-                            <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                        </svg>
-                    }
+                    icon={<CheckCircle2 className="h-5 w-5 text-emerald-400" />}
                 />
             </div>
 
-            <section>
-                <div className="mb-4 flex items-end justify-between gap-4">
+            {/* Prazos das Ordens */}
+            <section className="space-y-4">
+                <div className="flex items-end justify-between gap-4">
                     <div>
-                        <h2 className="text-lg font-semibold text-white">Prazos das ordens</h2>
-                        <p className="mt-1 text-sm text-slate-400">
-                            Acompanhe vencimentos que exigem atenção.
+                        <div className="flex items-center gap-2">
+                            <Activity className="h-4 w-4 text-teal-400" />
+                            <h2 className="text-lg font-bold text-white tracking-tight">Prazos das ordens</h2>
+                        </div>
+                        <p className="mt-0.5 text-xs sm:text-sm text-slate-400">
+                            Acompanhe vencimentos que exigem ação preventiva imediata.
                         </p>
                     </div>
 
                     <Link
                         href="/ordens"
-                        className="shrink-0 text-xs font-medium text-teal-300 transition hover:text-teal-200 sm:text-sm"
+                        className="inline-flex items-center gap-1 shrink-0 text-xs font-semibold text-teal-400 transition hover:text-teal-300"
                     >
-                        Ver todas
+                        <span>Ver todas</span>
+                        <ArrowUpRight className="h-3.5 w-3.5" />
                     </Link>
                 </div>
 
-                <div className="grid gap-3 sm:grid-cols-3 sm:gap-4">
+                <div className="grid gap-3.5 sm:grid-cols-3">
                     <Link
                         href="/ordens?deadline=overdue"
-                        className="group rounded-2xl border border-red-500/25 bg-red-500/5 p-4 transition hover:border-red-400/50 hover:bg-red-500/10"
+                        className="group rounded-2xl border border-red-500/25 bg-gradient-to-br from-red-950/20 to-slate-950/70 p-4 transition-all duration-200 hover:border-red-500/50 hover:shadow-md hover:shadow-red-500/10"
                     >
-                        <p className="text-xs font-medium text-red-300 sm:text-sm">Atrasadas</p>
-                        <strong className="mt-2 block text-2xl font-bold text-red-200 sm:text-3xl">
+                        <div className="flex items-center justify-between">
+                            <span className="text-xs font-semibold text-red-300">Atrasadas</span>
+                            <div className="p-1.5 rounded-lg bg-red-500/10 text-red-400 group-hover:scale-110 transition-transform">
+                                <AlertOctagon className="h-4 w-4" />
+                            </div>
+                        </div>
+                        <strong className="mt-2 block text-2xl sm:text-3xl font-extrabold text-red-200">
                             {s.overdueServiceOrders}
                         </strong>
-                        <p className="mt-1 text-xs text-slate-400">Prazo já vencido</p>
+                        <p className="mt-1 text-[11px] font-medium text-red-400/80">Prazo já expirado</p>
                     </Link>
 
                     <Link
                         href="/ordens?deadline=today"
-                        className="group rounded-2xl border border-amber-500/25 bg-amber-500/5 p-4 transition hover:border-amber-400/50 hover:bg-amber-500/10"
+                        className="group rounded-2xl border border-amber-500/25 bg-gradient-to-br from-amber-950/20 to-slate-950/70 p-4 transition-all duration-200 hover:border-amber-500/50 hover:shadow-md hover:shadow-amber-500/10"
                     >
-                        <p className="text-xs font-medium text-amber-300 sm:text-sm">Vencem hoje</p>
-                        <strong className="mt-2 block text-2xl font-bold text-amber-200 sm:text-3xl">
+                        <div className="flex items-center justify-between">
+                            <span className="text-xs font-semibold text-amber-300">Vencem hoje</span>
+                            <div className="p-1.5 rounded-lg bg-amber-500/10 text-amber-400 group-hover:scale-110 transition-transform">
+                                <AlertTriangle className="h-4 w-4" />
+                            </div>
+                        </div>
+                        <strong className="mt-2 block text-2xl sm:text-3xl font-extrabold text-amber-200">
                             {s.dueTodayServiceOrders}
                         </strong>
-                        <p className="mt-1 text-xs text-slate-400">Atenção imediata</p>
+                        <p className="mt-1 text-[11px] font-medium text-amber-400/80">Atenção e execução hoje</p>
                     </Link>
 
                     <Link
                         href="/ordens?deadline=next_7_days"
-                        className="group rounded-2xl border border-sky-500/25 bg-sky-500/5 p-4 transition hover:border-sky-400/50 hover:bg-sky-500/10"
+                        className="group rounded-2xl border border-sky-500/25 bg-gradient-to-br from-sky-950/20 to-slate-950/70 p-4 transition-all duration-200 hover:border-sky-500/50 hover:shadow-md hover:shadow-sky-500/10"
                     >
-                        <p className="text-xs font-medium text-sky-300 sm:text-sm">Próximos 7 dias</p>
-                        <strong className="mt-2 block text-2xl font-bold text-sky-200 sm:text-3xl">
+                        <div className="flex items-center justify-between">
+                            <span className="text-xs font-semibold text-sky-300">Próximos 7 dias</span>
+                            <div className="p-1.5 rounded-lg bg-sky-500/10 text-sky-400 group-hover:scale-110 transition-transform">
+                                <CalendarClock className="h-4 w-4" />
+                            </div>
+                        </div>
+                        <strong className="mt-2 block text-2xl sm:text-3xl font-extrabold text-sky-200">
                             {s.dueNextSevenDaysServiceOrders}
                         </strong>
-                        <p className="mt-1 text-xs text-slate-400">Planejamento próximo</p>
+                        <p className="mt-1 text-[11px] font-medium text-sky-400/80">Planejamento da semana</p>
                     </Link>
                 </div>
             </section>
 
             {/* Grid: Gráfico + Prioridades */}
             <div className="grid gap-6 lg:grid-cols-3">
-                {/* Gráfico de ordens por mês */}
-                <section className="rounded-2xl border border-slate-800 bg-slate-950/70 p-5 lg:col-span-2">
-                    <h3 className="text-sm font-medium text-slate-400">Ordens nos últimos 6 meses</h3>
+                {/* Gráfico de ordens por mês com Gradiente */}
+                <section className="rounded-2xl border border-slate-800/90 bg-slate-950/80 p-5 lg:col-span-2 shadow-sm">
+                    <div className="flex items-center justify-between mb-4">
+                        <div className="flex items-center gap-2">
+                            <BarChart3 className="h-4 w-4 text-teal-400" />
+                            <h3 className="text-sm font-semibold text-slate-200">Ordens nos últimos 6 meses</h3>
+                        </div>
+                        <span className="text-xs font-mono text-slate-500">Histórico mensal</span>
+                    </div>
 
                     <div className="mt-4 h-56">
                         {s.ordersByMonth.some((m) => m.count > 0) ? (
                             <ResponsiveContainer width="100%" height="100%">
-                                <BarChart data={s.ordersByMonth} margin={{ top: 5, right: 10, left: -10, bottom: 5 }}>
-                                    <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" />
+                                <BarChart data={s.ordersByMonth} margin={{ top: 10, right: 10, left: -15, bottom: 0 }}>
+                                    <defs>
+                                        <linearGradient id="barTealGradient" x1="0" y1="0" x2="0" y2="1">
+                                            <stop offset="0%" stopColor="#2dd4bf" stopOpacity={1} />
+                                            <stop offset="100%" stopColor="#0f766e" stopOpacity={0.8} />
+                                        </linearGradient>
+                                    </defs>
+                                    <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" vertical={false} />
                                     <XAxis
                                         dataKey="month"
-                                        tick={{ fill: '#94a3b8', fontSize: 12 }}
+                                        tick={{ fill: '#94a3b8', fontSize: 11 }}
                                         axisLine={{ stroke: '#334155' }}
                                         tickLine={false}
                                     />
                                     <YAxis
                                         allowDecimals={false}
-                                        tick={{ fill: '#94a3b8', fontSize: 12 }}
+                                        tick={{ fill: '#94a3b8', fontSize: 11 }}
                                         axisLine={{ stroke: '#334155' }}
                                         tickLine={false}
                                     />
                                     <Tooltip
-                                        cursor={{ fill: '#1e293b' }}
-                                        contentStyle={{ backgroundColor: '#0f172a', border: '1px solid #1e293b', borderRadius: '12px', fontSize: '13px' }}
-                                        labelStyle={{ color: '#e2e8f0', fontWeight: 600 }}
-                                        itemStyle={{ color: '#cbd5e1' }}
+                                        cursor={{ fill: '#1e293b', opacity: 0.4 }}
+                                        contentStyle={{ 
+                                            backgroundColor: '#090d16', 
+                                            border: '1px solid #334155', 
+                                            borderRadius: '12px', 
+                                            fontSize: '12px',
+                                            boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.5)'
+                                        }}
+                                        labelStyle={{ color: '#f1f5f9', fontWeight: 700 }}
+                                        itemStyle={{ color: '#2dd4bf' }}
                                         formatter={(value) => [`${value} ordem${Number(value) !== 1 ? 'ns' : ''}`, 'Total']}
                                     />
-                                    <Bar dataKey="count" fill="#14b8a6" radius={[4, 4, 0, 0]} maxBarSize={40} />
+                                    <Bar dataKey="count" fill="url(#barTealGradient)" radius={[6, 6, 0, 0]} maxBarSize={36} />
                                 </BarChart>
                             </ResponsiveContainer>
                         ) : (
-                            <div className="flex h-full items-center justify-center text-sm text-slate-500">
+                            <div className="flex h-full items-center justify-center text-xs sm:text-sm text-slate-500">
                                 Nenhuma ordem registrada nos últimos 6 meses.
                             </div>
                         )}
                     </div>
                 </section>
 
-                {/* Prioridades */}
-                <section className="rounded-2xl border border-slate-800 bg-slate-950/70 p-5">
-                    <h3 className="text-sm font-medium text-slate-400">Ordens por Prioridade</h3>
+                {/* Prioridades com Barra de Progresso */}
+                <section className="rounded-2xl border border-slate-800/90 bg-slate-950/80 p-5 shadow-sm">
+                    <div className="flex items-center gap-2 mb-4">
+                        <Layers className="h-4 w-4 text-teal-400" />
+                        <h3 className="text-sm font-semibold text-slate-200">Ordens por Prioridade</h3>
+                    </div>
 
                     <div className="mt-4 space-y-4">
                         {(['critical', 'high', 'medium', 'low'] as const).map((key) => {
@@ -332,13 +372,16 @@ export function DashboardOverview() {
                             const barWidth = maxCount > 0 ? (count / maxCount) * 100 : 0;
 
                             return (
-                                <div key={key}>
-                                    <div className="mb-1 flex items-center justify-between text-xs">
-                                        <span className={config.color}>{config.label}</span>
-                                        <span className="font-medium text-slate-300">{count}</span>
+                                <div key={key} className="space-y-1.5">
+                                    <div className="flex items-center justify-between text-xs">
+                                        <span className={`font-semibold ${config.color}`}>{config.label}</span>
+                                        <span className="font-mono font-bold text-slate-200">{count}</span>
                                     </div>
-                                    <div className="h-1.5 overflow-hidden rounded-full bg-slate-800">
-                                        <div className="h-full rounded-full transition-all duration-500" style={{ width: `${barWidth}%`, backgroundColor: config.barColor }} />
+                                    <div className="h-2 overflow-hidden rounded-full bg-slate-900 border border-slate-800">
+                                        <div 
+                                            className="h-full rounded-full transition-all duration-700 ease-out" 
+                                            style={{ width: `${barWidth}%`, backgroundColor: config.barColor }} 
+                                        />
                                     </div>
                                 </div>
                             );
@@ -347,28 +390,30 @@ export function DashboardOverview() {
                 </section>
             </div>
 
-            <section className="rounded-2xl border border-slate-800 bg-slate-950/70 p-5">
+            {/* Ordens com Prazo Urgente */}
+            <section className="rounded-2xl border border-slate-800/90 bg-slate-950/80 p-5 shadow-sm space-y-4">
                 <div className="flex items-end justify-between gap-4">
                     <div>
-                        <h3 className="text-sm font-medium text-slate-300">Ordens com prazo mais urgente</h3>
-                        <p className="mt-1 text-xs text-slate-500">
-                            Atrasadas e vencimentos dos próximos 7 dias.
+                        <h3 className="text-sm font-semibold text-slate-200">Ordens com prazo mais urgente</h3>
+                        <p className="mt-0.5 text-xs text-slate-500">
+                            Atrasadas e vencimentos dos próximos 7 dias que necessitam de triagem.
                         </p>
                     </div>
 
                     <Link
                         href="/ordens?sort=due_asc"
-                        className="shrink-0 text-xs font-medium text-teal-300 transition hover:text-teal-200"
+                        className="inline-flex items-center gap-1 shrink-0 text-xs font-semibold text-teal-400 transition hover:text-teal-300"
                     >
-                        Ver por prazo
+                        <span>Ver por prazo</span>
+                        <ArrowUpRight className="h-3.5 w-3.5" />
                     </Link>
                 </div>
 
-                <div className="mt-4 space-y-2">
+                <div className="space-y-2.5">
                     {s.urgentOrders.length === 0 ? (
-                        <p className="rounded-xl border border-dashed border-slate-800 px-4 py-6 text-center text-sm text-slate-500">
-                            Nenhum prazo urgente no momento.
-                        </p>
+                        <div className="rounded-xl border border-dashed border-slate-800 p-8 text-center text-xs sm:text-sm text-slate-500">
+                            Nenhum prazo urgente no momento. Todas as ordens estão em dia! ✨
+                        </div>
                     ) : (
                         s.urgentOrders.map((order) => {
                             const equipmentName = Array.isArray(order.equipment)
@@ -379,16 +424,14 @@ export function DashboardOverview() {
                                 <Link
                                     key={order.id}
                                     href={`/ordens/${order.id}`}
-                                    className="flex flex-col gap-3 rounded-xl border border-slate-800/70 bg-slate-900/30 p-3 transition hover:border-slate-700 sm:flex-row sm:items-center sm:justify-between"
+                                    className="group flex flex-col gap-3 rounded-xl border border-slate-800/80 bg-slate-900/40 p-3.5 transition-all duration-200 hover:border-teal-500/40 hover:bg-slate-900/80 sm:flex-row sm:items-center sm:justify-between"
                                 >
                                     <div className="min-w-0">
-                                        <p className="truncate text-sm font-medium text-slate-200">
+                                        <p className="truncate text-sm font-semibold text-slate-100 group-hover:text-teal-300 transition-colors">
                                             {order.title}
                                         </p>
-                                        <p className="mt-0.5 truncate text-xs text-slate-500">
-                                            {equipmentName ?? 'Equipamento não informado'}
-                                            {' · '}
-                                            {serviceOrderPriorityLabels[order.priority]}
+                                        <p className="mt-0.5 truncate text-xs text-slate-400">
+                                            {`${equipmentName ?? 'Equipamento não informado'} · ${serviceOrderPriorityLabels[order.priority]}`}
                                         </p>
                                     </div>
 
@@ -406,12 +449,12 @@ export function DashboardOverview() {
             {/* Grid: Atividades Recentes */}
             <div className="grid gap-6 lg:grid-cols-2">
                 {/* Últimas ordens */}
-                <section className="rounded-2xl border border-slate-800 bg-slate-950/70 p-5">
-                    <h3 className="text-sm font-medium text-slate-400">Últimas Ordens de Serviço</h3>
+                <section className="rounded-2xl border border-slate-800/90 bg-slate-950/80 p-5 shadow-sm">
+                    <h3 className="text-sm font-semibold text-slate-300 mb-4">Últimas Ordens de Serviço</h3>
 
-                    <div className="mt-4 space-y-3">
+                    <div className="space-y-2.5">
                         {s.recentOrders.length === 0 ? (
-                            <p className="text-sm text-slate-500">Nenhuma ordem registrada.</p>
+                            <p className="text-xs text-slate-500">Nenhuma ordem registrada.</p>
                         ) : (
                             s.recentOrders.map((order) => {
                                 const equipName = Array.isArray(order.equipment)
@@ -419,19 +462,19 @@ export function DashboardOverview() {
                                     : (order.equipment as { name: string })?.name;
 
                                 return (
-                                    <div key={order.id} className="flex items-start gap-3 rounded-xl border border-slate-800/50 bg-slate-900/30 p-3 transition hover:border-slate-700">
-                                        <span className={`mt-0.5 h-2 w-2 shrink-0 rounded-full ${order.status === 'open' ? 'bg-amber-400' : order.status === 'in_progress' ? 'bg-orange-400' : 'bg-emerald-400'}`} />
+                                    <div key={order.id} className="flex items-start gap-3 rounded-xl border border-slate-800/60 bg-slate-900/30 p-3 transition hover:border-slate-700">
+                                        <span className={`mt-1.5 h-2 w-2 shrink-0 rounded-full ${order.status === 'open' ? 'bg-amber-400 ring-2 ring-amber-400/20' : order.status === 'in_progress' ? 'bg-orange-400 ring-2 ring-orange-400/20' : 'bg-emerald-400 ring-2 ring-emerald-400/20'}`} />
                                         <div className="min-w-0 flex-1">
-                                            <p className="truncate text-sm font-medium text-slate-200">{order.title}</p>
-                                            <p className="mt-0.5 text-xs text-slate-500">
+                                            <p className="truncate text-xs sm:text-sm font-semibold text-slate-200">{order.title}</p>
+                                            <p className="mt-0.5 text-xs text-slate-400">
                                                 {equipName ?? 'Equipamento não informado'}
                                                 {' · '}
-                                                <span className={order.priority === 'critical' ? 'text-red-400' : order.priority === 'high' ? 'text-orange-400' : 'text-slate-400'}>
+                                                <span className={order.priority === 'critical' ? 'text-red-400 font-medium' : order.priority === 'high' ? 'text-orange-400 font-medium' : 'text-slate-400'}>
                                                     {priorityConfig[order.priority as keyof typeof priorityConfig]?.label ?? order.priority}
                                                 </span>
                                             </p>
                                         </div>
-                                        <span className="shrink-0 text-xs text-slate-600">{formatDate(order.created_at)}</span>
+                                        <span className="shrink-0 text-[11px] font-mono text-slate-500">{formatDate(order.created_at)}</span>
                                     </div>
                                 );
                             })
@@ -440,29 +483,29 @@ export function DashboardOverview() {
                 </section>
 
                 {/* Últimos equipamentos */}
-                <section className="rounded-2xl border border-slate-800 bg-slate-950/70 p-5">
-                    <h3 className="text-sm font-medium text-slate-400">Últimos Equipamentos Cadastrados</h3>
+                <section className="rounded-2xl border border-slate-800/90 bg-slate-950/80 p-5 shadow-sm">
+                    <h3 className="text-sm font-semibold text-slate-300 mb-4">Últimos Equipamentos Cadastrados</h3>
 
-                    <div className="mt-4 space-y-3">
+                    <div className="space-y-2.5">
                         {s.recentEquipments.length === 0 ? (
-                            <p className="text-sm text-slate-500">Nenhum equipamento cadastrado.</p>
+                            <p className="text-xs text-slate-500">Nenhum equipamento cadastrado.</p>
                         ) : (
                             s.recentEquipments.map((equipment) => (
-                                <div key={equipment.id} className="flex items-start gap-3 rounded-xl border border-slate-800/50 bg-slate-900/30 p-3 transition hover:border-slate-700">
-                                    <svg className="mt-0.5 h-4 w-4 shrink-0 text-slate-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-                                        <path strokeLinecap="round" strokeLinejoin="round" d="M9.53 16.122a3 3 0 00-5.78 1.128 2.25 2.25 0 01-2.4 2.245 4.5 4.5 0 008.4-2.245c0-.399-.078-.78-.22-1.128zm0 0a15.998 15.998 0 003.388-1.62m-5.043-.025a15.994 15.994 0 011.622-3.395m3.42 3.42a15.995 15.995 0 004.764-4.648l3.876-5.814a1.151 1.151 0 00-1.597-1.597L14.146 6.32a15.996 15.996 0 00-4.649 4.763m3.42 3.42a6.776 6.776 0 00-3.42-3.42" />
-                                    </svg>
+                                <div key={equipment.id} className="flex items-start gap-3 rounded-xl border border-slate-800/60 bg-slate-900/30 p-3 transition hover:border-slate-700">
+                                    <div className="p-1 rounded-md bg-slate-800/80 text-teal-400 shrink-0 mt-0.5">
+                                        <Cpu className="h-3.5 w-3.5" />
+                                    </div>
                                     <div className="min-w-0 flex-1">
-                                        <p className="truncate text-sm font-medium text-slate-200">{equipment.name}</p>
-                                        <p className="mt-0.5 text-xs text-slate-500">
-                                            {equipment.patrimony_code}
-                                            {' · '}
-                                            <span className={equipment.status === 'active' ? 'text-teal-400' : equipment.status === 'maintenance' ? 'text-amber-400' : 'text-slate-400'}>
+                                        <p className="truncate text-xs sm:text-sm font-semibold text-slate-200">{equipment.name}</p>
+                                        <p className="mt-0.5 text-xs text-slate-400 flex items-center gap-1.5">
+                                            <span className="font-mono text-slate-300">{equipment.patrimony_code}</span>
+                                            <span>·</span>
+                                            <span className={equipment.status === 'active' ? 'text-teal-400 font-medium' : equipment.status === 'maintenance' ? 'text-amber-400 font-medium' : 'text-slate-400'}>
                                                 {equipment.status === 'active' ? 'Ativo' : equipment.status === 'maintenance' ? 'Em manutenção' : 'Inativo'}
                                             </span>
                                         </p>
                                     </div>
-                                    <span className="shrink-0 text-xs text-slate-600">{formatDate(equipment.created_at)}</span>
+                                    <span className="shrink-0 text-[11px] font-mono text-slate-500">{formatDate(equipment.created_at)}</span>
                                 </div>
                             ))
                         )}

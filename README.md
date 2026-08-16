@@ -6,7 +6,7 @@ O ManutFlow foi pensado para pequenas equipes e profissionais de manutenção qu
 
 ## Funcionalidades
 
-### 📊 Dashboard
+###  Dashboard
 - Indicadores em tempo real: total de equipamentos, ordens abertas e concluídas
 - Indicadores de prazo: ordens atrasadas, vencendo hoje e nos próximos 7 dias
 - Atalhos dos indicadores para a listagem com o filtro de prazo aplicado
@@ -17,7 +17,7 @@ O ManutFlow foi pensado para pequenas equipes e profissionais de manutenção qu
 - Taxa de conclusão (%) calculada automaticamente
 - Auto-refresh ao voltar para a aba (`visibilitychange`)
 
-### 🔧 Equipamentos
+###  Equipamentos
 - CRUD completo: cadastro, edição, listagem e exclusão
 - Busca textual por nome, patrimônio e localização
 - Filtro por status (ativo, inativo, em manutenção)
@@ -27,7 +27,7 @@ O ManutFlow foi pensado para pequenas equipes e profissionais de manutenção qu
 - Bloqueio de exclusão quando existem ordens vinculadas
 - Paginação server-side com limite ajustável (10, 20, 50)
 
-### 📋 Ordens de Serviço
+###  Ordens de Serviço
 - Cadastro vinculado a equipamentos, com prioridade e prazo opcional
 - Busca textual por título e descrição
 - Filtros combinados: status + prioridade + prazo
@@ -62,7 +62,7 @@ O ManutFlow foi pensado para pequenas equipes e profissionais de manutenção qu
 
 O modelo atual é de propriedade individual; não existem organizações nem papéis administrativos. Todo usuário autenticado pode criar equipamentos e ordens e pode listar, consultar, editar ou excluir somente os próprios registros. O campo `profiles.role` é apenas uma informação de perfil e não concede permissões. As APIs aplicam `user_id` e as policies RLS fornecem uma segunda camada de isolamento.
 
-### 📝 Logging
+###  Logging
 - Logger estruturado em JSON (`logger('level', 'event', data)`)
 - Logs de erro em todas as API routes
 - Logs de rate limit excedido
@@ -315,9 +315,15 @@ src/
 - Se for usar upload, configure o bucket e a coluna `photo_url`
 - Para prazos, garanta que a coluna `service_orders.due_date` e seu índice existam
 
-## Demonstração segura
+## Demonstração
 
-O repositório não inclui credenciais nem uma conta compartilhada. Para uma demonstração de portfólio, a opção recomendada é uma conta exclusiva do ambiente de demo, sem dados pessoais, preenchida apenas com registros fictícios identificáveis. Mantenha esse projeto Supabase separado de qualquer ambiente real e restaure os dados pelo fluxo normal da aplicação ou por um seed revisado. Não publique a service role e evite divulgar a senha no código ou nas capturas.
+- **Aplicação em produção:** [https://manutflow.vercel.app](https://manutflow.vercel.app)
+- **Repositório:** [https://github.com/tharciosantos/manutflow](https://github.com/tharciosantos/manutflow)
+
+A aplicação conta com **Acesso de Demonstração (1-Clique)** na tela de login:
+-  **Gestor de Manutenção (`Demo`):** `demo@manutflow.com` — acesso imediato ao dashboard com equipamentos, ordens de serviço, histórico e indicadores operacionais pré-carregados para avaliação do produto.
+
+Novos cadastros também podem ser criados normalmente pela tela de registro.
 
 ## Limitações conhecidas
 

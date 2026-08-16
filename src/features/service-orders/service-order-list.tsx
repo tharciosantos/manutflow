@@ -16,6 +16,17 @@ import { Modal } from '@/components/ui/modal';
 import { Pagination } from '@/components/ui/pagination';
 import { ServiceOrderDeadlineBadge } from './service-order-deadline-badge';
 import { formatDateOnlyPtBr } from './service-order-deadline';
+import { 
+    ClipboardList, 
+    Cpu, 
+    Tag, 
+    MapPin, 
+    Calendar, 
+    ArrowUpRight, 
+    Trash2, 
+    Plus, 
+    SearchX 
+} from 'lucide-react';
 
 type ServiceOrderListProps = {
     orders: ServiceOrder[];
@@ -165,37 +176,25 @@ export function ServiceOrderList({
         const hasSearch = searchTerm.trim().length > 0;
 
         return (
-            <div className="flex flex-col items-center justify-center rounded-2xl border border-dashed border-slate-700 bg-slate-950/30 px-6 py-16 text-center">
-                {/* Ilustração SVG */}
-                <svg
-                    className="mb-4 h-16 w-16 text-slate-600"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                    strokeWidth={1}
-                    aria-hidden="true"
-                >
-                    <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        d="M11.35 3.836c-.765.66-1.516 1.47-2.152 2.71a2.75 2.75 0 01-2.036 1.644 2.753 2.753 0 00-1.736 1.074A7.5 7.5 0 0112 2.25c2.07 0 3.944 1.18 4.83 3.02a2.754 2.754 0 001.736 1.074 2.752 2.752 0 012.036-1.644c.636-1.24 1.387-2.05 2.152-2.71M12 18.75c-2.07 0-3.944-1.18-4.83-3.02A2.752 2.752 0 006.434 14.28m0 0A7.5 7.5 0 0112 14.25a7.5 7.5 0 015.566 2.28m0 0a2.752 2.752 0 002.036 1.644c.636 1.24 1.387 2.05 2.152 2.71M6.434 14.28a2.75 2.75 0 00-1.736-1.074 2.753 2.753 0 00-2.036-1.644M3.75 12h.008v.008H3.75V12z"
-                    />
-                </svg>
+            <div className="flex flex-col items-center justify-center rounded-2xl border border-dashed border-slate-800 bg-slate-950/40 px-6 py-16 text-center">
+                <div className="mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-slate-900 border border-slate-800 text-slate-500">
+                    {hasActiveFilters ? <SearchX className="h-7 w-7" /> : <ClipboardList className="h-7 w-7 text-emerald-400/60" />}
+                </div>
 
-                <p className="text-base font-medium text-slate-300">
+                <p className="text-base font-semibold text-slate-200">
                     {hasActiveFilters
                         ? 'Nenhuma ordem encontrada'
                         : 'Nenhuma ordem de serviço cadastrada'}
                 </p>
 
-                <p className="mt-1 text-sm text-slate-500">
+                <p className="mt-1 text-sm text-slate-400 max-w-sm">
                     {hasActiveFilters
-                        ? 'Tente alterar os filtros ou buscar por outro termo.'
-                        : 'Crie sua primeira ordem de serviço para começar.'}
+                        ? 'Tente alterar os filtros aplicados ou buscar por outro termo.'
+                        : 'Crie sua primeira ordem de serviço para iniciar o controle de manutenção.'}
                 </p>
 
                 {hasActiveFilters && hasSearch && (
-                    <p className="mt-3 text-xs text-slate-600">
+                    <p className="mt-3 text-xs font-mono text-slate-500 bg-slate-900 px-3 py-1 rounded-md border border-slate-800">
                         Busca: &ldquo;{searchTerm.trim()}&rdquo;
                     </p>
                 )}
@@ -204,11 +203,9 @@ export function ServiceOrderList({
                     <button
                         type="button"
                         onClick={onCreateOrder}
-                        className="mt-6 inline-flex items-center gap-2 rounded-xl bg-teal-600 px-5 py-2.5 text-sm font-medium text-white transition hover:bg-teal-500"
+                        className="mt-6 inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 px-5 py-2.5 text-sm font-semibold text-white shadow-md shadow-emerald-900/30 transition-all hover:from-emerald-500 hover:to-teal-500"
                     >
-                        <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                            <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
-                        </svg>
+                        <Plus className="h-4 w-4 stroke-[2.5]" />
                         Criar Ordem de Serviço
                     </button>
                 )}
@@ -221,70 +218,84 @@ export function ServiceOrderList({
         <section className="space-y-4">
             <div className="flex flex-col gap-1 sm:flex-row sm:items-end sm:justify-between">
                 <div>
-                    <h2 className="text-lg font-semibold text-white sm:text-xl">
+                    <h2 className="text-lg font-bold text-white sm:text-xl tracking-tight">
                         Ordens cadastradas
                     </h2>
 
                     <p className="text-xs text-slate-400 sm:text-sm">
-                        Acompanhe as solicitações abertas e seus equipamentos vinculados.
+                        Acompanhe as solicitações, prioridades e equipamentos vinculados.
                     </p>
                 </div>
 
-                <span className="text-xs text-slate-500 sm:text-sm">
-                    {orders.length} {orders.length === 1 ? 'ordem' : 'ordens'}
+                <span className="text-xs font-mono text-slate-400 bg-slate-900/80 border border-slate-800 px-2.5 py-1 rounded-lg">
+                    {orders.length} {orders.length === 1 ? 'ordem encontrada' : 'ordens encontradas'}
                 </span>
             </div>
 
-            <div className="space-y-4">
+            <div className="space-y-3.5">
                 {orders.map((order) => (
                     <article
                         key={order.id}
-                        className="group rounded-2xl border border-slate-800 bg-slate-950/70 p-4 shadow-sm transition-all duration-200 hover:scale-[1.01] hover:border-teal-500/30 hover:shadow-lg hover:shadow-teal-500/5 sm:p-5"
+                        className="group flex flex-col justify-between rounded-2xl border border-slate-800/80 bg-slate-950/80 p-4 sm:p-5 shadow-sm transition-all duration-200 hover:border-emerald-500/40 hover:shadow-lg hover:shadow-emerald-500/5"
                     >
-                        <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
-                            <div className="min-w-0 space-y-2">
-                                <div>
-                                    <h3 className="text-sm font-semibold text-white sm:text-base">
-                                        {order.title}
-                                    </h3>
+                        <div>
+                            {/* Top row: Title + Priority */}
+                            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 mb-2.5">
+                                <h3 className="text-base font-bold text-slate-100 group-hover:text-emerald-300 transition-colors">
+                                    {order.title}
+                                </h3>
 
-                                    <p className="mt-0.5 text-xs text-slate-400 line-clamp-2 sm:text-sm">
-                                        {order.description || 'Sem descrição informada.'}
-                                    </p>
-                                </div>
-
-                                <div className="grid gap-0.5 text-xs text-slate-400 sm:gap-1 sm:text-sm">
-                                    <p className="truncate">
-                                        <span className="text-slate-500">Equipamento:</span>{' '}
-                                        <span className="text-slate-300">
-                                            {order.equipment.name}
-                                        </span>
-                                    </p>
-
-                                    <p className="truncate">
-                                        <span className="text-slate-500">Patrimônio:</span>{' '}
-                                        <span className="text-slate-300">
-                                            {order.equipment.patrimony_code}
-                                        </span>
-                                    </p>
-
-                                    <p className="truncate">
-                                        <span className="text-slate-500">Local:</span>{' '}
-                                        <span className="text-slate-300">
-                                            {order.equipment.location}
-                                        </span>
-                                    </p>
-
-                                    <p className="truncate">
-                                        <span className="text-slate-500">Prazo:</span>{' '}
-                                        <span className="text-slate-300">
-                                            {order.due_date ? formatDateOnlyPtBr(order.due_date) : 'Não definido'}
-                                        </span>
-                                    </p>
-                                </div>
+                                <span
+                                    className={`self-start sm:self-auto rounded-full border px-2.5 py-0.5 text-[11px] font-semibold ${serviceOrderPriorityStyles[order.priority]}`}
+                                >
+                                    {serviceOrderPriorityLabels[order.priority]}
+                                </span>
                             </div>
 
-                            <div className="flex flex-wrap items-center gap-1.5 sm:gap-2 lg:justify-end">
+                            <p className="text-xs sm:text-sm text-slate-400 line-clamp-2 mb-3.5">
+                                {order.description || 'Sem descrição detalhada informada.'}
+                            </p>
+
+                            {/* Meta Grid */}
+                            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2 text-xs text-slate-400 bg-slate-900/50 border border-slate-800/60 p-3 rounded-xl mb-4">
+                                <div className="flex items-center gap-1.5 min-w-0">
+                                    <Cpu className="h-3.5 w-3.5 text-teal-400 shrink-0" />
+                                    <span className="text-slate-500">Equip:</span>
+                                    <span className="font-semibold text-slate-200 truncate">
+                                        {order.equipment.name}
+                                    </span>
+                                </div>
+
+                                <div className="flex items-center gap-1.5 min-w-0">
+                                    <Tag className="h-3.5 w-3.5 text-teal-400 shrink-0" />
+                                    <span className="text-slate-500">Patrimônio:</span>
+                                    <span className="font-mono text-slate-300 truncate">
+                                        {order.equipment.patrimony_code}
+                                    </span>
+                                </div>
+
+                                <div className="flex items-center gap-1.5 min-w-0">
+                                    <MapPin className="h-3.5 w-3.5 text-teal-400 shrink-0" />
+                                    <span className="text-slate-500">Local:</span>
+                                    <span className="text-slate-300 truncate">
+                                        {order.equipment.location}
+                                    </span>
+                                </div>
+
+                                <div className="flex items-center gap-1.5 min-w-0">
+                                    <Calendar className="h-3.5 w-3.5 text-teal-400 shrink-0" />
+                                    <span className="text-slate-500">Prazo:</span>
+                                    <span className="text-slate-300 truncate">
+                                        {order.due_date ? formatDateOnlyPtBr(order.due_date) : 'Não definido'}
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Bottom action bar */}
+                        <div className="pt-3 border-t border-slate-800/80 flex flex-wrap items-center justify-between gap-2.5">
+                            <div className="flex items-center gap-2">
+                                <span className="text-xs text-slate-500 hidden sm:inline">Status:</span>
                                 <select
                                     value={order.status}
                                     disabled={updatingStatusOrderId === order.id}
@@ -295,7 +306,7 @@ export function ServiceOrderList({
                                         )
                                     }
                                     aria-label={`Alterar status da ordem ${order.title}`}
-                                    className={`rounded-full border px-2.5 py-1 text-[11px] font-medium outline-none transition disabled:cursor-not-allowed disabled:opacity-60 sm:px-3 sm:py-1 sm:text-xs ${serviceOrderStatusStyles[order.status]}`}
+                                    className={`rounded-xl border px-3 py-1.5 text-xs font-semibold outline-none transition disabled:cursor-not-allowed disabled:opacity-60 bg-slate-900 cursor-pointer ${serviceOrderStatusStyles[order.status]}`}
                                 >
                                     <option value="open" className="bg-slate-950 text-slate-100">
                                         {serviceOrderStatusLabels.open}
@@ -308,28 +319,32 @@ export function ServiceOrderList({
                                     </option>
                                 </select>
 
-                                <span
-                                    className={`rounded-full border px-2.5 py-1 text-[11px] font-medium sm:px-3 sm:py-1 sm:text-xs ${serviceOrderPriorityStyles[order.priority]}`}
-                                >
-                                    {serviceOrderPriorityLabels[order.priority]}
-                                </span>
                                 <ServiceOrderDeadlineBadge
                                     dueDate={order.due_date}
                                     status={order.status}
                                 />
+                            </div>
+
+                            <div className="flex items-center gap-2">
                                 <Link
                                     href={`/ordens/${order.id}`}
-                                    className="rounded-full border border-teal-500/30 px-2.5 py-1 text-[11px] font-medium text-teal-300 transition hover:bg-teal-500/10 sm:px-3 sm:py-1 sm:text-xs"
+                                    className="inline-flex items-center gap-1.5 rounded-xl border border-emerald-500/30 bg-emerald-500/10 px-3 py-1.5 text-xs font-semibold text-emerald-300 transition-all hover:bg-emerald-500/20 hover:border-emerald-400/50"
                                 >
-                                    Detalhes
+                                    <span>Ver Detalhes</span>
+                                    <ArrowUpRight className="h-3.5 w-3.5" />
                                 </Link>
+
                                 <button
                                     type="button"
                                     onClick={() => openDeleteModal(order.id)}
                                     disabled={deletingOrderId === order.id}
-                                    className="rounded-full border border-red-500/30 px-2.5 py-1 text-[11px] font-medium text-red-300 transition hover:bg-red-500/10 disabled:cursor-not-allowed disabled:opacity-60 sm:px-3 sm:py-1 sm:text-xs"
+                                    className="inline-flex items-center gap-1 rounded-xl border border-slate-800 bg-slate-900/60 px-2.5 py-1.5 text-xs font-medium text-slate-400 transition-all hover:border-red-500/40 hover:bg-red-500/10 hover:text-red-300 disabled:cursor-not-allowed disabled:opacity-50"
+                                    title="Excluir ordem de serviço"
                                 >
-                                    {deletingOrderId === order.id ? 'Excluindo...' : 'Excluir'}
+                                    <Trash2 className="h-3.5 w-3.5 text-red-400" />
+                                    <span className="hidden sm:inline">
+                                        {deletingOrderId === order.id ? 'Excluindo...' : 'Excluir'}
+                                    </span>
                                 </button>
                             </div>
                         </div>

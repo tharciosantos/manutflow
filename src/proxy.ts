@@ -12,7 +12,7 @@ export async function proxy(request: NextRequest) {
     // ROTAS PÚBLICAS (não precisam de autenticação)
     // ==========================================
     const publicRoutes = ["/login", "/register", "/auth/callback"];
-    const isPublicRoute = publicRoutes.some((route) => pathname.startsWith(route));
+    const isPublicRoute = pathname === "/" || publicRoutes.some((route) => pathname.startsWith(route));
 
     // ==========================================
     // NÃO AUTENTICADO + ROTA PROTEGIDA → REDIRECIONAR
@@ -26,9 +26,10 @@ export async function proxy(request: NextRequest) {
     }
 
     // ==========================================
-    // AUTENTICADO + ROTA PÚBLICA → HOME
+    // AUTENTICADO + TELA DE LOGIN/CADASTRO → HOME
     // ==========================================
-    if (user && isPublicRoute) {
+    const isAuthRoute = pathname.startsWith("/login") || pathname.startsWith("/register");
+    if (user && isAuthRoute) {
         const homeUrl = request.nextUrl.clone();
         homeUrl.pathname = "/";
         return NextResponse.redirect(homeUrl);

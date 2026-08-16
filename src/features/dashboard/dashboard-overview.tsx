@@ -18,18 +18,7 @@ import {
     Tooltip,
     ResponsiveContainer,
 } from 'recharts';
-import { 
-    Cpu, 
-    Clock, 
-    CheckCircle2, 
-    AlertOctagon, 
-    AlertTriangle, 
-    CalendarClock, 
-    ArrowUpRight, 
-    Layers,
-    BarChart3,
-    Activity
-} from 'lucide-react';
+import { ArrowUpRight } from 'lucide-react';
 
 type RecentOrder = {
     id: string;
@@ -92,11 +81,11 @@ async function fetchDashboardSummary(): Promise<DashboardSummary> {
     return response.json();
 }
 
-const priorityConfig: Record<string, { label: string; color: string; barColor: string; bgBadge: string }> = {
-    low: { label: 'Baixa', color: 'text-slate-400', barColor: '#94a3b8', bgBadge: 'bg-slate-800/80 text-slate-300 border-slate-700' },
-    medium: { label: 'Média', color: 'text-amber-300', barColor: '#f59e0b', bgBadge: 'bg-amber-950/40 text-amber-300 border-amber-800/50' },
-    high: { label: 'Alta', color: 'text-orange-300', barColor: '#f97316', bgBadge: 'bg-orange-950/40 text-orange-300 border-orange-800/50' },
-    critical: { label: 'Crítica', color: 'text-red-300', barColor: '#ef4444', bgBadge: 'bg-red-950/50 text-red-300 border-red-800/60' },
+const priorityConfig: Record<string, { label: string; color: string; barColor: string }> = {
+    low: { label: 'Baixa', color: 'text-slate-400', barColor: '#64748b' },
+    medium: { label: 'Média', color: 'text-amber-400', barColor: '#f59e0b' },
+    high: { label: 'Alta', color: 'text-orange-400', barColor: '#f97316' },
+    critical: { label: 'Crítica', color: 'text-red-400', barColor: '#ef4444' },
 };
 
 function formatDate(dateStr: string) {
@@ -156,19 +145,15 @@ export function DashboardOverview() {
 
     if (isLoading) {
         return (
-            <div className="mt-6 space-y-6">
+            <div className="space-y-6">
                 <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
                     {[1, 2, 3].map((i) => (
-                        <div key={i} className="animate-pulse rounded-2xl border border-slate-800 bg-slate-950/70 p-6">
-                            <div className="h-4 w-20 rounded bg-slate-800" />
+                        <div key={i} className="animate-pulse rounded-xl border border-slate-800 bg-slate-900/40 p-5">
+                            <div className="h-3 w-20 rounded bg-slate-800" />
                             <div className="mt-3 h-8 w-16 rounded bg-slate-800" />
                             <div className="mt-2 h-3 w-32 rounded bg-slate-800/60" />
                         </div>
                     ))}
-                </div>
-                <div className="animate-pulse rounded-2xl border border-slate-800 bg-slate-950/70 p-6">
-                    <div className="h-5 w-40 rounded bg-slate-800" />
-                    <div className="mt-6 h-48 rounded bg-slate-800/40" />
                 </div>
             </div>
         );
@@ -176,8 +161,8 @@ export function DashboardOverview() {
 
     if (errorMessage) {
         return (
-            <div className="mt-6 rounded-2xl border border-red-500/30 bg-red-500/10 p-6">
-                <p className="text-sm text-red-300">{errorMessage}</p>
+            <div className="rounded-xl border border-red-500/30 bg-red-500/10 p-4">
+                <p className="text-xs sm:text-sm text-red-300">{errorMessage}</p>
             </div>
         );
     }
@@ -185,16 +170,14 @@ export function DashboardOverview() {
     const s = summary!;
 
     return (
-        <div className="space-y-8">
-            {/* Cards de status principais */}
-            <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+        <div className="space-y-6">
+            {/* 3 Stat Cards Principais */}
+            <div className="grid grid-cols-1 gap-3.5 sm:grid-cols-3">
                 <StatusCard
                     title="Equipamentos"
                     value={String(s.totalEquipments)}
-                    description="Máquinas e ativos cadastrados"
-                    cardClassName="border-teal-500/25 bg-gradient-to-br from-slate-900/90 to-slate-950/80 hover:border-teal-500/40 hover:shadow-lg hover:shadow-teal-500/5 transition-all"
-                    valueClassName="text-teal-300"
-                    icon={<Cpu className="h-5 w-5 text-teal-400" />}
+                    description="Ativos cadastrados"
+                    valueClassName="text-slate-100"
                 />
 
                 <StatusCard
@@ -203,118 +186,87 @@ export function DashboardOverview() {
                     description="Aguardando atendimento"
                     trend={s.criticalPriorityServiceOrders > 0 ? `${s.criticalPriorityServiceOrders} críticas` : ''}
                     trendUp={false}
-                    cardClassName="border-amber-500/25 bg-gradient-to-br from-slate-900/90 to-slate-950/80 hover:border-amber-500/40 hover:shadow-lg hover:shadow-amber-500/5 transition-all"
-                    valueClassName="text-amber-300"
-                    icon={<Clock className="h-5 w-5 text-amber-400" />}
+                    valueClassName="text-amber-400"
                 />
 
                 <StatusCard
                     title="Concluídas"
                     value={String(s.closedServiceOrders)}
-                    description={`${s.completionRate}% de conclusão`}
+                    description={`${s.completionRate}% de taxa de resolução`}
                     trend={s.totalServiceOrders > 0 ? `${s.totalServiceOrders} total` : ''}
                     trendUp
-                    cardClassName="border-emerald-500/25 bg-gradient-to-br from-slate-900/90 to-slate-950/80 hover:border-emerald-500/40 hover:shadow-lg hover:shadow-emerald-500/5 transition-all"
-                    valueClassName="text-emerald-300"
-                    icon={<CheckCircle2 className="h-5 w-5 text-emerald-400" />}
+                    valueClassName="text-emerald-400"
                 />
             </div>
 
             {/* Prazos das Ordens */}
-            <section className="space-y-4">
-                <div className="flex items-end justify-between gap-4">
-                    <div>
-                        <div className="flex items-center gap-2">
-                            <Activity className="h-4 w-4 text-teal-400" />
-                            <h2 className="text-lg font-bold text-white tracking-tight">Prazos das ordens</h2>
-                        </div>
-                        <p className="mt-0.5 text-xs sm:text-sm text-slate-400">
-                            Acompanhe vencimentos que exigem ação preventiva imediata.
-                        </p>
-                    </div>
-
+            <section className="space-y-3">
+                <div className="flex items-center justify-between">
+                    <h2 className="text-sm font-bold uppercase tracking-wider text-slate-300">Prazos das ordens</h2>
                     <Link
                         href="/ordens"
-                        className="inline-flex items-center gap-1 shrink-0 text-xs font-semibold text-teal-400 transition hover:text-teal-300"
+                        className="inline-flex items-center gap-1 text-xs font-semibold text-teal-400 hover:underline"
                     >
                         <span>Ver todas</span>
-                        <ArrowUpRight className="h-3.5 w-3.5" />
+                        <ArrowUpRight className="h-3 w-3" />
                     </Link>
                 </div>
 
-                <div className="grid gap-3.5 sm:grid-cols-3">
+                <div className="grid gap-3 sm:grid-cols-3">
                     <Link
                         href="/ordens?deadline=overdue"
-                        className="group rounded-2xl border border-red-500/25 bg-gradient-to-br from-red-950/20 to-slate-950/70 p-4 transition-all duration-200 hover:border-red-500/50 hover:shadow-md hover:shadow-red-500/10"
+                        className="rounded-xl border border-slate-800 bg-slate-900/60 p-4 transition-colors hover:border-red-500/50 hover:bg-slate-900/90"
                     >
                         <div className="flex items-center justify-between">
-                            <span className="text-xs font-semibold text-red-300">Atrasadas</span>
-                            <div className="p-1.5 rounded-lg bg-red-500/10 text-red-400 group-hover:scale-110 transition-transform">
-                                <AlertOctagon className="h-4 w-4" />
-                            </div>
+                            <span className="text-xs font-semibold uppercase tracking-wider text-red-400">Atrasadas</span>
+                            <span className="text-[10px] font-mono text-red-400/80">SLA expirado</span>
                         </div>
-                        <strong className="mt-2 block text-2xl sm:text-3xl font-extrabold text-red-200">
+                        <strong className="mt-2 block font-mono text-2xl font-bold tabular-nums text-red-300">
                             {s.overdueServiceOrders}
                         </strong>
-                        <p className="mt-1 text-[11px] font-medium text-red-400/80">Prazo já expirado</p>
                     </Link>
 
                     <Link
                         href="/ordens?deadline=today"
-                        className="group rounded-2xl border border-amber-500/25 bg-gradient-to-br from-amber-950/20 to-slate-950/70 p-4 transition-all duration-200 hover:border-amber-500/50 hover:shadow-md hover:shadow-amber-500/10"
+                        className="rounded-xl border border-slate-800 bg-slate-900/60 p-4 transition-colors hover:border-amber-500/50 hover:bg-slate-900/90"
                     >
                         <div className="flex items-center justify-between">
-                            <span className="text-xs font-semibold text-amber-300">Vencem hoje</span>
-                            <div className="p-1.5 rounded-lg bg-amber-500/10 text-amber-400 group-hover:scale-110 transition-transform">
-                                <AlertTriangle className="h-4 w-4" />
-                            </div>
+                            <span className="text-xs font-semibold uppercase tracking-wider text-amber-400">Vencem hoje</span>
+                            <span className="text-[10px] font-mono text-amber-400/80">Ação imediata</span>
                         </div>
-                        <strong className="mt-2 block text-2xl sm:text-3xl font-extrabold text-amber-200">
+                        <strong className="mt-2 block font-mono text-2xl font-bold tabular-nums text-amber-300">
                             {s.dueTodayServiceOrders}
                         </strong>
-                        <p className="mt-1 text-[11px] font-medium text-amber-400/80">Atenção e execução hoje</p>
                     </Link>
 
                     <Link
                         href="/ordens?deadline=next_7_days"
-                        className="group rounded-2xl border border-sky-500/25 bg-gradient-to-br from-sky-950/20 to-slate-950/70 p-4 transition-all duration-200 hover:border-sky-500/50 hover:shadow-md hover:shadow-sky-500/10"
+                        className="rounded-xl border border-slate-800 bg-slate-900/60 p-4 transition-colors hover:border-sky-500/50 hover:bg-slate-900/90"
                     >
                         <div className="flex items-center justify-between">
-                            <span className="text-xs font-semibold text-sky-300">Próximos 7 dias</span>
-                            <div className="p-1.5 rounded-lg bg-sky-500/10 text-sky-400 group-hover:scale-110 transition-transform">
-                                <CalendarClock className="h-4 w-4" />
-                            </div>
+                            <span className="text-xs font-semibold uppercase tracking-wider text-sky-400">Próximos 7 dias</span>
+                            <span className="text-[10px] font-mono text-sky-400/80">Programadas</span>
                         </div>
-                        <strong className="mt-2 block text-2xl sm:text-3xl font-extrabold text-sky-200">
+                        <strong className="mt-2 block font-mono text-2xl font-bold tabular-nums text-sky-300">
                             {s.dueNextSevenDaysServiceOrders}
                         </strong>
-                        <p className="mt-1 text-[11px] font-medium text-sky-400/80">Planejamento da semana</p>
                     </Link>
                 </div>
             </section>
 
             {/* Grid: Gráfico + Prioridades */}
-            <div className="grid gap-6 lg:grid-cols-3">
-                {/* Gráfico de ordens por mês com Gradiente */}
-                <section className="rounded-2xl border border-slate-800/90 bg-slate-950/80 p-5 lg:col-span-2 shadow-sm">
+            <div className="grid gap-4 lg:grid-cols-3">
+                {/* Gráfico de ordens por mês */}
+                <section className="rounded-xl border border-slate-800 bg-slate-900/60 p-4 sm:p-5 lg:col-span-2">
                     <div className="flex items-center justify-between mb-4">
-                        <div className="flex items-center gap-2">
-                            <BarChart3 className="h-4 w-4 text-teal-400" />
-                            <h3 className="text-sm font-semibold text-slate-200">Ordens nos últimos 6 meses</h3>
-                        </div>
-                        <span className="text-xs font-mono text-slate-500">Histórico mensal</span>
+                        <h3 className="text-xs font-bold uppercase tracking-wider text-slate-300">Ordens nos últimos 6 meses</h3>
+                        <span className="text-xs font-mono text-slate-500">Histórico</span>
                     </div>
 
-                    <div className="mt-4 h-56">
+                    <div className="h-52">
                         {s.ordersByMonth.some((m) => m.count > 0) ? (
                             <ResponsiveContainer width="100%" height="100%">
-                                <BarChart data={s.ordersByMonth} margin={{ top: 10, right: 10, left: -15, bottom: 0 }}>
-                                    <defs>
-                                        <linearGradient id="barTealGradient" x1="0" y1="0" x2="0" y2="1">
-                                            <stop offset="0%" stopColor="#2dd4bf" stopOpacity={1} />
-                                            <stop offset="100%" stopColor="#0f766e" stopOpacity={0.8} />
-                                        </linearGradient>
-                                    </defs>
+                                <BarChart data={s.ordersByMonth} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
                                     <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" vertical={false} />
                                     <XAxis
                                         dataKey="month"
@@ -333,33 +285,29 @@ export function DashboardOverview() {
                                         contentStyle={{ 
                                             backgroundColor: '#090d16', 
                                             border: '1px solid #334155', 
-                                            borderRadius: '12px', 
-                                            fontSize: '12px',
-                                            boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.5)'
+                                            borderRadius: '8px', 
+                                            fontSize: '12px'
                                         }}
-                                        labelStyle={{ color: '#f1f5f9', fontWeight: 700 }}
+                                        labelStyle={{ color: '#f1f5f9', fontWeight: 600 }}
                                         itemStyle={{ color: '#2dd4bf' }}
                                         formatter={(value) => [`${value} ordem${Number(value) !== 1 ? 'ns' : ''}`, 'Total']}
                                     />
-                                    <Bar dataKey="count" fill="url(#barTealGradient)" radius={[6, 6, 0, 0]} maxBarSize={36} />
+                                    <Bar dataKey="count" fill="#14b8a6" radius={[4, 4, 0, 0]} maxBarSize={32} />
                                 </BarChart>
                             </ResponsiveContainer>
                         ) : (
-                            <div className="flex h-full items-center justify-center text-xs sm:text-sm text-slate-500">
-                                Nenhuma ordem registrada nos últimos 6 meses.
+                            <div className="flex h-full items-center justify-center text-xs text-slate-500 font-mono">
+                                Nenhuma ordem registrada no período.
                             </div>
                         )}
                     </div>
                 </section>
 
-                {/* Prioridades com Barra de Progresso */}
-                <section className="rounded-2xl border border-slate-800/90 bg-slate-950/80 p-5 shadow-sm">
-                    <div className="flex items-center gap-2 mb-4">
-                        <Layers className="h-4 w-4 text-teal-400" />
-                        <h3 className="text-sm font-semibold text-slate-200">Ordens por Prioridade</h3>
-                    </div>
+                {/* Prioridades */}
+                <section className="rounded-xl border border-slate-800 bg-slate-900/60 p-4 sm:p-5">
+                    <h3 className="text-xs font-bold uppercase tracking-wider text-slate-300 mb-4">Por Prioridade</h3>
 
-                    <div className="mt-4 space-y-4">
+                    <div className="space-y-3.5">
                         {(['critical', 'high', 'medium', 'low'] as const).map((key) => {
                             const count =
                                 key === 'critical' ? s.criticalPriorityServiceOrders
@@ -372,14 +320,14 @@ export function DashboardOverview() {
                             const barWidth = maxCount > 0 ? (count / maxCount) * 100 : 0;
 
                             return (
-                                <div key={key} className="space-y-1.5">
+                                <div key={key} className="space-y-1">
                                     <div className="flex items-center justify-between text-xs">
-                                        <span className={`font-semibold ${config.color}`}>{config.label}</span>
+                                        <span className={`font-medium ${config.color}`}>{config.label}</span>
                                         <span className="font-mono font-bold text-slate-200">{count}</span>
                                     </div>
-                                    <div className="h-2 overflow-hidden rounded-full bg-slate-900 border border-slate-800">
+                                    <div className="h-1.5 overflow-hidden rounded-full bg-slate-800">
                                         <div 
-                                            className="h-full rounded-full transition-all duration-700 ease-out" 
+                                            className="h-full rounded-full" 
                                             style={{ width: `${barWidth}%`, backgroundColor: config.barColor }} 
                                         />
                                     </div>
@@ -391,29 +339,20 @@ export function DashboardOverview() {
             </div>
 
             {/* Ordens com Prazo Urgente */}
-            <section className="rounded-2xl border border-slate-800/90 bg-slate-950/80 p-5 shadow-sm space-y-4">
-                <div className="flex items-end justify-between gap-4">
-                    <div>
-                        <h3 className="text-sm font-semibold text-slate-200">Ordens com prazo mais urgente</h3>
-                        <p className="mt-0.5 text-xs text-slate-500">
-                            Atrasadas e vencimentos dos próximos 7 dias que necessitam de triagem.
-                        </p>
-                    </div>
-
+            <section className="rounded-xl border border-slate-800 bg-slate-900/60 p-4 sm:p-5 space-y-3">
+                <div className="flex items-center justify-between">
+                    <h3 className="text-xs font-bold uppercase tracking-wider text-slate-300">Ordens com prazo mais urgente</h3>
                     <Link
                         href="/ordens?sort=due_asc"
-                        className="inline-flex items-center gap-1 shrink-0 text-xs font-semibold text-teal-400 transition hover:text-teal-300"
+                        className="text-xs font-semibold text-teal-400 hover:underline"
                     >
-                        <span>Ver por prazo</span>
-                        <ArrowUpRight className="h-3.5 w-3.5" />
+                        Ver por prazo
                     </Link>
                 </div>
 
-                <div className="space-y-2.5">
+                <div className="space-y-2">
                     {s.urgentOrders.length === 0 ? (
-                        <div className="rounded-xl border border-dashed border-slate-800 p-8 text-center text-xs sm:text-sm text-slate-500">
-                            Nenhum prazo urgente no momento. Todas as ordens estão em dia! ✨
-                        </div>
+                        <p className="text-xs text-slate-500 py-2">Nenhum prazo urgente no momento.</p>
                     ) : (
                         s.urgentOrders.map((order) => {
                             const equipmentName = Array.isArray(order.equipment)
@@ -424,10 +363,10 @@ export function DashboardOverview() {
                                 <Link
                                     key={order.id}
                                     href={`/ordens/${order.id}`}
-                                    className="group flex flex-col gap-3 rounded-xl border border-slate-800/80 bg-slate-900/40 p-3.5 transition-all duration-200 hover:border-teal-500/40 hover:bg-slate-900/80 sm:flex-row sm:items-center sm:justify-between"
+                                    className="flex flex-col gap-2 rounded-lg border border-slate-800/80 bg-slate-950/40 p-3 transition-colors hover:border-slate-700 hover:bg-slate-900/60 sm:flex-row sm:items-center sm:justify-between"
                                 >
                                     <div className="min-w-0">
-                                        <p className="truncate text-sm font-semibold text-slate-100 group-hover:text-teal-300 transition-colors">
+                                        <p className="truncate text-xs sm:text-sm font-semibold text-slate-200">
                                             {order.title}
                                         </p>
                                         <p className="mt-0.5 truncate text-xs text-slate-400">
@@ -447,12 +386,12 @@ export function DashboardOverview() {
             </section>
 
             {/* Grid: Atividades Recentes */}
-            <div className="grid gap-6 lg:grid-cols-2">
+            <div className="grid gap-4 lg:grid-cols-2">
                 {/* Últimas ordens */}
-                <section className="rounded-2xl border border-slate-800/90 bg-slate-950/80 p-5 shadow-sm">
-                    <h3 className="text-sm font-semibold text-slate-300 mb-4">Últimas Ordens de Serviço</h3>
+                <section className="rounded-xl border border-slate-800 bg-slate-900/60 p-4 sm:p-5">
+                    <h3 className="text-xs font-bold uppercase tracking-wider text-slate-300 mb-3">Últimas Ordens de Serviço</h3>
 
-                    <div className="space-y-2.5">
+                    <div className="space-y-2">
                         {s.recentOrders.length === 0 ? (
                             <p className="text-xs text-slate-500">Nenhuma ordem registrada.</p>
                         ) : (
@@ -462,19 +401,14 @@ export function DashboardOverview() {
                                     : (order.equipment as { name: string })?.name;
 
                                 return (
-                                    <div key={order.id} className="flex items-start gap-3 rounded-xl border border-slate-800/60 bg-slate-900/30 p-3 transition hover:border-slate-700">
-                                        <span className={`mt-1.5 h-2 w-2 shrink-0 rounded-full ${order.status === 'open' ? 'bg-amber-400 ring-2 ring-amber-400/20' : order.status === 'in_progress' ? 'bg-orange-400 ring-2 ring-orange-400/20' : 'bg-emerald-400 ring-2 ring-emerald-400/20'}`} />
+                                    <div key={order.id} className="flex items-center justify-between gap-3 rounded-lg border border-slate-800/60 bg-slate-950/40 px-3 py-2.5">
                                         <div className="min-w-0 flex-1">
-                                            <p className="truncate text-xs sm:text-sm font-semibold text-slate-200">{order.title}</p>
-                                            <p className="mt-0.5 text-xs text-slate-400">
-                                                {equipName ?? 'Equipamento não informado'}
-                                                {' · '}
-                                                <span className={order.priority === 'critical' ? 'text-red-400 font-medium' : order.priority === 'high' ? 'text-orange-400 font-medium' : 'text-slate-400'}>
-                                                    {priorityConfig[order.priority as keyof typeof priorityConfig]?.label ?? order.priority}
-                                                </span>
+                                            <p className="truncate text-xs font-semibold text-slate-200">{order.title}</p>
+                                            <p className="text-[11px] text-slate-400 truncate">
+                                                {equipName ?? 'Equipamento não informado'} · {priorityConfig[order.priority as keyof typeof priorityConfig]?.label ?? order.priority}
                                             </p>
                                         </div>
-                                        <span className="shrink-0 text-[11px] font-mono text-slate-500">{formatDate(order.created_at)}</span>
+                                        <span className="shrink-0 font-mono text-[10px] text-slate-500">{formatDate(order.created_at)}</span>
                                     </div>
                                 );
                             })
@@ -483,29 +417,22 @@ export function DashboardOverview() {
                 </section>
 
                 {/* Últimos equipamentos */}
-                <section className="rounded-2xl border border-slate-800/90 bg-slate-950/80 p-5 shadow-sm">
-                    <h3 className="text-sm font-semibold text-slate-300 mb-4">Últimos Equipamentos Cadastrados</h3>
+                <section className="rounded-xl border border-slate-800 bg-slate-900/60 p-4 sm:p-5">
+                    <h3 className="text-xs font-bold uppercase tracking-wider text-slate-300 mb-3">Últimos Equipamentos</h3>
 
-                    <div className="space-y-2.5">
+                    <div className="space-y-2">
                         {s.recentEquipments.length === 0 ? (
                             <p className="text-xs text-slate-500">Nenhum equipamento cadastrado.</p>
                         ) : (
                             s.recentEquipments.map((equipment) => (
-                                <div key={equipment.id} className="flex items-start gap-3 rounded-xl border border-slate-800/60 bg-slate-900/30 p-3 transition hover:border-slate-700">
-                                    <div className="p-1 rounded-md bg-slate-800/80 text-teal-400 shrink-0 mt-0.5">
-                                        <Cpu className="h-3.5 w-3.5" />
-                                    </div>
+                                <div key={equipment.id} className="flex items-center justify-between gap-3 rounded-lg border border-slate-800/60 bg-slate-950/40 px-3 py-2.5">
                                     <div className="min-w-0 flex-1">
-                                        <p className="truncate text-xs sm:text-sm font-semibold text-slate-200">{equipment.name}</p>
-                                        <p className="mt-0.5 text-xs text-slate-400 flex items-center gap-1.5">
-                                            <span className="font-mono text-slate-300">{equipment.patrimony_code}</span>
-                                            <span>·</span>
-                                            <span className={equipment.status === 'active' ? 'text-teal-400 font-medium' : equipment.status === 'maintenance' ? 'text-amber-400 font-medium' : 'text-slate-400'}>
-                                                {equipment.status === 'active' ? 'Ativo' : equipment.status === 'maintenance' ? 'Em manutenção' : 'Inativo'}
-                                            </span>
+                                        <p className="truncate text-xs font-semibold text-slate-200">{equipment.name}</p>
+                                        <p className="text-[11px] font-mono text-slate-400 truncate">
+                                            {equipment.patrimony_code} · {equipment.status === 'active' ? 'Ativo' : equipment.status === 'maintenance' ? 'Em manutenção' : 'Inativo'}
                                         </p>
                                     </div>
-                                    <span className="shrink-0 text-[11px] font-mono text-slate-500">{formatDate(equipment.created_at)}</span>
+                                    <span className="shrink-0 font-mono text-[10px] text-slate-500">{formatDate(equipment.created_at)}</span>
                                 </div>
                             ))
                         )}

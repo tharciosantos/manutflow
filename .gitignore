@@ -38,6 +38,7 @@ yarn-error.log*
 !.env.example
 
 # project docs (not code)
+docs/
 scripts/
 
 # typescript

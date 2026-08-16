@@ -2,6 +2,18 @@
 
 import { useEffect, useState, type FormEvent } from 'react';
 import { AppShell } from '@/components/layout/app-shell';
+import { 
+    User, 
+    Briefcase, 
+    Phone, 
+    Mail, 
+    Calendar, 
+    Save, 
+    CheckCircle, 
+    AlertCircle, 
+    Loader2, 
+    ShieldCheck 
+} from 'lucide-react';
 
 type Profile = {
     id: string;
@@ -93,10 +105,12 @@ export default function PerfilPage() {
         });
     }
 
+    const userInitial = (fullName || profile?.email || 'U').charAt(0).toUpperCase();
+
     if (isLoading) {
         return (
             <AppShell>
-                <section className="mx-auto max-w-2xl px-4 py-12 sm:px-6 sm:py-16">
+                <section className="mx-auto max-w-2xl px-4 py-8 sm:px-6 sm:py-12">
                     <div className="animate-pulse space-y-6">
                         <div className="h-8 w-40 rounded-lg bg-slate-800" />
                         <div className="h-4 w-64 rounded bg-slate-800/60" />
@@ -117,8 +131,9 @@ export default function PerfilPage() {
     if (errorMessage && !profile) {
         return (
             <AppShell>
-                <section className="mx-auto max-w-2xl px-4 py-12 sm:px-6 sm:py-16">
-                    <div className="rounded-2xl border border-red-500/30 bg-red-500/10 p-6">
+                <section className="mx-auto max-w-2xl px-4 py-8 sm:px-6 sm:py-12">
+                    <div className="rounded-2xl border border-red-500/30 bg-red-500/10 p-6 flex items-start gap-3">
+                        <AlertCircle className="h-5 w-5 text-red-400 shrink-0 mt-0.5" />
                         <p className="text-sm text-red-300">{errorMessage}</p>
                     </div>
                 </section>
@@ -128,18 +143,29 @@ export default function PerfilPage() {
 
     return (
         <AppShell>
-            <section className="mx-auto max-w-2xl px-4 py-12 sm:px-6 sm:py-16">
-                <div className="mb-8">
-                    <h1 className="text-2xl font-bold text-slate-100 sm:text-3xl">Meu Perfil</h1>
-                    <p className="mt-1 text-sm text-slate-400">Gerencie suas informações pessoais.</p>
+            <section className="mx-auto max-w-2xl px-4 py-8 sm:px-6 sm:py-12">
+                {/* Header de Perfil com Avatar */}
+                <div className="mb-8 flex items-center gap-4">
+                    <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-teal-400 to-emerald-500 text-2xl font-extrabold text-slate-950 shadow-md shadow-teal-500/20">
+                        {userInitial}
+                    </div>
+                    <div>
+                        <div className="inline-flex items-center gap-1.5 rounded-full bg-teal-500/10 border border-teal-500/20 px-2.5 py-0.5 text-xs font-semibold text-teal-400 mb-1">
+                            <ShieldCheck className="h-3 w-3" />
+                            <span>Conta do Sistema</span>
+                        </div>
+                        <h1 className="text-2xl font-bold text-slate-100 sm:text-3xl tracking-tight">Meu Perfil</h1>
+                        <p className="text-xs sm:text-sm text-slate-400">Gerencie suas informações pessoais e credenciais.</p>
+                    </div>
                 </div>
 
-                <form onSubmit={handleSubmit} className="rounded-2xl border border-slate-800 bg-slate-950/70 p-6 shadow-sm">
+                <form onSubmit={handleSubmit} className="rounded-2xl border border-slate-800/90 bg-slate-950/80 p-5 sm:p-7 shadow-sm">
                     <div className="space-y-5">
                         {/* Nome */}
                         <div>
-                            <label htmlFor="fullName" className="mb-1.5 block text-sm font-medium text-slate-300">
-                                Nome completo
+                            <label htmlFor="fullName" className="mb-1.5 flex items-center gap-1.5 text-xs font-semibold text-slate-300">
+                                <User className="h-3.5 w-3.5 text-teal-400" />
+                                <span>Nome completo</span>
                             </label>
                             <input
                                 id="fullName"
@@ -147,29 +173,31 @@ export default function PerfilPage() {
                                 value={fullName}
                                 onChange={(e) => setFullName(e.target.value)}
                                 placeholder="Seu nome completo"
-                                className="w-full rounded-xl border border-slate-700 bg-slate-950 px-4 py-2.5 text-sm text-slate-100 outline-none transition placeholder:text-slate-600 focus:border-teal-500"
+                                className="w-full rounded-xl border border-slate-700 bg-slate-900 px-4 py-2.5 text-sm text-slate-100 outline-none transition placeholder:text-slate-600 focus:border-teal-500 focus:ring-1 focus:ring-teal-500"
                             />
                         </div>
 
                         {/* Cargo */}
                         <div>
-                            <label htmlFor="role" className="mb-1.5 block text-sm font-medium text-slate-300">
-                                Cargo / Função
+                            <label htmlFor="role" className="mb-1.5 flex items-center gap-1.5 text-xs font-semibold text-slate-300">
+                                <Briefcase className="h-3.5 w-3.5 text-teal-400" />
+                                <span>Cargo / Função</span>
                             </label>
                             <input
                                 id="role"
                                 type="text"
                                 value={role}
                                 onChange={(e) => setRole(e.target.value)}
-                                placeholder="Ex: Técnico de Manutenção"
-                                className="w-full rounded-xl border border-slate-700 bg-slate-950 px-4 py-2.5 text-sm text-slate-100 outline-none transition placeholder:text-slate-600 focus:border-teal-500"
+                                placeholder="Ex: Gestor de Manutenção / Técnico"
+                                className="w-full rounded-xl border border-slate-700 bg-slate-900 px-4 py-2.5 text-sm text-slate-100 outline-none transition placeholder:text-slate-600 focus:border-teal-500 focus:ring-1 focus:ring-teal-500"
                             />
                         </div>
 
                         {/* Telefone */}
                         <div>
-                            <label htmlFor="phone" className="mb-1.5 block text-sm font-medium text-slate-300">
-                                Telefone
+                            <label htmlFor="phone" className="mb-1.5 flex items-center gap-1.5 text-xs font-semibold text-slate-300">
+                                <Phone className="h-3.5 w-3.5 text-teal-400" />
+                                <span>Telefone</span>
                             </label>
                             <input
                                 id="phone"
@@ -177,53 +205,57 @@ export default function PerfilPage() {
                                 value={phone}
                                 onChange={(e) => setPhone(e.target.value)}
                                 placeholder="Ex: (11) 99999-8888"
-                                className="w-full rounded-xl border border-slate-700 bg-slate-950 px-4 py-2.5 text-sm text-slate-100 outline-none transition placeholder:text-slate-600 focus:border-teal-500"
+                                className="w-full rounded-xl border border-slate-700 bg-slate-900 px-4 py-2.5 text-sm text-slate-100 outline-none transition placeholder:text-slate-600 focus:border-teal-500 focus:ring-1 focus:ring-teal-500"
                             />
                         </div>
 
                         {/* Divisória */}
-                        <hr className="border-slate-800" />
+                        <hr className="border-slate-800/80 my-4" />
 
                         {/* Email (read-only) */}
                         <div>
-                            <label htmlFor="email" className="mb-1.5 block text-sm font-medium text-slate-400">
-                                Email
+                            <label htmlFor="email" className="mb-1.5 flex items-center gap-1.5 text-xs font-semibold text-slate-400">
+                                <Mail className="h-3.5 w-3.5 text-slate-500" />
+                                <span>Email da conta (autenticação)</span>
                             </label>
                             <input
                                 id="email"
                                 type="text"
                                 value={profile?.email ?? ''}
                                 readOnly
-                                className="w-full rounded-xl border border-slate-800 bg-slate-900/50 px-4 py-2.5 text-sm text-slate-500 outline-none cursor-not-allowed"
+                                className="w-full rounded-xl border border-slate-800 bg-slate-900/40 px-4 py-2.5 text-sm text-slate-400 font-mono outline-none cursor-not-allowed"
                             />
                         </div>
 
                         {/* Data de criação (read-only) */}
                         <div>
-                            <label htmlFor="createdAt" className="mb-1.5 block text-sm font-medium text-slate-400">
-                                Membro desde
+                            <label htmlFor="createdAt" className="mb-1.5 flex items-center gap-1.5 text-xs font-semibold text-slate-400">
+                                <Calendar className="h-3.5 w-3.5 text-slate-500" />
+                                <span>Membro desde</span>
                             </label>
                             <input
                                 id="createdAt"
                                 type="text"
                                 value={profile?.created_at ? formatDate(profile.created_at) : ''}
                                 readOnly
-                                className="w-full rounded-xl border border-slate-800 bg-slate-900/50 px-4 py-2.5 text-sm text-slate-500 outline-none cursor-not-allowed"
+                                className="w-full rounded-xl border border-slate-800 bg-slate-900/40 px-4 py-2.5 text-sm text-slate-400 outline-none cursor-not-allowed"
                             />
                         </div>
                     </div>
 
                     {/* Mensagens de feedback */}
                     {successMessage && (
-                        <p className="mt-5 rounded-xl border border-emerald-500/30 bg-emerald-500/10 p-3 text-sm text-emerald-300">
-                            {successMessage}
-                        </p>
+                        <div className="mt-5 rounded-xl border border-emerald-500/30 bg-emerald-500/10 p-3 text-xs sm:text-sm text-emerald-300 flex items-center gap-2">
+                            <CheckCircle className="h-4 w-4 shrink-0" />
+                            <span>{successMessage}</span>
+                        </div>
                     )}
 
                     {errorMessage && profile && (
-                        <p className="mt-5 rounded-xl border border-red-500/30 bg-red-500/10 p-3 text-sm text-red-300">
-                            {errorMessage}
-                        </p>
+                        <div className="mt-5 rounded-xl border border-red-500/30 bg-red-500/10 p-3 text-xs sm:text-sm text-red-300 flex items-center gap-2">
+                            <AlertCircle className="h-4 w-4 shrink-0" />
+                            <span>{errorMessage}</span>
+                        </div>
                     )}
 
                     {/* Botão salvar */}
@@ -231,17 +263,19 @@ export default function PerfilPage() {
                         <button
                             type="submit"
                             disabled={isSaving}
-                            className="inline-flex items-center gap-2 rounded-xl bg-teal-600 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-teal-500 disabled:cursor-not-allowed disabled:opacity-60"
+                            className="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-teal-600 to-emerald-600 px-5 py-2.5 text-sm font-semibold text-white shadow-md shadow-teal-900/30 transition-all hover:from-teal-500 hover:to-emerald-500 active:scale-95 disabled:cursor-not-allowed disabled:opacity-60"
                         >
                             {isSaving ? (
                                 <>
-                                    <svg className="h-4 w-4 animate-spin" viewBox="0 0 24 24" fill="none">
-                                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
-                                    </svg>
-                                    Salvando...
+                                    <Loader2 className="h-4 w-4 animate-spin" />
+                                    <span>Salvando...</span>
                                 </>
-                            ) : 'Salvar alterações'}
+                            ) : (
+                                <>
+                                    <Save className="h-4 w-4 stroke-[2.2]" />
+                                    <span>Salvar alterações</span>
+                                </>
+                            )}
                         </button>
                     </div>
                 </form>

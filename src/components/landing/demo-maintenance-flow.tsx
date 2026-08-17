@@ -8,7 +8,7 @@ const flowSteps = [
         id: "open",
         orderNumber: "OS #204",
         statusLabel: "Aberta",
-        statusBadgeClass: "border-amber-500/30 bg-amber-500/10 text-amber-300",
+        statusBadgeClass: "border-amber-500/30 bg-amber-500/10 text-amber-700 dark:text-amber-300",
         equipmentName: "Compressor Parafuso 50HP",
         patrimonyCode: "COMP-001",
         location: "Linha de Montagem B",
@@ -23,7 +23,7 @@ const flowSteps = [
         id: "in_progress",
         orderNumber: "OS #204",
         statusLabel: "Em Andamento",
-        statusBadgeClass: "border-sky-500/30 bg-sky-500/10 text-sky-300",
+        statusBadgeClass: "border-sky-500/30 bg-sky-500/10 text-sky-700 dark:text-sky-300",
         equipmentName: "Compressor Parafuso 50HP",
         patrimonyCode: "COMP-001",
         location: "Linha de Montagem B",
@@ -38,7 +38,7 @@ const flowSteps = [
         id: "closed",
         orderNumber: "OS #204",
         statusLabel: "Concluída",
-        statusBadgeClass: "border-emerald-500/30 bg-emerald-500/10 text-emerald-300",
+        statusBadgeClass: "border-emerald-500/30 bg-emerald-500/10 text-emerald-700 dark:text-emerald-300",
         equipmentName: "Compressor Parafuso 50HP",
         patrimonyCode: "COMP-001",
         location: "Linha de Montagem B",
@@ -85,26 +85,26 @@ export function DemoMaintenanceFlow() {
                         setCurrentStep((prev) => (prev + 1) % flowSteps.length);
                     }
                 }}
-                className="relative cursor-pointer overflow-hidden rounded-2xl border border-slate-800 bg-slate-900/90 p-5 sm:p-6 shadow-xl transition-all hover:border-slate-700 space-y-4"
+                className="relative cursor-pointer overflow-hidden rounded-2xl border border-slate-200 bg-white p-5 sm:p-6 shadow-xl transition-all hover:border-slate-300 space-y-4 dark:border-slate-800 dark:bg-slate-900/90 dark:hover:border-slate-700"
             >
                 {/* Cabeçalho da Ordem */}
-                <div className="flex items-start justify-between gap-3 border-b border-slate-800 pb-3">
+                <div className="flex items-start justify-between gap-3 border-b border-slate-100 pb-3 dark:border-slate-800">
                     <div>
                         <div className="flex items-center gap-2">
-                            <span className="font-mono text-xs font-bold text-teal-400">
+                            <span className="font-mono text-xs font-bold text-teal-600 dark:text-teal-400">
                                 {active.orderNumber}
                             </span>
-                            <span className="text-slate-700">·</span>
-                            <span className="font-mono text-xs text-slate-400">
+                            <span className="text-slate-300 dark:text-slate-700">·</span>
+                            <span className="font-mono text-xs text-slate-500 dark:text-slate-400">
                                 {active.patrimonyCode}
                             </span>
-                            <span className="text-slate-700">·</span>
+                            <span className="text-slate-300 dark:text-slate-700">·</span>
                             <span className="text-xs text-slate-500">
                                 {active.location}
                             </span>
                         </div>
 
-                        <h2 className="mt-1 text-base font-bold text-slate-100">
+                        <h2 className="mt-1 text-base font-bold text-slate-900 dark:text-slate-100">
                             {active.equipmentName}
                         </h2>
                     </div>
@@ -116,10 +116,10 @@ export function DemoMaintenanceFlow() {
 
                 {/* Conteúdo Técnico */}
                 <div className="space-y-1.5 py-1">
-                    <p className="text-xs sm:text-sm font-semibold text-slate-200">
+                    <p className="text-xs sm:text-sm font-semibold text-slate-800 dark:text-slate-200">
                         {active.title}
                     </p>
-                    <p className="text-xs text-slate-400 leading-relaxed">
+                    <p className="text-xs text-slate-600 leading-relaxed dark:text-slate-400">
                         {active.description}
                     </p>
                 </div>
@@ -139,12 +139,12 @@ export function DemoMaintenanceFlow() {
                                         e.stopPropagation();
                                         setCurrentStep(idx);
                                     }}
-                                    className={`rounded-lg border py-1.5 text-center text-xs font-medium transition-all ${
+                                    className={`rounded-lg border py-1.5 text-center text-xs font-medium transition-all cursor-pointer ${
                                         isCurrent
-                                            ? "border-teal-500/50 bg-teal-500/10 text-teal-300 font-semibold"
+                                            ? "border-teal-500/50 bg-teal-500/10 text-teal-700 dark:text-teal-300 font-semibold"
                                             : isPast
-                                            ? "border-slate-700 bg-slate-800/40 text-slate-300"
-                                            : "border-slate-800/60 bg-slate-950/40 text-slate-600 hover:text-slate-400"
+                                            ? "border-slate-300 bg-slate-100 text-slate-700 dark:border-slate-700 dark:bg-slate-800/40 dark:text-slate-300"
+                                            : "border-slate-200 bg-slate-50 text-slate-400 hover:text-slate-600 dark:border-slate-800/60 dark:bg-slate-950/40 dark:text-slate-600 dark:hover:text-slate-400"
                                     }`}
                                 >
                                     {idx + 1}. {step.statusLabel}
@@ -155,13 +155,13 @@ export function DemoMaintenanceFlow() {
                 </div>
 
                 {/* Rodapé com Metadados */}
-                <div className="flex items-center justify-between border-t border-slate-800 pt-3 text-xs">
-                    <div className="text-slate-400 truncate">
-                        <span className="text-slate-500">{active.actorLabel}: </span>
-                        <strong className="text-slate-300 font-medium">{active.actorName}</strong>
+                <div className="flex items-center justify-between border-t border-slate-100 pt-3 text-xs dark:border-slate-800">
+                    <div className="text-slate-600 dark:text-slate-400 truncate">
+                        <span className="text-slate-400 dark:text-slate-500">{active.actorLabel}: </span>
+                        <strong className="text-slate-800 font-medium dark:text-slate-300">{active.actorName}</strong>
                     </div>
 
-                    <div className="font-mono text-slate-400 text-[11px] shrink-0">
+                    <div className="font-mono text-slate-500 text-[11px] shrink-0 dark:text-slate-400">
                         {active.deadlineText}
                     </div>
                 </div>
@@ -173,7 +173,7 @@ export function DemoMaintenanceFlow() {
                 <button
                     type="button"
                     onClick={togglePlay}
-                    className="inline-flex items-center gap-1 hover:text-slate-300 transition-colors"
+                    className="inline-flex items-center gap-1 hover:text-slate-700 dark:hover:text-slate-300 transition-colors cursor-pointer"
                 >
                     {isPaused ? <Play className="h-3 w-3" /> : <Pause className="h-3 w-3" />}
                     <span>{isPaused ? "Retomar" : "Pausar"}</span>

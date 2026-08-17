@@ -45,12 +45,12 @@ export function Toolbar({
   );
 
   return (
-    <div className="rounded-xl border border-slate-800 bg-slate-900/60 p-3 sm:p-4 space-y-3">
+    <div className="rounded-xl border border-slate-200 bg-white p-3 sm:p-4 space-y-3 shadow-xs dark:border-slate-800 dark:bg-slate-900/60">
       {/* Busca */}
       {searchPlaceholder && searchValue !== undefined && onSearchChange && (
         <div className="relative w-full">
           <svg
-            className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-500"
+            className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400 dark:text-slate-500"
             fill="none"
             viewBox="0 0 24 24"
             stroke="currentColor"
@@ -72,7 +72,7 @@ export function Toolbar({
             value={searchValue}
             onChange={(event) => onSearchChange(event.target.value)}
             placeholder={searchPlaceholder}
-            className="w-full rounded-lg border border-slate-700 bg-slate-950 py-2 pl-9 pr-3 text-xs sm:text-sm text-slate-100 outline-none transition placeholder:text-slate-500 focus:border-teal-500"
+            className="w-full rounded-lg border border-slate-300 bg-slate-50 py-2 pl-9 pr-3 text-xs sm:text-sm text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-teal-500 focus:bg-white dark:border-slate-700 dark:bg-slate-950 dark:text-slate-100 dark:placeholder:text-slate-500 dark:focus:border-teal-500"
           />
         </div>
       )}
@@ -89,11 +89,11 @@ export function Toolbar({
                 id={`filter-${filter.label}`}
                 value={filter.value}
                 onChange={(event) => filter.onChange(event.target.value)}
-                className="w-full rounded-lg border border-slate-700 bg-slate-950 px-2.5 py-1.5 text-xs text-slate-200 outline-none transition focus:border-teal-500 cursor-pointer"
+                className="w-full rounded-lg border border-slate-300 bg-slate-50 px-2.5 py-1.5 text-xs text-slate-800 outline-none transition focus:border-teal-500 cursor-pointer dark:border-slate-700 dark:bg-slate-950 dark:text-slate-200 dark:focus:border-teal-500"
                 aria-label={filter.label}
               >
                 {filter.options.map((option) => (
-                  <option key={option.value} value={option.value} className="bg-slate-950 text-slate-100">
+                  <option key={option.value} value={option.value} className="bg-white text-slate-900 dark:bg-slate-950 dark:text-slate-100">
                     {option.label}
                   </option>
                 ))}
@@ -105,4 +105,3 @@ export function Toolbar({
     </div>
   );
 }
-

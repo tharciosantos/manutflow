@@ -4,6 +4,7 @@ import { useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import { ThemeSwitcher } from "@/components/ui/theme-switcher";
 
 export default function RegisterPage() {
     const [email, setEmail] = useState("");
@@ -45,22 +46,27 @@ export default function RegisterPage() {
     };
 
     return (
-        <div className="min-h-screen flex items-center justify-center bg-slate-950 px-4 font-sans">
+        <div className="relative min-h-screen flex items-center justify-center bg-slate-50 px-4 font-sans dark:bg-slate-950 transition-colors">
+            {/* Theme switcher floating */}
+            <div className="absolute top-4 right-4 sm:top-6 sm:right-6">
+                <ThemeSwitcher />
+            </div>
+
             {/* Card Principal */}
-            <div className="w-full max-w-sm p-6 sm:p-7 bg-slate-900/70 border border-slate-800 rounded-xl shadow-xl">
+            <div className="w-full max-w-sm p-6 sm:p-7 bg-white border border-slate-200 rounded-2xl shadow-xl dark:bg-slate-900/70 dark:border-slate-800">
                 <div className="text-center mb-6">
-                    <span className="inline-flex h-8 w-8 items-center justify-center rounded-lg bg-teal-500 text-slate-950 text-xs font-black tracking-tighter mb-2">
+                    <span className="inline-flex h-8 w-8 items-center justify-center rounded-lg bg-teal-500 text-slate-950 text-xs font-black tracking-tighter mb-2 shadow-xs">
                         MF
                     </span>
-                    <h1 className="text-xl font-bold text-slate-100 tracking-tight">
+                    <h1 className="text-xl font-bold text-slate-900 tracking-tight dark:text-slate-100">
                         Criar Conta
                     </h1>
-                    <p className="text-slate-400 text-xs mt-0.5">Cadastre-se para gerenciar seus ativos industriais.</p>
+                    <p className="text-slate-500 text-xs mt-0.5 dark:text-slate-400">Cadastre-se para gerenciar seus ativos industriais.</p>
                 </div>
 
                 <form onSubmit={handleRegister} className="space-y-3.5">
                     <div>
-                        <label htmlFor="reg-name" className="block text-xs font-medium text-slate-300 mb-1">
+                        <label htmlFor="reg-name" className="block text-xs font-medium text-slate-700 mb-1 dark:text-slate-300">
                             Nome completo
                         </label>
                         <input
@@ -71,12 +77,12 @@ export default function RegisterPage() {
                             onChange={e => setFullName(e.target.value)}
                             placeholder="Seu nome"
                             autoComplete="name"
-                            className="w-full px-3 py-2 bg-slate-950 border border-slate-700 rounded-lg text-slate-100 placeholder-slate-500 focus:outline-none focus:border-teal-500 text-xs sm:text-sm transition-colors"
+                            className="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-lg text-slate-900 placeholder-slate-400 focus:outline-none focus:border-teal-500 focus:bg-white text-xs sm:text-sm transition-colors dark:bg-slate-950 dark:border-slate-700 dark:text-slate-100 dark:placeholder-slate-500"
                         />
                     </div>
 
                     <div>
-                        <label htmlFor="reg-email" className="block text-xs font-medium text-slate-300 mb-1">
+                        <label htmlFor="reg-email" className="block text-xs font-medium text-slate-700 mb-1 dark:text-slate-300">
                             E-mail
                         </label>
                         <input
@@ -88,12 +94,12 @@ export default function RegisterPage() {
                             required
                             placeholder="seu@email.com"
                             autoComplete="email"
-                            className="w-full px-3 py-2 bg-slate-950 border border-slate-700 rounded-lg text-slate-100 placeholder-slate-500 focus:outline-none focus:border-teal-500 text-xs sm:text-sm transition-colors"
+                            className="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-lg text-slate-900 placeholder-slate-400 focus:outline-none focus:border-teal-500 focus:bg-white text-xs sm:text-sm transition-colors dark:bg-slate-950 dark:border-slate-700 dark:text-slate-100 dark:placeholder-slate-500"
                         />
                     </div>
 
                     <div>
-                        <label htmlFor="reg-password" className="block text-xs font-medium text-slate-300 mb-1">
+                        <label htmlFor="reg-password" className="block text-xs font-medium text-slate-700 mb-1 dark:text-slate-300">
                             Senha
                         </label>
                         <div className="relative">
@@ -107,12 +113,12 @@ export default function RegisterPage() {
                                 minLength={6}
                                 placeholder="Mínimo 6 caracteres"
                                 autoComplete="new-password"
-                                className="w-full pl-3 pr-16 py-2 bg-slate-950 border border-slate-700 rounded-lg text-slate-100 placeholder-slate-500 focus:outline-none focus:border-teal-500 text-xs sm:text-sm transition-colors"
+                                className="w-full pl-3 pr-16 py-2 bg-slate-50 border border-slate-300 rounded-lg text-slate-900 placeholder-slate-400 focus:outline-none focus:border-teal-500 focus:bg-white text-xs sm:text-sm transition-colors dark:bg-slate-950 dark:border-slate-700 dark:text-slate-100 dark:placeholder-slate-500"
                             />
                             <button
                                 type="button"
                                 onClick={() => setShowPassword(!showPassword)}
-                                className="absolute right-2.5 top-1/2 -translate-y-1/2 text-xs text-slate-400 hover:text-slate-200"
+                                className="absolute right-2.5 top-1/2 -translate-y-1/2 text-xs text-slate-500 hover:text-slate-700 cursor-pointer dark:text-slate-400 dark:hover:text-slate-200"
                             >
                                 {showPassword ? "Ocultar" : "Mostrar"}
                             </button>
@@ -120,7 +126,7 @@ export default function RegisterPage() {
                     </div>
 
                     {error && (
-                        <div className="text-red-400 text-xs bg-red-950/30 border border-red-900/50 rounded-lg px-3 py-2 text-center">
+                        <div className="text-red-600 text-xs bg-red-50 border border-red-200 rounded-lg px-3 py-2 text-center dark:text-red-400 dark:bg-red-950/30 dark:border-red-900/50">
                             {error}
                         </div>
                     )}
@@ -128,16 +134,16 @@ export default function RegisterPage() {
                     <button
                         type="submit"
                         disabled={loading}
-                        className="w-full py-2 bg-teal-500 hover:bg-teal-400 disabled:opacity-60 text-slate-950 font-bold text-xs sm:text-sm rounded-lg transition-colors mt-2"
+                        className="w-full py-2 bg-teal-500 hover:bg-teal-400 disabled:opacity-60 text-slate-950 font-bold text-xs sm:text-sm rounded-lg transition-colors mt-2 cursor-pointer shadow-xs"
                     >
                         {loading ? "Criando conta..." : "Criar Conta"}
                     </button>
                 </form>
 
                 <div className="mt-5 text-center">
-                    <p className="text-slate-400 text-xs">
+                    <p className="text-slate-500 text-xs dark:text-slate-400">
                         Já possui uma conta?{" "}
-                        <Link href="/login" className="text-teal-400 hover:underline">
+                        <Link href="/login" className="text-teal-600 font-semibold hover:underline dark:text-teal-400">
                             Faça login
                         </Link>
                     </p>
@@ -145,4 +151,4 @@ export default function RegisterPage() {
             </div>
         </div>
     );
-}
+}

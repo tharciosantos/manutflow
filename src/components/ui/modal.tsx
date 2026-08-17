@@ -7,7 +7,6 @@ type ModalProps = {
   onClose: () => void;
   title: string;
   children?: React.ReactNode;
-  // Props para modo confirmação
   onConfirm?: () => void;
   description?: string;
   confirmLabel?: string;
@@ -57,7 +56,7 @@ export function Modal({
   const variantStyles = {
     danger: {
       icon: (
-        <svg className="h-6 w-6 text-red-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+        <svg className="h-6 w-6 text-red-500 dark:text-red-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
           <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126ZM12 15.75h.007v.008H12v-.008Z" />
         </svg>
       ),
@@ -66,7 +65,7 @@ export function Modal({
     },
     warning: {
       icon: (
-        <svg className="h-6 w-6 text-amber-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+        <svg className="h-6 w-6 text-amber-500 dark:text-amber-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
           <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008Z" />
         </svg>
       ),
@@ -75,7 +74,7 @@ export function Modal({
     },
     info: {
       icon: (
-        <svg className="h-6 w-6 text-teal-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+        <svg className="h-6 w-6 text-teal-500 dark:text-teal-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
           <path strokeLinecap="round" strokeLinejoin="round" d="M11.25 11.25l.041-.02a.75.75 0 011.063.852l-.708 2.836a.75.75 0 001.063.853l.041-.021M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9-3.75h.008v.008H12V8.25Z" />
         </svg>
       ),
@@ -92,7 +91,7 @@ export function Modal({
       onClick={handleBackdropClick}
       onKeyDown={handleKeyDown}
       aria-labelledby={titleId}
-      className="fixed inset-0 m-auto h-fit w-full max-w-md rounded-2xl border border-slate-800 bg-slate-900 p-0 shadow-2xl backdrop:bg-black/70 backdrop:backdrop-blur-sm"
+      className="fixed inset-0 m-auto h-fit w-full max-w-md rounded-2xl border border-slate-200 bg-white p-0 shadow-2xl backdrop:bg-black/60 backdrop:backdrop-blur-sm dark:border-slate-800 dark:bg-slate-900"
     >
       <div className="p-6">
         <div className="flex items-start gap-4">
@@ -102,9 +101,9 @@ export function Modal({
             </div>
           )}
           <div className="min-w-0 flex-1">
-            <h2 id={titleId} className="text-lg font-semibold text-white">{title}</h2>
+            <h2 id={titleId} className="text-lg font-semibold text-slate-900 dark:text-white">{title}</h2>
             {description && (
-              <p className="mt-2 text-sm text-slate-400">{description}</p>
+              <p className="mt-2 text-sm text-slate-600 dark:text-slate-400">{description}</p>
             )}
             {children}
           </div>
@@ -112,12 +111,12 @@ export function Modal({
       </div>
 
       {!children && (
-        <div className="flex flex-row items-center justify-center gap-3 border-t border-slate-800 bg-slate-950/50 px-6 py-4">
+        <div className="flex flex-row items-center justify-center gap-3 border-t border-slate-200 bg-slate-50 px-6 py-4 dark:border-slate-800 dark:bg-slate-950/50">
           <button
             type="button"
             onClick={onClose}
             disabled={isLoading}
-            className="rounded-2xl border border-slate-700 bg-slate-800 px-4 py-2.5 text-sm font-medium text-slate-300 transition hover:bg-slate-700 active:scale-95 disabled:cursor-not-allowed disabled:opacity-60"
+            className="rounded-2xl border border-slate-300 bg-white px-4 py-2.5 text-sm font-medium text-slate-700 transition hover:bg-slate-100 active:scale-95 disabled:cursor-not-allowed disabled:opacity-60 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700"
           >
             {cancelLabel}
           </button>
@@ -125,7 +124,7 @@ export function Modal({
             type="button"
             onClick={onConfirm}
             disabled={isLoading}
-            className={`rounded-2xl px-4 py-2.5 text-sm font-medium text-white transition hover:opacity-90 active:scale-95 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-slate-900 disabled:cursor-not-allowed disabled:opacity-60 ${styles.confirmButton}`}
+            className={`rounded-2xl px-4 py-2.5 text-sm font-medium text-white transition hover:opacity-90 active:scale-95 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-white dark:focus:ring-offset-slate-900 disabled:cursor-not-allowed disabled:opacity-60 ${styles.confirmButton}`}
           >
             {isLoading ? (
               <span className="flex items-center gap-2">

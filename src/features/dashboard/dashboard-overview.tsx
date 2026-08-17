@@ -82,10 +82,10 @@ async function fetchDashboardSummary(): Promise<DashboardSummary> {
 }
 
 const priorityConfig: Record<string, { label: string; color: string; barColor: string }> = {
-    low: { label: 'Baixa', color: 'text-slate-400', barColor: '#64748b' },
-    medium: { label: 'Média', color: 'text-amber-400', barColor: '#f59e0b' },
-    high: { label: 'Alta', color: 'text-orange-400', barColor: '#f97316' },
-    critical: { label: 'Crítica', color: 'text-red-400', barColor: '#ef4444' },
+    low: { label: 'Baixa', color: 'text-slate-600 dark:text-slate-400', barColor: '#64748b' },
+    medium: { label: 'Média', color: 'text-amber-600 dark:text-amber-400', barColor: '#f59e0b' },
+    high: { label: 'Alta', color: 'text-orange-600 dark:text-orange-400', barColor: '#f97316' },
+    critical: { label: 'Crítica', color: 'text-red-600 dark:text-red-400', barColor: '#ef4444' },
 };
 
 function formatDate(dateStr: string) {
@@ -148,10 +148,10 @@ export function DashboardOverview() {
             <div className="space-y-6">
                 <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
                     {[1, 2, 3].map((i) => (
-                        <div key={i} className="animate-pulse rounded-xl border border-slate-800 bg-slate-900/40 p-5">
-                            <div className="h-3 w-20 rounded bg-slate-800" />
-                            <div className="mt-3 h-8 w-16 rounded bg-slate-800" />
-                            <div className="mt-2 h-3 w-32 rounded bg-slate-800/60" />
+                        <div key={i} className="animate-pulse rounded-xl border border-slate-200 bg-white p-5 dark:border-slate-800 dark:bg-slate-900/40">
+                            <div className="h-3 w-20 rounded bg-slate-200 dark:bg-slate-800" />
+                            <div className="mt-3 h-8 w-16 rounded bg-slate-200 dark:bg-slate-800" />
+                            <div className="mt-2 h-3 w-32 rounded bg-slate-200/60 dark:bg-slate-800/60" />
                         </div>
                     ))}
                 </div>
@@ -162,7 +162,7 @@ export function DashboardOverview() {
     if (errorMessage) {
         return (
             <div className="rounded-xl border border-red-500/30 bg-red-500/10 p-4">
-                <p className="text-xs sm:text-sm text-red-300">{errorMessage}</p>
+                <p className="text-xs sm:text-sm text-red-600 dark:text-red-300">{errorMessage}</p>
             </div>
         );
     }
@@ -177,7 +177,7 @@ export function DashboardOverview() {
                     title="Equipamentos"
                     value={String(s.totalEquipments)}
                     description="Ativos cadastrados"
-                    valueClassName="text-slate-100"
+                    valueClassName="text-slate-900 dark:text-slate-100"
                 />
 
                 <StatusCard
@@ -186,7 +186,7 @@ export function DashboardOverview() {
                     description="Aguardando atendimento"
                     trend={s.criticalPriorityServiceOrders > 0 ? `${s.criticalPriorityServiceOrders} críticas` : ''}
                     trendUp={false}
-                    valueClassName="text-amber-400"
+                    valueClassName="text-amber-600 dark:text-amber-400"
                 />
 
                 <StatusCard
@@ -195,17 +195,17 @@ export function DashboardOverview() {
                     description={`${s.completionRate}% taxa de resolução`}
                     trend={s.totalServiceOrders > 0 ? `${s.totalServiceOrders} total` : ''}
                     trendUp
-                    valueClassName="text-emerald-400"
+                    valueClassName="text-emerald-600 dark:text-emerald-400"
                 />
             </div>
 
             {/* Prazos das Ordens */}
             <section className="space-y-1.5">
                 <div className="flex items-center justify-between">
-                    <h2 className="text-xs font-bold uppercase tracking-wider text-slate-400">Prazos das ordens</h2>
+                    <h2 className="text-xs font-bold uppercase tracking-wider text-slate-600 dark:text-slate-400">Prazos das ordens</h2>
                     <Link
                         href="/ordens"
-                        className="inline-flex items-center gap-1 text-[11px] font-semibold text-teal-400 hover:underline"
+                        className="inline-flex items-center gap-1 text-[11px] font-semibold text-teal-600 dark:text-teal-400 hover:underline"
                     >
                         <span>Ver todas</span>
                         <ArrowUpRight className="h-3 w-3" />
@@ -215,39 +215,39 @@ export function DashboardOverview() {
                 <div className="grid grid-cols-3 gap-2.5">
                     <Link
                         href="/ordens?deadline=overdue"
-                        className="rounded-lg border border-slate-800/80 bg-slate-900/50 p-2.5 sm:p-3 transition-colors hover:border-red-500/50 hover:bg-slate-900/80"
+                        className="rounded-lg border border-slate-200 bg-white p-2.5 sm:p-3 transition-colors hover:border-red-500/50 hover:bg-red-50/50 shadow-xs dark:border-slate-800/80 dark:bg-slate-900/50 dark:hover:bg-slate-900/80"
                     >
                         <div className="flex items-center justify-between">
-                            <span className="text-[11px] font-semibold uppercase tracking-wider text-red-400">Atrasadas</span>
+                            <span className="text-[11px] font-semibold uppercase tracking-wider text-red-600 dark:text-red-400">Atrasadas</span>
                             <span className="hidden sm:inline text-[9px] font-mono text-slate-500">SLA expirado</span>
                         </div>
-                        <strong className={`mt-0.5 block font-mono text-lg sm:text-xl font-bold tabular-nums ${s.overdueServiceOrders > 0 ? 'text-red-400' : 'text-slate-500'}`}>
+                        <strong className={`mt-0.5 block font-mono text-lg sm:text-xl font-bold tabular-nums ${s.overdueServiceOrders > 0 ? 'text-red-600 dark:text-red-400' : 'text-slate-400 dark:text-slate-500'}`}>
                             {s.overdueServiceOrders}
                         </strong>
                     </Link>
 
                     <Link
                         href="/ordens?deadline=today"
-                        className="rounded-lg border border-slate-800/80 bg-slate-900/50 p-2.5 sm:p-3 transition-colors hover:border-amber-500/50 hover:bg-slate-900/80"
+                        className="rounded-lg border border-slate-200 bg-white p-2.5 sm:p-3 transition-colors hover:border-amber-500/50 hover:bg-amber-50/50 shadow-xs dark:border-slate-800/80 dark:bg-slate-900/50 dark:hover:bg-slate-900/80"
                     >
                         <div className="flex items-center justify-between">
-                            <span className="text-[11px] font-semibold uppercase tracking-wider text-amber-400">Vencem hoje</span>
+                            <span className="text-[11px] font-semibold uppercase tracking-wider text-amber-600 dark:text-amber-400">Vencem hoje</span>
                             <span className="hidden sm:inline text-[9px] font-mono text-slate-500">Ação imediata</span>
                         </div>
-                        <strong className={`mt-0.5 block font-mono text-lg sm:text-xl font-bold tabular-nums ${s.dueTodayServiceOrders > 0 ? 'text-amber-300' : 'text-slate-500'}`}>
+                        <strong className={`mt-0.5 block font-mono text-lg sm:text-xl font-bold tabular-nums ${s.dueTodayServiceOrders > 0 ? 'text-amber-600 dark:text-amber-300' : 'text-slate-400 dark:text-slate-500'}`}>
                             {s.dueTodayServiceOrders}
                         </strong>
                     </Link>
 
                     <Link
                         href="/ordens?deadline=next_7_days"
-                        className="rounded-lg border border-slate-800/80 bg-slate-900/50 p-2.5 sm:p-3 transition-colors hover:border-sky-500/50 hover:bg-slate-900/80"
+                        className="rounded-lg border border-slate-200 bg-white p-2.5 sm:p-3 transition-colors hover:border-sky-500/50 hover:bg-sky-50/50 shadow-xs dark:border-slate-800/80 dark:bg-slate-900/50 dark:hover:bg-slate-900/80"
                     >
                         <div className="flex items-center justify-between">
-                            <span className="text-[11px] font-semibold uppercase tracking-wider text-sky-400">Próximos 7 dias</span>
+                            <span className="text-[11px] font-semibold uppercase tracking-wider text-sky-600 dark:text-sky-400">Próximos 7 dias</span>
                             <span className="hidden sm:inline text-[9px] font-mono text-slate-500">Programadas</span>
                         </div>
-                        <strong className={`mt-0.5 block font-mono text-lg sm:text-xl font-bold tabular-nums ${s.dueNextSevenDaysServiceOrders > 0 ? 'text-sky-300' : 'text-slate-500'}`}>
+                        <strong className={`mt-0.5 block font-mono text-lg sm:text-xl font-bold tabular-nums ${s.dueNextSevenDaysServiceOrders > 0 ? 'text-sky-600 dark:text-sky-300' : 'text-slate-400 dark:text-slate-500'}`}>
                             {s.dueNextSevenDaysServiceOrders}
                         </strong>
                     </Link>
@@ -259,9 +259,9 @@ export function DashboardOverview() {
                 {/* Coluna Esquerda (2/3): Gráfico + Ordens com Prazo Urgente */}
                 <div className="space-y-3.5 lg:col-span-2 flex flex-col justify-between">
                     {/* Gráfico de ordens por mês */}
-                    <section className="rounded-xl border border-slate-800 bg-slate-900/60 p-3.5 sm:p-4">
+                    <section className="rounded-xl border border-slate-200 bg-white p-3.5 sm:p-4 shadow-xs dark:border-slate-800 dark:bg-slate-900/60">
                         <div className="flex items-center justify-between mb-2">
-                            <h3 className="text-xs font-bold uppercase tracking-wider text-slate-300">Ordens nos últimos 6 meses</h3>
+                            <h3 className="text-xs font-bold uppercase tracking-wider text-slate-800 dark:text-slate-300">Ordens nos últimos 6 meses</h3>
                             <span className="text-[10px] font-mono text-slate-500">Histórico</span>
                         </div>
 
@@ -269,30 +269,31 @@ export function DashboardOverview() {
                             {s.ordersByMonth.some((m) => m.count > 0) ? (
                                 <ResponsiveContainer width="100%" height="100%">
                                     <BarChart data={s.ordersByMonth} margin={{ top: 5, right: 5, left: -25, bottom: 0 }}>
-                                        <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" vertical={false} />
+                                        <CartesianGrid strokeDasharray="3 3" stroke="#94a3b833" vertical={false} />
                                         <XAxis
                                             dataKey="month"
-                                            tick={{ fill: '#94a3b8', fontSize: 10 }}
-                                            axisLine={{ stroke: '#334155' }}
+                                            tick={{ fill: '#64748b', fontSize: 10 }}
+                                            axisLine={{ stroke: '#cbd5e1' }}
                                             tickLine={false}
                                         />
                                         <YAxis
                                             allowDecimals={false}
-                                            tick={{ fill: '#94a3b8', fontSize: 10 }}
-                                            axisLine={{ stroke: '#334155' }}
+                                            tick={{ fill: '#64748b', fontSize: 10 }}
+                                            axisLine={{ stroke: '#cbd5e1' }}
                                             tickLine={false}
                                         />
                                         <Tooltip
-                                            cursor={{ fill: '#1e293b', opacity: 0.4 }}
+                                            cursor={{ fill: '#94a3b81a' }}
                                             contentStyle={{ 
-                                                backgroundColor: '#090d16', 
-                                                border: '1px solid #334155', 
+                                                backgroundColor: 'var(--color-background, #090d16)', 
+                                                border: '1px solid #94a3b844', 
                                                 borderRadius: '6px', 
                                                 fontSize: '11px',
-                                                padding: '6px 10px'
+                                                padding: '6px 10px',
+                                                boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)'
                                             }}
-                                            labelStyle={{ color: '#f1f5f9', fontWeight: 600 }}
-                                            itemStyle={{ color: '#2dd4bf' }}
+                                            labelStyle={{ color: 'var(--color-foreground, #f1f5f9)', fontWeight: 600 }}
+                                            itemStyle={{ color: '#0d9488' }}
                                             formatter={(value) => [`${value} ordem${Number(value) !== 1 ? 'ns' : ''}`, 'Total']}
                                         />
                                         <Bar dataKey="count" fill="#14b8a6" radius={[4, 4, 0, 0]} maxBarSize={28} />
@@ -307,12 +308,12 @@ export function DashboardOverview() {
                     </section>
 
                     {/* Ordens com Prazo Urgente */}
-                    <section className="rounded-xl border border-slate-800 bg-slate-900/60 p-3.5 sm:p-4 space-y-2">
+                    <section className="rounded-xl border border-slate-200 bg-white p-3.5 sm:p-4 space-y-2 shadow-xs dark:border-slate-800 dark:bg-slate-900/60">
                         <div className="flex items-center justify-between">
-                            <h3 className="text-xs font-bold uppercase tracking-wider text-slate-300">Ordens com prazo mais urgente</h3>
+                            <h3 className="text-xs font-bold uppercase tracking-wider text-slate-800 dark:text-slate-300">Ordens com prazo mais urgente</h3>
                             <Link
                                 href="/ordens?sort=due_asc"
-                                className="text-[11px] font-semibold text-teal-400 hover:underline"
+                                className="text-[11px] font-semibold text-teal-600 dark:text-teal-400 hover:underline"
                             >
                                 Ver por prazo
                             </Link>
@@ -331,13 +332,13 @@ export function DashboardOverview() {
                                         <Link
                                             key={order.id}
                                             href={`/ordens/${order.id}`}
-                                            className="flex flex-col gap-1.5 rounded-lg border border-slate-800/80 bg-slate-950/40 p-2.5 transition-colors hover:border-slate-700 hover:bg-slate-900/60 sm:flex-row sm:items-center sm:justify-between"
+                                            className="flex flex-col gap-1.5 rounded-lg border border-slate-200 bg-slate-50/70 p-2.5 transition-colors hover:border-teal-500/40 hover:bg-slate-100 dark:border-slate-800/80 dark:bg-slate-950/40 dark:hover:border-slate-700 dark:hover:bg-slate-900/60 sm:flex-row sm:items-center sm:justify-between"
                                         >
                                             <div className="min-w-0 flex-1">
-                                                <p className="truncate text-xs font-semibold text-slate-200">
+                                                <p className="truncate text-xs font-semibold text-slate-900 dark:text-slate-200">
                                                     {order.title}
                                                 </p>
-                                                <p className="mt-0.5 truncate text-[11px] text-slate-400">
+                                                <p className="mt-0.5 truncate text-[11px] text-slate-500 dark:text-slate-400">
                                                     {`${equipmentName ?? 'Equipamento não informado'} · ${serviceOrderPriorityLabels[order.priority]}`}
                                                 </p>
                                             </div>
@@ -357,8 +358,8 @@ export function DashboardOverview() {
                 {/* Coluna Direita (1/3): Prioridades + Últimas Atividades */}
                 <div className="space-y-3.5 flex flex-col justify-between">
                     {/* Prioridades */}
-                    <section className="rounded-xl border border-slate-800 bg-slate-900/60 p-3.5 sm:p-4">
-                        <h3 className="text-xs font-bold uppercase tracking-wider text-slate-300 mb-2.5">Por Prioridade</h3>
+                    <section className="rounded-xl border border-slate-200 bg-white p-3.5 sm:p-4 shadow-xs dark:border-slate-800 dark:bg-slate-900/60">
+                        <h3 className="text-xs font-bold uppercase tracking-wider text-slate-800 dark:text-slate-300 mb-2.5">Por Prioridade</h3>
 
                         <div className="space-y-2">
                             {(['critical', 'high', 'medium', 'low'] as const).map((key) => {
@@ -376,9 +377,9 @@ export function DashboardOverview() {
                                     <div key={key} className="space-y-0.5">
                                         <div className="flex items-center justify-between text-[11px]">
                                             <span className={`font-medium ${config.color}`}>{config.label}</span>
-                                            <span className="font-mono font-bold text-slate-200">{count}</span>
+                                            <span className="font-mono font-bold text-slate-800 dark:text-slate-200">{count}</span>
                                         </div>
-                                        <div className="h-1 overflow-hidden rounded-full bg-slate-800">
+                                        <div className="h-1 overflow-hidden rounded-full bg-slate-100 dark:bg-slate-800">
                                             <div 
                                                 className="h-full rounded-full" 
                                                 style={{ width: `${barWidth}%`, backgroundColor: config.barColor }} 
@@ -391,8 +392,8 @@ export function DashboardOverview() {
                     </section>
 
                     {/* Atividades Recentes */}
-                    <section className="rounded-xl border border-slate-800 bg-slate-900/60 p-3.5 sm:p-4 space-y-2">
-                        <h3 className="text-xs font-bold uppercase tracking-wider text-slate-300">Atividades Recentes</h3>
+                    <section className="rounded-xl border border-slate-200 bg-white p-3.5 sm:p-4 space-y-2 shadow-xs dark:border-slate-800 dark:bg-slate-900/60">
+                        <h3 className="text-xs font-bold uppercase tracking-wider text-slate-800 dark:text-slate-300">Atividades Recentes</h3>
 
                         <div className="space-y-1.5">
                             {s.recentOrders.length === 0 && s.recentEquipments.length === 0 ? (
@@ -405,22 +406,22 @@ export function DashboardOverview() {
                                             : (order.equipment as { name: string })?.name;
 
                                         return (
-                                            <div key={order.id} className="rounded-lg border border-slate-800/60 bg-slate-950/40 p-2 space-y-1">
-                                                <p className="truncate text-xs font-medium text-slate-200 leading-tight">{order.title}</p>
-                                                <div className="flex items-center justify-between text-[10px] text-slate-400">
+                                            <div key={order.id} className="rounded-lg border border-slate-200 bg-slate-50/70 p-2 space-y-1 dark:border-slate-800/60 dark:bg-slate-950/40">
+                                                <p className="truncate text-xs font-medium text-slate-900 dark:text-slate-200 leading-tight">{order.title}</p>
+                                                <div className="flex items-center justify-between text-[10px] text-slate-500 dark:text-slate-400">
                                                     <span className="truncate">{equipName ?? 'OS'} · {priorityConfig[order.priority as keyof typeof priorityConfig]?.label ?? order.priority}</span>
-                                                    <span className="shrink-0 font-mono text-slate-500">{formatDate(order.created_at)}</span>
+                                                    <span className="shrink-0 font-mono text-slate-400 dark:text-slate-500">{formatDate(order.created_at)}</span>
                                                 </div>
                                             </div>
                                         );
                                     })}
 
                                     {s.recentEquipments.slice(0, 2).map((equipment) => (
-                                        <div key={equipment.id} className="rounded-lg border border-slate-800/60 bg-slate-950/40 p-2 space-y-1">
-                                            <p className="truncate text-xs font-medium text-slate-200 leading-tight">{equipment.name}</p>
-                                            <div className="flex items-center justify-between text-[10px] text-slate-400">
-                                                <span className="font-mono text-slate-400">{equipment.patrimony_code}</span>
-                                                <span className="shrink-0 font-mono text-slate-500">{formatDate(equipment.created_at)}</span>
+                                        <div key={equipment.id} className="rounded-lg border border-slate-200 bg-slate-50/70 p-2 space-y-1 dark:border-slate-800/60 dark:bg-slate-950/40">
+                                            <p className="truncate text-xs font-medium text-slate-900 dark:text-slate-200 leading-tight">{equipment.name}</p>
+                                            <div className="flex items-center justify-between text-[10px] text-slate-500 dark:text-slate-400">
+                                                <span className="font-mono text-slate-600 dark:text-slate-400">{equipment.patrimony_code}</span>
+                                                <span className="shrink-0 font-mono text-slate-400 dark:text-slate-500">{formatDate(equipment.created_at)}</span>
                                             </div>
                                         </div>
                                     ))}

@@ -108,19 +108,19 @@ export function ServiceOrderForm({ onCreated }: ServiceOrderFormProps) {
         <form
             id="service-order-form"
             onSubmit={handleSubmit}
-            className="scroll-mt-24 rounded-2xl border border-slate-800 bg-slate-950/70 p-4 shadow-sm sm:p-5"
+            className="scroll-mt-24 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm sm:p-5 dark:border-slate-800 dark:bg-slate-950/70"
         >
             <div className="mb-5 flex flex-col gap-2 sm:mb-6 sm:flex-row sm:items-start sm:justify-between">
                 <div>
-                    <span className="rounded-full border border-teal-500/30 bg-teal-500/10 px-3 py-1 text-xs font-medium text-teal-300">
+                    <span className="rounded-full border border-teal-500/30 bg-teal-500/10 px-3 py-1 text-xs font-medium text-teal-700 dark:text-teal-300">
                         Nova OS
                     </span>
 
-                    <h2 className="mt-3 text-xl font-semibold text-white">
+                    <h2 className="mt-3 text-xl font-semibold text-slate-900 dark:text-white">
                         Abrir ordem de serviço
                     </h2>
 
-                    <p className="mt-1 text-sm text-slate-400">
+                    <p className="mt-1 text-sm text-slate-600 dark:text-slate-400">
                         Registre uma solicitação de manutenção vinculada a um equipamento.
                     </p>
                 </div>
@@ -130,7 +130,7 @@ export function ServiceOrderForm({ onCreated }: ServiceOrderFormProps) {
                 <div>
                     <label
                         htmlFor="title"
-                        className="mb-1.5 block text-sm font-medium text-slate-300"
+                        className="mb-1.5 block text-sm font-medium text-slate-700 dark:text-slate-300"
                     >
                         Título
                     </label>
@@ -142,7 +142,7 @@ export function ServiceOrderForm({ onCreated }: ServiceOrderFormProps) {
                         onChange={(event) => setTitle(event.target.value)}
                         placeholder="Ex: Troca de correia"
                         required
-                        className="w-full rounded-xl border border-slate-700 bg-slate-950 px-3 py-2.5 text-sm text-slate-100 outline-none transition placeholder:text-slate-600 focus:border-teal-500"
+                        className="w-full rounded-xl border border-slate-300 bg-slate-50 px-3 py-2.5 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-teal-500 focus:bg-white dark:border-slate-700 dark:bg-slate-950 dark:text-slate-100 dark:placeholder:text-slate-600"
                     />
                 </div>
 
@@ -150,7 +150,7 @@ export function ServiceOrderForm({ onCreated }: ServiceOrderFormProps) {
                     <div>
                         <label
                             htmlFor="equipment"
-                            className="mb-1.5 block text-sm font-medium text-slate-300"
+                            className="mb-1.5 block text-sm font-medium text-slate-700 dark:text-slate-300"
                         >
                             Equipamento
                         </label>
@@ -160,7 +160,7 @@ export function ServiceOrderForm({ onCreated }: ServiceOrderFormProps) {
                             value={equipmentId}
                             onChange={(event) => setEquipmentId(event.target.value)}
                             required
-                            className="w-full rounded-xl border border-slate-700 bg-slate-950 px-3 py-2.5 text-sm text-slate-100 outline-none transition focus:border-teal-500"
+                            className="w-full rounded-xl border border-slate-300 bg-slate-50 px-3 py-2.5 text-sm text-slate-900 outline-none transition focus:border-teal-500 cursor-pointer dark:border-slate-700 dark:bg-slate-950 dark:text-slate-100"
                         >
                             <option value="">Selecione um equipamento</option>
 
@@ -175,7 +175,7 @@ export function ServiceOrderForm({ onCreated }: ServiceOrderFormProps) {
                     <div>
                         <label
                             htmlFor="priority"
-                            className="mb-1.5 block text-sm font-medium text-slate-300"
+                            className="mb-1.5 block text-sm font-medium text-slate-700 dark:text-slate-300"
                         >
                             Prioridade
                         </label>
@@ -184,7 +184,7 @@ export function ServiceOrderForm({ onCreated }: ServiceOrderFormProps) {
                             id="priority"
                             value={priority}
                             onChange={(event) => setPriority(event.target.value)}
-                            className="w-full rounded-xl border border-slate-700 bg-slate-950 px-3 py-2.5 text-sm text-slate-100 outline-none transition focus:border-teal-500"
+                            className="w-full rounded-xl border border-slate-300 bg-slate-50 px-3 py-2.5 text-sm text-slate-900 outline-none transition focus:border-teal-500 cursor-pointer dark:border-slate-700 dark:bg-slate-950 dark:text-slate-100"
                         >
                             {priorities.map((item) => (
                                 <option key={item.value} value={item.value}>
@@ -197,9 +197,9 @@ export function ServiceOrderForm({ onCreated }: ServiceOrderFormProps) {
                     <div>
                         <label
                             htmlFor="due-date"
-                            className="mb-1.5 block text-sm font-medium text-slate-300"
+                            className="mb-1.5 block text-sm font-medium text-slate-700 dark:text-slate-300"
                         >
-                            Prazo <span className="font-normal text-slate-500">(opcional)</span>
+                            Prazo <span className="font-normal text-slate-400 dark:text-slate-500">(opcional)</span>
                         </label>
 
                         <input
@@ -207,7 +207,7 @@ export function ServiceOrderForm({ onCreated }: ServiceOrderFormProps) {
                             type="date"
                             value={dueDate}
                             onChange={(event) => setDueDate(event.target.value)}
-                            className="w-full rounded-xl border border-slate-700 bg-slate-950 px-3 py-2.5 text-sm text-slate-100 outline-none transition focus:border-teal-500 [color-scheme:dark]"
+                            className="w-full rounded-xl border border-slate-300 bg-slate-50 px-3 py-2.5 text-sm text-slate-900 outline-none transition focus:border-teal-500 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-100 dark:[color-scheme:dark]"
                         />
                     </div>
                 </div>
@@ -215,7 +215,7 @@ export function ServiceOrderForm({ onCreated }: ServiceOrderFormProps) {
                 <div>
                     <label
                         htmlFor="description"
-                        className="mb-1.5 block text-sm font-medium text-slate-300"
+                        className="mb-1.5 block text-sm font-medium text-slate-700 dark:text-slate-300"
                     >
                         Descrição
                     </label>
@@ -226,19 +226,19 @@ export function ServiceOrderForm({ onCreated }: ServiceOrderFormProps) {
                         onChange={(event) => setDescription(event.target.value)}
                         placeholder="Descreva o problema ou serviço necessário."
                         rows={4}
-                        className="w-full resize-none rounded-xl border border-slate-700 bg-slate-950 px-3 py-2.5 text-sm text-slate-100 outline-none transition placeholder:text-slate-600 focus:border-teal-500"
+                        className="w-full resize-none rounded-xl border border-slate-300 bg-slate-50 px-3 py-2.5 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-teal-500 focus:bg-white dark:border-slate-700 dark:bg-slate-950 dark:text-slate-100 dark:placeholder:text-slate-600"
                     />
                 </div>
             </div>
 
             {errorMessage && (
-                <p className="mt-4 rounded-xl border border-red-500/30 bg-red-500/10 p-3 text-sm text-red-300">
+                <p className="mt-4 rounded-xl border border-red-500/30 bg-red-500/10 p-3 text-sm text-red-600 dark:text-red-300">
                     {errorMessage}
                 </p>
             )}
 
             {successMessage && (
-                <p className="mt-4 rounded-xl border border-emerald-500/30 bg-emerald-500/10 p-3 text-sm text-emerald-300">
+                <p className="mt-4 rounded-xl border border-emerald-500/30 bg-emerald-500/10 p-3 text-sm text-emerald-700 dark:text-emerald-300">
                     {successMessage}
                 </p>
             )}
@@ -247,7 +247,7 @@ export function ServiceOrderForm({ onCreated }: ServiceOrderFormProps) {
                 <button
                     type="submit"
                     disabled={isSubmitting}
-                    className="rounded-xl bg-teal-600 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-teal-500 disabled:cursor-not-allowed disabled:opacity-60"
+                    className="rounded-xl bg-teal-600 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-teal-500 disabled:cursor-not-allowed disabled:opacity-60 cursor-pointer shadow-xs"
                 >
                     {isSubmitting ? 'Cadastrando...' : 'Abrir ordem'}
                 </button>

@@ -1,371 +1,270 @@
 # ManutFlow
 
-Sistema de Controle de Manutenção e Ordens de Serviço — full stack com Next.js, Supabase e TypeScript.
+Sistema de Gestão de Ativos e Controle de Manutenção Industrial — full stack com Next.js 16, Supabase, TypeScript e Tailwind CSS.
 
-O ManutFlow foi pensado para pequenas equipes e profissionais de manutenção que precisam cadastrar ativos, localizar equipamentos e acompanhar ordens de serviço sem depender de planilhas dispersas. O fluxo principal é: autenticar-se, cadastrar o equipamento, abrir ordens vinculadas e acompanhar status e prazos pelo dashboard.
+O ManutFlow foi desenvolvido para equipes operacionais e gestores de manutenção que necessitam cadastrar máquinas e equipamentos, rastrear histórico de intervenções e acompanhar ordens de serviço e prazos (SLAs) com precisão técnica, substituindo planilhas manuais e processos descentralizados.
+
+---
 
 ## Funcionalidades
 
-###  Dashboard
-- Indicadores em tempo real: total de equipamentos, ordens abertas e concluídas
-- Indicadores de prazo: ordens atrasadas, vencendo hoje e nos próximos 7 dias
-- Atalhos dos indicadores para a listagem com o filtro de prazo aplicado
-- Lista das 5 ordens com prazo mais urgente, com acesso aos detalhes
-- **Gráfico de ordens por mês** (Recharts) — últimos 6 meses
-- **Atividades recentes**: últimas 5 ordens e últimos 5 equipamentos
-- Prioridades com barras de progresso visuais
-- Taxa de conclusão (%) calculada automaticamente
-- Auto-refresh ao voltar para a aba (`visibilitychange`)
+### 🌐 Página Inicial & Demonstração Interativa (Pública)
+- **Hero Institucional**: Apresentação clara da proposta de valor, acesso rápido ao login e registro.
+- **Simulador Interativo de Manutenção (Live Interactive Flow)**: Demonstração em tempo real das 3 etapas de uma ordem de manutenção (*1. Aberta, 2. Em Andamento, 3. Concluída*) com ficha técnica, patrimônio do ativo e auditoria de status sem necessidade de autenticação prévia.
+- **Capacidades Operacionais**: Cards técnicos detalhando controle de inventário, conformidade de prazos e rastreabilidade total.
+- **Alternância Automática**: Exibição da Landing Page para visitantes e redirecionamento dinâmico para o Dashboard Operacional para usuários autenticados.
 
-###  Equipamentos
-- CRUD completo: cadastro, edição, listagem e exclusão
-- Busca textual por nome, patrimônio e localização
-- Filtro por status (ativo, inativo, em manutenção)
-- **Upload de foto** (JPEG/PNG/WebP até 5MB) via Supabase Storage
-- Preview da imagem no formulário e thumbnail nos cards
-- Página de detalhes com foto, breadcrumbs e ordens vinculadas
-- Bloqueio de exclusão quando existem ordens vinculadas
-- Paginação server-side com limite ajustável (10, 20, 50)
+### 📊 Dashboard Operacional
+- **Indicadores em tempo real**: Total de equipamentos, ordens abertas e concluídas.
+- **Controle de Prazos (SLAs)**: Ordens atrasadas, vencendo hoje e nos próximos 7 dias.
+- **Atalhos Inteligentes**: Filtros de prazo acionados com 1 clique diretamente dos cards de métricas.
+- **Ordens Urgentes**: Destaque para as 5 solicitações com prazo mais crítico.
+- **Gráfico Mensal (Recharts)**: Volume de ordens dos últimos 6 meses em gráfico de barras sóbrio e responsivo.
+- **Atividades Recentes**: Histórico rápido dos últimos equipamentos cadastrados e ordens abertas.
+- **Taxa de Conclusão**: Cálculo percentual automatizado da eficiência operacional.
+- **Auto-refresh**: Atualização inteligente de dados ao focar na aba (`visibilitychange`).
 
-###  Ordens de Serviço
-- Cadastro vinculado a equipamentos, com prioridade e prazo opcional
-- Busca textual por título e descrição
-- Filtros combinados: status + prioridade + prazo
-- Ordenação por data de criação ou vencimento
-- Indicadores visuais para ordens atrasadas, vencendo hoje e próximas do prazo
-- Alteração de status via dropdown inline
-- Edição ou remoção do prazo na página de detalhes
-- Histórico de alterações de status e prazo
-- Página de detalhes com equipamento vinculado e histórico
-- Paginação server-side com limite ajustável (10, 20, 50)
+### ⚙️ Equipamentos & Ativos
+- **CRUD Completo**: Cadastro, edição técnica via modal, listagem e exclusão controlada.
+- **Ficha Técnica & Patrimônio**: Identificação unívoca com código mono (`patrimony_code`), localização e criticidade.
+- **Upload de Fotos**: Integração com Supabase Storage (JPEG, PNG, WebP até 5MB) com preview e miniaturas.
+- **Página de Detalhes**: Visualização do ativo, métricas consolidadas e listagem tabular de ordens vinculadas.
+- **Proteção de Integridade**: Bloqueio de exclusão quando o equipamento possui ordens de serviço ativas.
+- **Filtros e Paginação**: Busca textual (nome, código, setor), filtro por status operacional e paginação server-side.
+
+### 📋 Ordens de Serviço
+- **Abertura & Vinculação**: Criação de ordens associadas a equipamentos com prioridade (`low`, `medium`, `high`, `critical`) e prazo limite.
+- **Gestão de Prazos**: Indicadores visuais de SLA (Atrasada, Vence hoje, Próximos 7 dias, Sem prazo) calculados no fuso de Brasília.
+- **Alteração Rápida de Status**: Seletor inline com atualização imediata e sincronizada.
+- **Histórico & Auditoria**: Rastreabilidade completa de todas as alterações de status e prorrogações de prazo.
+- **Página de Detalhes da Ordem**: Layout com dados técnicos do ativo associado, formulário de ajuste de prazo e log cronológico de eventos.
 
 ### 👤 Perfil do Usuário
-- Página `/perfil` com nome, cargo e telefone (editáveis)
-- Email e data de criação (read-only)
-- Validação de tamanho dos campos (255/50/100 chars)
+- Gestão de dados pessoais: Nome completo, cargo/função operacional e telefone de contato.
+- E-mail e data de cadastro com proteção somente leitura.
 
-### 🛡️ Segurança
-- Autenticação Supabase (email/senha) com JWT
-- Proteção de páginas pelo `proxy.ts` do Next.js 16
-- Isolamento de dados por `user_id` em todas as queries
-- Rate limiting em memória (30 req/min em POST/PATCH/DELETE)
-- Rate limit específico para upload e remoção de imagens (10 req/min)
-- Proteção contra open redirect no callback de auth
-- Validação de propriedade antes de remover fotos do Storage
-- Validação de campos no servidor (tamanho máximo, tipos)
-- Respostas de erro seguras (sem expor detalhes internos)
-- Row Level Security (RLS) no Supabase
-- Validação de UUID nas rotas de detalhe, edição e exclusão de equipamentos
-- Fotos aceitas pela API somente quando pertencem ao diretório do usuário autenticado no bucket configurado
+### 🛡️ Segurança & Arquitetura
+- **Autenticação SSR**: Supabase Auth com gerenciamento de sessão e tokens JWT seguros.
+- **Proteção de Rotas**: Controle via `proxy.ts` (Next.js 16) com proteção contra Open Redirect.
+- **Row Level Security (RLS)**: Isolamento estrito de dados por `user_id` no banco PostgreSQL.
+- **Rate Limiting em Memória**: Proteção contra abusos em mutações e uploads (10–30 req/min).
+- **Validação Server-Side**: Sanitização de dados, limites de caracteres e verificação de propriedade de arquivos no Storage.
+- **Logging Estruturado**: Logger padronizado em JSON para auditoria técnica.
 
-### Permissões
+---
 
-O modelo atual é de propriedade individual; não existem organizações nem papéis administrativos. Todo usuário autenticado pode criar equipamentos e ordens e pode listar, consultar, editar ou excluir somente os próprios registros. O campo `profiles.role` é apenas uma informação de perfil e não concede permissões. As APIs aplicam `user_id` e as policies RLS fornecem uma segunda camada de isolamento.
+## Preview do Sistema
 
-###  Logging
-- Logger estruturado em JSON (`logger('level', 'event', data)`)
-- Logs de erro em todas as API routes
-- Logs de rate limit excedido
-
-## Preview
-
-> As capturas abaixo são referências visuais. Os indicadores de prazo adicionados recentemente ainda não aparecem nas imagens atuais.
-
-### Dashboard
+### 1. Página Inicial & Simulador Interativo (Pública)
 
 <p align="center">
-  <img src="public/previews/preview-dashboard.png" alt="Preview do dashboard do ManutFlow com indicadores de equipamentos e ordens de serviço" width="900" />
+  <img src="public/previews/preview-landing.png" alt="Preview da página inicial do ManutFlow com apresentação e simulador interativo de ordens" width="900" />
 </p>
 
-### Equipamentos
+### 2. Dashboard Operacional
 
 <p align="center">
-  <img src="public/previews/preview-equipamentos.png" alt="Preview da tela de equipamentos do ManutFlow com cadastro, busca, filtros e listagem" width="900" />
+  <img src="public/previews/preview-dashboard.png" alt="Preview do dashboard do ManutFlow com indicadores de equipamentos, prazos e gráfico" width="900" />
 </p>
 
-### Detalhes do equipamento
+### 3. Equipamentos & Ativos
 
 <p align="center">
-  <img src="public/previews/preview-equipamento-detalhes.png" alt="Preview da página de detalhes de equipamento do ManutFlow com informações gerais e ordens vinculadas" width="900" />
+  <img src="public/previews/preview-equipamentos.png" alt="Preview da tela de equipamentos do ManutFlow com busca, filtros e listagem" width="900" />
 </p>
 
-### Ordens de Serviço
+### 4. Ficha Técnica do Equipamento
 
 <p align="center">
-  <img src="public/previews/preview-ordens.png" alt="Preview da tela de ordens de serviço do ManutFlow com formulário, busca e filtros" width="900" />
+  <img src="public/previews/preview-equipamento-detalhes.png" alt="Preview da página de detalhes de equipamento com métricas e ordens vinculadas" width="900" />
 </p>
 
-### Detalhes da ordem de serviço
+### 5. Ordens de Serviço
 
 <p align="center">
-  <img src="public/previews/preview-ordem-detalhes.png" alt="Preview da página de detalhes de ordem de serviço do ManutFlow com status, prioridade, histórico e equipamento vinculado" width="900" />
+  <img src="public/previews/preview-ordens.png" alt="Preview da tela de ordens de serviço com filtros combinados e status de SLA" width="900" />
 </p>
 
-### Login e Cadastro
+### 6. Detalhes & Auditoria da Ordem
 
 <p align="center">
-  <img src="public/previews/preview-login.png" alt="Preview da tela de login do ManutFlow com formulário de email e senha, tema dark e gradiente teal" width="900" />
+  <img src="public/previews/preview-ordem-detalhes.png" alt="Preview da página de detalhes de ordem de serviço com histórico e ativo vinculado" width="900" />
+</p>
+
+### 7. Autenticação (Login & Cadastro)
+
+<p align="center">
+  <img src="public/previews/preview-login.png" alt="Preview da tela de login do ManutFlow com acesso demo de 1 clique" width="900" />
 </p>
 
 <p align="center">
-  <img src="public/previews/preview-register.png" alt="Preview da tela de cadastro do ManutFlow com formulário de nome, email e senha" width="900" />
+  <img src="public/previews/preview-register.png" alt="Preview da tela de cadastro do ManutFlow" width="900" />
 </p>
 
-## Stack
+---
 
-| Camada | Tecnologia |
-|--------|-----------|
-| Framework | Next.js 16 (App Router) |
-| UI | React 19 + Tailwind CSS 4 |
-| Banco | PostgreSQL (Supabase) |
-| Auth | Supabase Auth (SSR) |
-| Storage | Supabase Storage |
-| Gráficos | Recharts |
-| Testes | Vitest |
-| Linter | ESLint 9 (flat config) |
-| TypeScript | strict mode |
+## Stack Tecnológica
 
-## Páginas
+| Camada | Tecnologia | Finalidade |
+|---|---|---|
+| **Framework** | Next.js 16 (App Router) | Renderização híbrida SSR/Client, rotas dinâmicas e Server Components |
+| **Linguagem** | TypeScript 5 (Strict Mode) | Tipagem estática rigorosa e segurança em tempo de compilação |
+| **Estilização** | Tailwind CSS 4 | Design System minimalista, responsividade e utilitários modernos |
+| **Banco de Dados** | PostgreSQL (Supabase) | Armazenamento relacional com constraints e índices |
+| **Autenticação** | Supabase Auth (SSR) | Sessões seguras com cookies HttpOnly e JWT |
+| **Storage** | Supabase Storage | Armazenamento de fotos de equipamentos com controle de permissão |
+| **Gráficos** | Recharts | Visualização de séries temporais e volumes mensais |
+| **Ícones** | Lucide React | Ícones funcionais e minimalistas |
+| **Testes** | Vitest | Testes unitários e de integração (161 testes automatizados) |
+| **Qualidade** | ESLint 9 (Flat Config) | Padronização e análise estática de código |
 
-| Rota | Descrição |
-|------|-----------|
-| `/` | Dashboard com indicadores gerais e de prazo, gráfico, ordens urgentes e atividades recentes |
-| `/equipamentos` | CRUD de equipamentos com busca, filtro, paginação e upload de foto |
-| `/equipamentos/[id]` | Detalhes do equipamento com foto e ordens vinculadas |
-| `/ordens` | CRUD de ordens com busca, filtros combinados, ordenação, prazos e paginação |
-| `/ordens/[id]` | Detalhes da ordem com equipamento, edição de prazo e histórico |
-| `/perfil` | Edição de nome, cargo e telefone |
-| `/login` | Login com email e senha |
-| `/register` | Cadastro com nome, email e senha |
+---
+
+## Páginas & Rotas
+
+| Rota | Acesso | Descrição |
+|---|---|---|
+| `/` | Público / Autenticado | Landing Page institucional com simulador para visitantes; Dashboard operacional para usuários logados |
+| `/equipamentos` | Autenticado | Gestão de equipamentos com busca, filtros de status, upload e paginação |
+| `/equipamentos/[id]` | Autenticado | Ficha técnica detalhada do ativo com histórico de ordens associadas |
+| `/ordens` | Autenticado | Central de ordens de serviço com filtros combinados de SLA, prioridade e status |
+| `/ordens/[id]` | Autenticado | Detalhes da ordem, controle de prazos e linha do tempo de auditoria |
+| `/perfil` | Autenticado | Gerenciamento de dados cadastrais do operador |
+| `/login` | Público | Autenticação com e-mail/senha e botão de acesso rápido Demo (1-Clique) |
+| `/register` | Público | Criação de novas contas no sistema |
+
+---
 
 ## Rotas de API
 
 | Método | Rota | Descrição |
-|--------|------|-----------|
-| `GET` | `/api/health` | Health check |
-| `GET` | `/api/dashboard-summary` | Indicadores gerais e de prazo, gráfico e atividades do dashboard |
-| `GET` | `/api/equipments` | Lista equipamentos (paginado, busca, filtro) |
-| `POST` | `/api/equipments` | Cadastra equipamento |
-| `GET` | `/api/equipments/[id]` | Detalhes do equipamento + ordens vinculadas |
-| `PATCH` | `/api/equipments/[id]` | Edita equipamento (parcial) |
-| `DELETE` | `/api/equipments/[id]` | Exclui equipamento (bloqueia se houver ordens) |
-| `GET` | `/api/service-orders` | Lista ordens (paginado, busca, filtros e ordenação) |
-| `POST` | `/api/service-orders` | Cadastra ordem com prazo opcional |
-| `GET` | `/api/service-orders/[id]` | Detalhes da ordem + equipamento + histórico |
-| `PATCH` | `/api/service-orders/[id]` | Altera status e/ou prazo com registro de histórico |
-| `DELETE` | `/api/service-orders/[id]` | Exclui ordem |
-| `GET` | `/api/profile` | Dados do perfil |
-| `PATCH` | `/api/profile` | Atualiza perfil (nome, cargo, telefone) |
-| `POST` | `/api/upload` | Upload de imagem (valida MIME, 5MB, rate limit 10/min) |
-| `DELETE` | `/api/upload` | Remove uma imagem pertencente ao usuário |
+|---|---|---|
+| `GET` | `/api/health` | Verificação de disponibilidade e integridade do serviço |
+| `GET` | `/api/dashboard-summary` | Consolidação de totais, prazos, ordens críticas e gráfico |
+| `GET` | `/api/equipments` | Listagem paginada de ativos com suporte a filtros e busca |
+| `POST` | `/api/equipments` | Cadastro de novo equipamento |
+| `GET` | `/api/equipments/[id]` | Consulta de ativo específico e suas ordens de serviço |
+| `PATCH` | `/api/equipments/[id]` | Edição parcial de dados do equipamento |
+| `DELETE` | `/api/equipments/[id]` | Exclusão de equipamento (com verificação de vínculo) |
+| `GET` | `/api/service-orders` | Listagem paginada com ordenação e filtros de status/prazo/prioridade |
+| `POST` | `/api/service-orders` | Abertura de nova ordem com especificação opcional de SLA |
+| `GET` | `/api/service-orders/[id]` | Consulta da ordem com ativo vinculado e timeline de eventos |
+| `PATCH` | `/api/service-orders/[id]` | Atualização de status e/ou prazo com gravação no histórico |
+| `DELETE` | `/api/service-orders/[id]` | Exclusão de ordem de serviço |
+| `GET` | `/api/profile` | Leitura dos dados do perfil do usuário autenticado |
+| `PATCH` | `/api/profile` | Atualização de nome, cargo e telefone |
+| `POST` | `/api/upload` | Upload seguro de imagens com validação MIME e rate limit (10/min) |
+| `DELETE` | `/api/upload` | Remoção de foto vinculada no bucket de storage |
 
-### Filtros e ordenação de ordens
+---
 
-| Parâmetro | Valores |
-|-----------|---------|
-| `status` | `open / in_progress / closed` |
-| `priority` | `low / medium / high / critical` |
-| `deadline` | `overdue / today / next_7_days / without_due_date` |
-| `sort` | `created_desc / created_asc / due_asc / due_desc` |
+## Estrutura de Pastas
 
-## Banco de Dados
-
-### `profiles`
-| Campo | Tipo | Descrição |
-|-------|------|-----------|
-| `id` | UUID PK | Vinculado a `auth.users.id` |
-| `email` | text | Preenchido automaticamente |
-| `full_name` | text \| null | Editável via perfil |
-| `phone` | text \| null | Editável via perfil |
-| `role` | text \| null | Editável via perfil |
-| `avatar_url` | text \| null | (não usado) |
-| `created_at` | timestamptz | |
-| `updated_at` | timestamptz | |
-
-### `equipments`
-| Campo | Tipo | Descrição |
-|-------|------|-----------|
-| `id` | UUID PK | |
-| `name` | text | Obrigatório, máx 255 |
-| `patrimony_code` | text | Obrigatório, único por user_id |
-| `location` | text | Obrigatório, máx 255 |
-| `status` | text | `active / inactive / maintenance` |
-| `photo_url` | text \| null | URL da foto no Supabase Storage |
-| `user_id` | UUID FK | |
-| `created_at` | timestamptz | |
-| `updated_at` | timestamptz | |
-
-### `service_orders`
-| Campo | Tipo | Descrição |
-|-------|------|-----------|
-| `id` | UUID PK | |
-| `title` | text | Obrigatório, máx 255 |
-| `description` | text \| null | Máx 2000 |
-| `status` | text | `open / in_progress / closed` |
-| `priority` | text | `low / medium / high / critical` |
-| `equipment_id` | UUID FK | → equipments |
-| `user_id` | UUID FK | |
-| `due_date` | date \| null | Prazo opcional da ordem |
-| `created_at` | timestamptz | |
-
-### `service_order_history`
-| Campo | Tipo | Descrição |
-|-------|------|-----------|
-| `id` | UUID PK | |
-| `service_order_id` | UUID FK | → service_orders |
-| `user_id` | UUID FK | |
-| `event_type` | text | Ex: `status_changed / due_date_changed` |
-| `previous_status` | text \| null | |
-| `new_status` | text \| null | |
-| `description` | text \| null | |
-| `created_at` | timestamptz | |
-
-## Variáveis de ambiente
-
-```env
-NEXT_PUBLIC_SUPABASE_URL=
-NEXT_PUBLIC_SUPABASE_ANON_KEY=
-SUPABASE_SERVICE_ROLE_KEY=        # Necessário no servidor para upload/remoção de imagens
+```
+manutflow/
+├── src/
+│   ├── app/
+│   │   ├── api/                   # Route Handlers REST
+│   │   ├── equipamentos/          # Páginas de listagem e detalhes de ativos
+│   │   ├── ordens/                # Páginas de listagem e detalhes de ordens
+│   │   ├── perfil/                # Página de perfil do usuário
+│   │   ├── login/                 # Página de login com acesso demo
+│   │   ├── register/              # Página de registro de usuário
+│   │   ├── page.tsx               # Roteamento inteligente: Landing Page ou Dashboard
+│   │   ├── layout.tsx             # Layout raiz da aplicação
+│   │   └── globals.css            # Diretivas Tailwind CSS
+│   ├── components/
+│   │   ├── landing/               # LandingHeader, DemoMaintenanceFlow, FeatureCard
+│   │   ├── layout/                # AppShell, AppHeader
+│   │   └── ui/                    # Modal, StatusCard, Pagination, Breadcrumbs
+│   ├── features/
+│   │   ├── dashboard/             # Overview, métricas de SLA, gráfico e atividades
+│   │   ├── equipments/            # Formulários, listagens, cards e config
+│   │   └── service-orders/        # Gestão de ordens, badges de prazo e histórico
+│   ├── lib/
+│   │   ├── auth.ts                # Obtenção de sessão e autenticação de APIs
+│   │   ├── rate-limit.ts          # Rate limiting em memória com expiração
+│   │   ├── logger.ts              # Logger estruturado em formato JSON
+│   │   └── supabase/              # Clientes Supabase (Browser, Server, Middleware)
+│   ├── types/                     # Definições TypeScript (equipment, service-order, profile)
+│   └── proxy.ts                   # Middleware Next.js 16 para proteção de sessão SSR
+└── public/
+    └── previews/                  # Capturas de tela para documentação
 ```
 
-As fotos são JPEG, PNG ou WebP de até 5 MB. O servidor gera o caminho `user_id/arquivo`, persiste uma URL pública e rejeita URLs externas ou pertencentes a outro usuário. A service role nunca deve usar o prefixo `NEXT_PUBLIC_` nem ser enviada ao navegador.
+---
 
-## Como rodar localmente
+## Demonstração Online
+
+- **Aplicação em produção:** [https://manutflow.vercel.app](https://manutflow.vercel.app)
+- **Repositório oficial:** [https://github.com/tharciosantos/manutflow](https://github.com/tharciosantos/manutflow)
+
+### Acesso Rápido Demo (1-Clique)
+Na tela de login, clique no botão **"Acessar como Gestor (Demo)"** para entrar com dados pré-configurados (`demo@manutflow.com`) e avaliar o sistema com ativos, ordens e histórico completos em funcionamento.
+
+---
+
+## Como Executar Localmente
+
+### Pré-requisitos
+- Node.js 20+
+- Conta no Supabase (com projeto configurado)
+
+### Passo a passo
 
 ```bash
+# 1. Clonar o repositório
 git clone https://github.com/tharciosantos/manutflow.git
 cd manutflow
+
+# 2. Instalar dependências
 npm install
+
+# 3. Configurar variáveis de ambiente
 cp .env.example .env.local        # Linux/macOS
 Copy-Item .env.example .env.local # PowerShell
+
+# 4. Iniciar servidor de desenvolvimento
 npm run dev                       # http://localhost:3000
 ```
 
-## Testes
+### Variáveis de Ambiente Necessárias (`.env.local`)
+
+```env
+NEXT_PUBLIC_SUPABASE_URL=https://seu-projeto.supabase.co
+NEXT_PUBLIC_SUPABASE_ANON_KEY=sua-chave-anonima
+SUPABASE_SERVICE_ROLE_KEY=sua-service-role-key  # Usado exclusivamente no servidor para upload/storage
+```
+
+---
+
+## Testes & Qualidade
 
 ```bash
-npm run test       # 153 testes (Vitest)
-npm run test:watch # Modo watch
-npm run lint       # ESLint (flat config)
-npm run build      # Next build (standalone)
+# Executar todos os testes automatizados (Vitest)
+npm run test
+
+# Executar testes em modo interativo (Watch)
+npm run test:watch
+
+# Checagem estática de tipos
+npx tsc --noEmit
+
+# Validação de regras de lint
+npm run lint
+
+# Build otimizado para produção
+npm run build
 ```
 
-Cobertura atual: 15 arquivos e 161 testes, incluindo APIs, autenticação, armazenamento de fotos, validação de identificadores, regras de prazo e componentes do dashboard/listagem.
+**Cobertura de Testes**: 161 testes automatizados passando em 15 arquivos de suíte, cobrindo endpoints de API, fluxos de autenticação, cálculos de SLA, rate limiters, storage e componentes de interface.
 
-| Área | Escopo |
-|------|--------|
-| API de saúde | Health check |
-| APIs de equipamentos | Listagem, criação, detalhes, edição e exclusão |
-| APIs de ordens | Listagem, criação, detalhes, status, prazo, histórico e exclusão |
-| API do dashboard | Totais, prioridades, vencimentos e ordens urgentes |
-| API de upload | Validação, upload, rate limit e remoção |
-| Componentes | Dashboard e combinação de filtros da listagem de ordens |
-| Utilitários | Auth, redirects seguros, Storage e regras de vencimento |
+---
 
-## Migrations SQL
+## Fases Implementadas
 
-Os scripts de referência ficam em `scripts/`, pasta ignorada pelo Git e mantida apenas no ambiente local. Eles não são incluídos automaticamente em um novo clone.
+| # | Fase | Descrição |
+|:-:|---|---|
+| 0–13 | **Core & Evolução** | CRUD de equipamentos, upload no Storage, filtros combinados, gestão de prazos (SLAs), rate limiting, auditoria e testes automatizados. |
+| 14 | **Modernização Visual & Landing Page** | Criação da Landing Page pública com simulador interativo de manutenção, redesign minimalista B2B (estilo Linear/MaintainX), sobriedade visual e eliminação de ruído gráfico. |
 
-- `03-add-profile-fields.sql` — colunas `phone` e `role`
-- `04-upload-imagens.sql` — bucket storage + photo_url
-- `05-add-service-order-due-date.sql` — prazo opcional e índice de vencimento
-- `seed-equipments.sql` — dados opcionais de equipamentos para desenvolvimento
-
-Execute no SQL Editor do Supabase somente os scripts necessários para o ambiente. Em uma instalação nova, as tabelas base, os relacionamentos e as políticas RLS descritos neste README também precisam estar configurados previamente.
-
-## Estrutura de pastas
-
-```
-src/
-  __tests__/            setup + mocks globais
-  app/
-    api/                8 route handlers de API
-    equipamentos/       listagem e detalhes
-    ordens/             listagem e detalhes
-    perfil/             página de perfil
-    login/              login
-    register/           cadastro
-  components/
-    layout/             AppShell, AppHeader
-    ui/                 Modal (<dialog>), StatusCard, Pagination, Breadcrumbs
-  features/
-    dashboard/          indicadores, vencimentos, gráfico e atividades
-    equipments/         form, list, search, filters, config
-    service-orders/     form, list, prazos, filtros, badges e config
-  lib/
-    auth.ts             getUser() para API routes
-    rate-limit.ts       rate limiter em memória
-    logger.ts           logger estruturado JSON
-    supabase/           client.ts, server.ts, middleware.ts
-  types/                equipment.ts, service-order.ts, profile.ts
-  proxy.ts              sessão SSR e proteção de rotas
-```
-
-## Deploy
-
-### Vercel
-1. Conecte o repositório no [vercel.com](https://vercel.com)
-2. Configure as variáveis de ambiente no dashboard
-3. Faça o deploy
-
-### Pós-deploy
-- Configure as **Redirect URLs** no Supabase (Authentication > URL Configuration)
-- Adicione `https://seu-app.vercel.app/auth/callback`
-- Configure `SUPABASE_SERVICE_ROLE_KEY` somente como variável server-side
-- Se for usar upload, configure o bucket e a coluna `photo_url`
-- Para prazos, garanta que a coluna `service_orders.due_date` e seu índice existam
-
-## Demonstração
-
-- **Aplicação em produção:** [https://manutflow.vercel.app](https://manutflow.vercel.app)
-- **Repositório:** [https://github.com/tharciosantos/manutflow](https://github.com/tharciosantos/manutflow)
-
-A aplicação conta com **Acesso de Demonstração (1-Clique)** na tela de login:
--  **Gestor de Manutenção (`Demo`):** `demo@manutflow.com` — acesso imediato ao dashboard com equipamentos, ordens de serviço, histórico e indicadores operacionais pré-carregados para avaliação do produto.
-
-Novos cadastros também podem ser criados normalmente pela tela de registro.
-
-## Limitações conhecidas
-
-- O rate limiter é local à instância e não oferece contagem compartilhada em deploy horizontal/serverless.
-- Não há organizações, matriz de papéis, recuperação de senha, testes E2E ou anexos além da foto do equipamento.
-- Os scripts SQL de referência ficam fora do versionamento; uma instalação nova ainda exige configurar schema e RLS no Supabase.
-- O bucket de fotos é público. O controle de escrita e remoção é por proprietário, mas quem conhece uma URL pode visualizar a imagem.
-
-## Fases implementadas
-
-| # | Fase | Branch |
-|:-:|------|--------|
-| 0 | Hardening (validações, acessibilidade, segurança) | `fix/hardening-final` |
-| 1 | Base inicial de testes automatizados (24 testes) | `feat/testes-automatizados` |
-| 2 | Edição de equipamentos (PATCH + modal) | `feat/edicao-equipamentos` |
-| 3 | Paginação + filtros server-side | `feat/paginacao` |
-| 4 | Dashboard com gráfico Recharts + atividades | `feat/dashboard-melhorias` |
-| 5 | Perfil do usuário (API + página + header) | `feat/perfil-usuario` |
-| 6 | Rate limiting + logging estruturado | `feat/rate-limit-logs` |
-| 7 | Upload de imagens (Supabase Storage) | `feat/upload-imagens` |
-| 8 | Responsividade mobile e correções de tema escuro | `feat/melhorias-mobile` / `feat/correcoes-tema-escuro` |
-| 9 | Filtros e ordenação da listagem de ordens | `feat/melhorias-listagem-ordens` |
-| 10 | Redirects seguros e limpeza de fotos órfãs | `fix/validar-redirecionamento-login` / `fix/limpar-fotos-equipamentos-storage` |
-| 11 | Cobertura adicional das APIs e validação de PRs no CI | `test/cobrir-api-*` / `ci/validar-pull-requests` |
-| 12 | Prazo, vencimentos, filtros e histórico nas ordens | `feat/adicionar-prazo-ordens-api` / `feat/exibir-prazos-e-vencimentos` |
-| 13 | Indicadores de prazo e ordens urgentes no dashboard | `feat/adicionar-indicadores-prazo-dashboard` |
-
-## Aprendizados
-
-- Organização por features (feature-first)
-- CRUD completo com GET, POST, PATCH, DELETE
-- Paginação server-side com LIMIT/OFFSET
-- Busca textual com ILIKE no PostgreSQL
-- Filtros e ordenação combinados por query string
-- Regras de vencimento consistentes no fuso `America/Sao_Paulo`
-- Upload de arquivos com FormData + Supabase Storage
-- Rate limiting em memória com cleanup
-- Logger estruturado em JSON
-- Testes com Vitest + mocks manuais do Supabase
-- Git flow: branch → commit → PR → merge → limpeza
-- Segurança em camadas: JWT → user_id → RLS
-- Proteção de rotas com o Proxy do Next.js 16
-- Acessibilidade: labels, aria-*, required
-- Tema escuro com Tailwind CSS v4
-- Modal com `<dialog>` nativo

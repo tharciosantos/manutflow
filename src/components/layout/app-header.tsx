@@ -4,9 +4,11 @@ import Link from "next/link";
 import { useRouter, usePathname } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { useEffect, useMemo, useState } from "react";
+import { Menu, X } from "lucide-react";
 
 export function AppHeader() {
   const [userEmail, setUserEmail] = useState<string | null>(null);
+  const [userName, setUserName] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const router = useRouter();
@@ -18,12 +20,13 @@ export function AppHeader() {
       const { data: { user } } = await supabase.auth.getUser();
       if (user) {
         setUserEmail(user.email ?? null);
+        const name = user.user_metadata?.full_name || user.email?.split("@")[0] || null;
+        setUserName(name);
       }
     }
     getUser();
   }, [supabase]);
 
-  // Close menu on route change via click on mobile nav links
   const closeMenu = () => setMenuOpen(false);
 
   const handleLogout = async () => {
@@ -35,114 +38,134 @@ export function AppHeader() {
   };
 
   const navLinks = [
-    { href: "/", label: "Painel" },
+    { href: "/", label: "Dashboard" },
     { href: "/equipamentos", label: "Equipamentos" },
-    { href: "/ordens", label: "Ordens" },
+    { href: "/ordens", label: "Ordens de Serviço" },
   ];
+
+  const userInitial = (userName || userEmail || "U").charAt(0).toUpperCase();
 
   return (
     <header className="sticky top-0 z-50 border-b border-slate-800 bg-slate-950/90 backdrop-blur-md">
-      <div className="mx-auto flex max-w-5xl items-center justify-between px-4 py-3 sm:px-6 sm:py-4">
-        {/* Logo */}
-        <div className="min-w-0 flex-1 sm:flex-none">
-          <Link href="/" className="text-base font-semibold text-slate-100 sm:text-lg">
-            ManutFlow
+      <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-2.5 sm:px-6">
+        {/* Logo Minimalista */}
+        <div className="flex items-center gap-6">
+          <Link href="/" className="flex items-center gap-2 group">
+            <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-teal-500 text-slate-950 text-xs font-black tracking-tighter">
+              MF
+            </span>
+            <span className="text-base font-bold tracking-tight text-slate-100 group-hover:text-teal-400 transition-colors">
+              ManutFlow
+            </span>
           </Link>
-          <p className="hidden truncate text-xs text-slate-400 sm:block sm:text-sm">
-            Controle de Manutenção e Ordens de Serviço
-          </p>
+
+          {/* Desktop Navigation Minimalista */}
+          <nav className="hidden items-center gap-1 text-xs sm:text-sm md:flex">
+            {navLinks.map((link) => {
+              const isActive = pathname === link.href;
+              return (
+                <Link
+                  key={link.href}
+                  href={link.href}
+                  className={`rounded-lg px-3 py-1.5 font-medium transition-colors ${
+                    isActive
+                      ? "bg-slate-800/80 text-white"
+                      : "text-slate-400 hover:text-slate-200 hover:bg-slate-900/50"
+                  }`}
+                >
+                  {link.label}
+                </Link>
+              );
+            })}
+          </nav>
         </div>
 
-        {/* Desktop Navigation */}
-        <nav className="hidden items-center gap-1 text-sm text-slate-300 lg:flex">
-          {navLinks.map((link) => (
-            <Link
-              key={link.href}
-              href={link.href}
-              className={`rounded-lg px-3 py-2 transition hover:text-slate-100 ${
-                pathname === link.href
-                  ? "bg-slate-800/60 text-slate-100"
-                  : ""
-              }`}
-            >
-              {link.label}
-            </Link>
-          ))}
-        </nav>
-
         {/* Desktop User Area */}
-        <div className="hidden items-center gap-3 lg:flex">
-          <span className={`hidden max-w-[120px] truncate text-sm text-slate-400 sm:block xl:max-w-none ${userEmail ? 'visible' : 'invisible'}`}>
-            {userEmail || 'email@exemplo.com'}
-          </span>
+        <div className="hidden items-center gap-3 md:flex">
+          {userEmail && (
+            <div className="flex items-center gap-2 text-xs text-slate-400 font-mono">
+              <span className="flex h-6 w-6 items-center justify-center rounded-full bg-slate-800 text-[11px] font-bold text-slate-200">
+                {userInitial}
+              </span>
+              <span className="max-w-[200px] truncate text-slate-300">
+                {userName || userEmail}
+              </span>
+            </div>
+          )}
+
+          <div className="h-4 w-px bg-slate-800" />
+
           <Link
             href="/perfil"
-            className="rounded-lg border border-slate-700 px-3 py-1.5 text-sm text-slate-300 transition hover:border-teal-500 hover:text-teal-400"
+            className="rounded-lg px-2.5 py-1 text-xs font-medium text-slate-300 hover:text-white hover:bg-slate-900 transition-colors"
           >
-            Meu Perfil
+            Perfil
           </Link>
+
           <button
             onClick={handleLogout}
             disabled={loading}
-            className="rounded-lg border border-slate-700 px-3 py-1.5 text-sm text-slate-300 transition hover:border-red-500 hover:text-red-400 disabled:opacity-50"
+            className="rounded-lg px-2.5 py-1 text-xs font-medium text-slate-400 hover:text-red-400 hover:bg-slate-900 transition-colors disabled:opacity-50"
           >
             {loading ? "Saindo..." : "Sair"}
           </button>
         </div>
 
-        {/* Mobile Hamburger Button */}
+        {/* Mobile Menu Button */}
         <button
           type="button"
           onClick={() => setMenuOpen(!menuOpen)}
-          className="flex items-center justify-center rounded-lg border border-slate-700 p-2 text-slate-300 transition hover:bg-slate-800 lg:hidden"
+          className="flex h-8 w-8 items-center justify-center rounded-lg border border-slate-800 text-slate-300 hover:text-white md:hidden"
           aria-label={menuOpen ? "Fechar menu" : "Abrir menu"}
           aria-expanded={menuOpen}
         >
-          {menuOpen ? (
-            <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
-            </svg>
-          ) : (
-            <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
-            </svg>
-          )}
+          {menuOpen ? <X className="h-4 w-4" /> : <Menu className="h-4 w-4" />}
         </button>
       </div>
 
       {/* Mobile Menu Dropdown */}
       {menuOpen && (
-        <div className="border-t border-slate-800 bg-slate-950/95 backdrop-blur-md lg:hidden">
-          <nav className="mx-auto max-w-5xl space-y-1 px-4 py-3">
-            {navLinks.map((link) => (
+        <div className="border-t border-slate-800 bg-slate-950 p-4 md:hidden animate-fade-in">
+          <nav className="space-y-1">
+            {navLinks.map((link) => {
+              const isActive = pathname === link.href;
+              return (
+                <Link
+                  key={link.href}
+                  href={link.href}
+                  onClick={closeMenu}
+                  className={`block rounded-lg px-3 py-2 text-sm font-medium transition ${
+                    isActive
+                      ? "bg-slate-800 text-white font-semibold"
+                      : "text-slate-300 hover:bg-slate-900"
+                  }`}
+                >
+                  {link.label}
+                </Link>
+              );
+            })}
+
+            <hr className="my-3 border-slate-800" />
+
+            <div className="flex items-center justify-between py-1 px-3">
+              <span className="text-xs text-slate-400 truncate">
+                {userName || userEmail || "Usuário"}
+              </span>
               <Link
-                key={link.href}
-                href={link.href}
+                href="/perfil"
                 onClick={closeMenu}
-                className={`block rounded-lg px-4 py-3 text-sm font-medium transition ${
-                  pathname === link.href
-                    ? "bg-slate-800/60 text-teal-300"
-                    : "text-slate-300 hover:bg-slate-800/40 hover:text-slate-100"
-                }`}
+                className="text-xs font-semibold text-teal-400"
               >
-                {link.label}
+                Perfil
               </Link>
-            ))}
-            <hr className="border-slate-800" />
-            {userEmail && (
-              <p className="px-4 py-2 text-xs text-slate-500 truncate">
-                {userEmail}
-              </p>
-            )}
+            </div>
+
             <button
               onClick={handleLogout}
               disabled={loading}
-              className="flex w-full items-center gap-2 rounded-lg px-4 py-3 text-sm font-medium text-red-400 transition hover:bg-red-500/10 disabled:opacity-50"
+              className="mt-2 w-full text-left rounded-lg px-3 py-2 text-xs font-semibold text-red-400 hover:bg-red-500/10 transition"
             >
-              <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15m3 0l3-3m0 0l-3-3m3 3H9" />
-              </svg>
-              {loading ? "Saindo..." : "Sair"}
+              {loading ? "Saindo..." : "Sair da conta"}
             </button>
           </nav>
         </div>

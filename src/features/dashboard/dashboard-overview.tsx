@@ -18,6 +18,7 @@ import {
     Tooltip,
     ResponsiveContainer,
 } from 'recharts';
+import { ArrowUpRight } from 'lucide-react';
 
 type RecentOrder = {
     id: string;
@@ -81,10 +82,10 @@ async function fetchDashboardSummary(): Promise<DashboardSummary> {
 }
 
 const priorityConfig: Record<string, { label: string; color: string; barColor: string }> = {
-    low: { label: 'Baixa', color: 'text-slate-400', barColor: '#94a3b8' },
-    medium: { label: 'Média', color: 'text-yellow-300', barColor: '#fbbf24' },
-    high: { label: 'Alta', color: 'text-orange-300', barColor: '#fb923c' },
-    critical: { label: 'Crítica', color: 'text-red-300', barColor: '#f87171' },
+    low: { label: 'Baixa', color: 'text-slate-400', barColor: '#64748b' },
+    medium: { label: 'Média', color: 'text-amber-400', barColor: '#f59e0b' },
+    high: { label: 'Alta', color: 'text-orange-400', barColor: '#f97316' },
+    critical: { label: 'Crítica', color: 'text-red-400', barColor: '#ef4444' },
 };
 
 function formatDate(dateStr: string) {
@@ -128,7 +129,6 @@ export function DashboardOverview() {
 
     void loadDashboardSummary();
 
-    // Auto-refresh ao voltar para a aba
     function handleVisibilityChange() {
       if (document.visibilityState === 'visible') {
         void loadDashboardSummary();
@@ -145,19 +145,15 @@ export function DashboardOverview() {
 
     if (isLoading) {
         return (
-            <div className="mt-6 space-y-6">
+            <div className="space-y-6">
                 <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
                     {[1, 2, 3].map((i) => (
-                        <div key={i} className="animate-pulse rounded-2xl border border-slate-800 bg-slate-950/70 p-6">
-                            <div className="h-4 w-20 rounded bg-slate-800" />
+                        <div key={i} className="animate-pulse rounded-xl border border-slate-800 bg-slate-900/40 p-5">
+                            <div className="h-3 w-20 rounded bg-slate-800" />
                             <div className="mt-3 h-8 w-16 rounded bg-slate-800" />
                             <div className="mt-2 h-3 w-32 rounded bg-slate-800/60" />
                         </div>
                     ))}
-                </div>
-                <div className="animate-pulse rounded-2xl border border-slate-800 bg-slate-950/70 p-6">
-                    <div className="h-5 w-40 rounded bg-slate-800" />
-                    <div className="mt-6 h-48 rounded bg-slate-800/40" />
                 </div>
             </div>
         );
@@ -165,8 +161,8 @@ export function DashboardOverview() {
 
     if (errorMessage) {
         return (
-            <div className="mt-6 rounded-2xl border border-red-500/30 bg-red-500/10 p-6">
-                <p className="text-sm text-red-300">{errorMessage}</p>
+            <div className="rounded-xl border border-red-500/30 bg-red-500/10 p-4">
+                <p className="text-xs sm:text-sm text-red-300">{errorMessage}</p>
             </div>
         );
     }
@@ -174,20 +170,14 @@ export function DashboardOverview() {
     const s = summary!;
 
     return (
-        <div className="mt-6 space-y-6 sm:mt-10">
-            {/* Cards de status */}
-            <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+        <div className="space-y-3.5">
+            {/* 3 Stat Cards Principais */}
+            <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-3">
                 <StatusCard
                     title="Equipamentos"
                     value={String(s.totalEquipments)}
-                    description="Máquinas e ativos cadastrados"
-                    cardClassName="border-teal-500/20 bg-gradient-to-br from-slate-900 to-slate-900/50"
-                    valueClassName="text-teal-300"
-                    icon={
-                        <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-                            <path strokeLinecap="round" strokeLinejoin="round" d="M9.53 16.122a3 3 0 00-5.78 1.128 2.25 2.25 0 01-2.4 2.245 4.5 4.5 0 008.4-2.245c0-.399-.078-.78-.22-1.128zm0 0a15.998 15.998 0 003.388-1.62m-5.043-.025a15.994 15.994 0 011.622-3.395m3.42 3.42a15.995 15.995 0 004.764-4.648l3.876-5.814a1.151 1.151 0 00-1.597-1.597L14.146 6.32a15.996 15.996 0 00-4.649 4.763m3.42 3.42a6.776 6.776 0 00-3.42-3.42" />
-                        </svg>
-                    }
+                    description="Ativos cadastrados"
+                    valueClassName="text-slate-100"
                 />
 
                 <StatusCard
@@ -196,278 +186,249 @@ export function DashboardOverview() {
                     description="Aguardando atendimento"
                     trend={s.criticalPriorityServiceOrders > 0 ? `${s.criticalPriorityServiceOrders} críticas` : ''}
                     trendUp={false}
-                    cardClassName="border-amber-500/20 bg-gradient-to-br from-slate-900 to-slate-900/50"
-                    valueClassName="text-amber-300"
-                    icon={
-                        <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-                            <path strokeLinecap="round" strokeLinejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" />
-                        </svg>
-                    }
+                    valueClassName="text-amber-400"
                 />
 
                 <StatusCard
                     title="Concluídas"
                     value={String(s.closedServiceOrders)}
-                    description={`${s.completionRate}% de conclusão`}
+                    description={`${s.completionRate}% taxa de resolução`}
                     trend={s.totalServiceOrders > 0 ? `${s.totalServiceOrders} total` : ''}
                     trendUp
-                    cardClassName="border-emerald-500/20 bg-gradient-to-br from-slate-900 to-slate-900/50"
-                    valueClassName="text-emerald-300"
-                    icon={
-                        <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-                            <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                        </svg>
-                    }
+                    valueClassName="text-emerald-400"
                 />
             </div>
 
-            <section>
-                <div className="mb-4 flex items-end justify-between gap-4">
-                    <div>
-                        <h2 className="text-lg font-semibold text-white">Prazos das ordens</h2>
-                        <p className="mt-1 text-sm text-slate-400">
-                            Acompanhe vencimentos que exigem atenção.
-                        </p>
-                    </div>
-
+            {/* Prazos das Ordens */}
+            <section className="space-y-1.5">
+                <div className="flex items-center justify-between">
+                    <h2 className="text-xs font-bold uppercase tracking-wider text-slate-400">Prazos das ordens</h2>
                     <Link
                         href="/ordens"
-                        className="shrink-0 text-xs font-medium text-teal-300 transition hover:text-teal-200 sm:text-sm"
+                        className="inline-flex items-center gap-1 text-[11px] font-semibold text-teal-400 hover:underline"
                     >
-                        Ver todas
+                        <span>Ver todas</span>
+                        <ArrowUpRight className="h-3 w-3" />
                     </Link>
                 </div>
 
-                <div className="grid gap-3 sm:grid-cols-3 sm:gap-4">
+                <div className="grid grid-cols-3 gap-2.5">
                     <Link
                         href="/ordens?deadline=overdue"
-                        className="group rounded-2xl border border-red-500/25 bg-red-500/5 p-4 transition hover:border-red-400/50 hover:bg-red-500/10"
+                        className="rounded-lg border border-slate-800/80 bg-slate-900/50 p-2.5 sm:p-3 transition-colors hover:border-red-500/50 hover:bg-slate-900/80"
                     >
-                        <p className="text-xs font-medium text-red-300 sm:text-sm">Atrasadas</p>
-                        <strong className="mt-2 block text-2xl font-bold text-red-200 sm:text-3xl">
+                        <div className="flex items-center justify-between">
+                            <span className="text-[11px] font-semibold uppercase tracking-wider text-red-400">Atrasadas</span>
+                            <span className="hidden sm:inline text-[9px] font-mono text-slate-500">SLA expirado</span>
+                        </div>
+                        <strong className={`mt-0.5 block font-mono text-lg sm:text-xl font-bold tabular-nums ${s.overdueServiceOrders > 0 ? 'text-red-400' : 'text-slate-500'}`}>
                             {s.overdueServiceOrders}
                         </strong>
-                        <p className="mt-1 text-xs text-slate-400">Prazo já vencido</p>
                     </Link>
 
                     <Link
                         href="/ordens?deadline=today"
-                        className="group rounded-2xl border border-amber-500/25 bg-amber-500/5 p-4 transition hover:border-amber-400/50 hover:bg-amber-500/10"
+                        className="rounded-lg border border-slate-800/80 bg-slate-900/50 p-2.5 sm:p-3 transition-colors hover:border-amber-500/50 hover:bg-slate-900/80"
                     >
-                        <p className="text-xs font-medium text-amber-300 sm:text-sm">Vencem hoje</p>
-                        <strong className="mt-2 block text-2xl font-bold text-amber-200 sm:text-3xl">
+                        <div className="flex items-center justify-between">
+                            <span className="text-[11px] font-semibold uppercase tracking-wider text-amber-400">Vencem hoje</span>
+                            <span className="hidden sm:inline text-[9px] font-mono text-slate-500">Ação imediata</span>
+                        </div>
+                        <strong className={`mt-0.5 block font-mono text-lg sm:text-xl font-bold tabular-nums ${s.dueTodayServiceOrders > 0 ? 'text-amber-300' : 'text-slate-500'}`}>
                             {s.dueTodayServiceOrders}
                         </strong>
-                        <p className="mt-1 text-xs text-slate-400">Atenção imediata</p>
                     </Link>
 
                     <Link
                         href="/ordens?deadline=next_7_days"
-                        className="group rounded-2xl border border-sky-500/25 bg-sky-500/5 p-4 transition hover:border-sky-400/50 hover:bg-sky-500/10"
+                        className="rounded-lg border border-slate-800/80 bg-slate-900/50 p-2.5 sm:p-3 transition-colors hover:border-sky-500/50 hover:bg-slate-900/80"
                     >
-                        <p className="text-xs font-medium text-sky-300 sm:text-sm">Próximos 7 dias</p>
-                        <strong className="mt-2 block text-2xl font-bold text-sky-200 sm:text-3xl">
+                        <div className="flex items-center justify-between">
+                            <span className="text-[11px] font-semibold uppercase tracking-wider text-sky-400">Próximos 7 dias</span>
+                            <span className="hidden sm:inline text-[9px] font-mono text-slate-500">Programadas</span>
+                        </div>
+                        <strong className={`mt-0.5 block font-mono text-lg sm:text-xl font-bold tabular-nums ${s.dueNextSevenDaysServiceOrders > 0 ? 'text-sky-300' : 'text-slate-500'}`}>
                             {s.dueNextSevenDaysServiceOrders}
                         </strong>
-                        <p className="mt-1 text-xs text-slate-400">Planejamento próximo</p>
                     </Link>
                 </div>
             </section>
 
-            {/* Grid: Gráfico + Prioridades */}
-            <div className="grid gap-6 lg:grid-cols-3">
-                {/* Gráfico de ordens por mês */}
-                <section className="rounded-2xl border border-slate-800 bg-slate-950/70 p-5 lg:col-span-2">
-                    <h3 className="text-sm font-medium text-slate-400">Ordens nos últimos 6 meses</h3>
+            {/* Grid Principal: Gráfico + Prioridades & Ordens Urgentes */}
+            <div className="grid gap-3.5 lg:grid-cols-3">
+                {/* Coluna Esquerda (2/3): Gráfico + Ordens com Prazo Urgente */}
+                <div className="space-y-3.5 lg:col-span-2 flex flex-col justify-between">
+                    {/* Gráfico de ordens por mês */}
+                    <section className="rounded-xl border border-slate-800 bg-slate-900/60 p-3.5 sm:p-4">
+                        <div className="flex items-center justify-between mb-2">
+                            <h3 className="text-xs font-bold uppercase tracking-wider text-slate-300">Ordens nos últimos 6 meses</h3>
+                            <span className="text-[10px] font-mono text-slate-500">Histórico</span>
+                        </div>
 
-                    <div className="mt-4 h-56">
-                        {s.ordersByMonth.some((m) => m.count > 0) ? (
-                            <ResponsiveContainer width="100%" height="100%">
-                                <BarChart data={s.ordersByMonth} margin={{ top: 5, right: 10, left: -10, bottom: 5 }}>
-                                    <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" />
-                                    <XAxis
-                                        dataKey="month"
-                                        tick={{ fill: '#94a3b8', fontSize: 12 }}
-                                        axisLine={{ stroke: '#334155' }}
-                                        tickLine={false}
-                                    />
-                                    <YAxis
-                                        allowDecimals={false}
-                                        tick={{ fill: '#94a3b8', fontSize: 12 }}
-                                        axisLine={{ stroke: '#334155' }}
-                                        tickLine={false}
-                                    />
-                                    <Tooltip
-                                        cursor={{ fill: '#1e293b' }}
-                                        contentStyle={{ backgroundColor: '#0f172a', border: '1px solid #1e293b', borderRadius: '12px', fontSize: '13px' }}
-                                        labelStyle={{ color: '#e2e8f0', fontWeight: 600 }}
-                                        itemStyle={{ color: '#cbd5e1' }}
-                                        formatter={(value) => [`${value} ordem${Number(value) !== 1 ? 'ns' : ''}`, 'Total']}
-                                    />
-                                    <Bar dataKey="count" fill="#14b8a6" radius={[4, 4, 0, 0]} maxBarSize={40} />
-                                </BarChart>
-                            </ResponsiveContainer>
-                        ) : (
-                            <div className="flex h-full items-center justify-center text-sm text-slate-500">
-                                Nenhuma ordem registrada nos últimos 6 meses.
-                            </div>
-                        )}
-                    </div>
-                </section>
-
-                {/* Prioridades */}
-                <section className="rounded-2xl border border-slate-800 bg-slate-950/70 p-5">
-                    <h3 className="text-sm font-medium text-slate-400">Ordens por Prioridade</h3>
-
-                    <div className="mt-4 space-y-4">
-                        {(['critical', 'high', 'medium', 'low'] as const).map((key) => {
-                            const count =
-                                key === 'critical' ? s.criticalPriorityServiceOrders
-                                : key === 'high' ? s.highPriorityServiceOrders
-                                : key === 'medium' ? s.mediumPriorityServiceOrders
-                                : s.lowPriorityServiceOrders;
-
-                            const config = priorityConfig[key];
-                            const maxCount = Math.max(s.criticalPriorityServiceOrders, s.highPriorityServiceOrders, s.mediumPriorityServiceOrders, s.lowPriorityServiceOrders, 1);
-                            const barWidth = maxCount > 0 ? (count / maxCount) * 100 : 0;
-
-                            return (
-                                <div key={key}>
-                                    <div className="mb-1 flex items-center justify-between text-xs">
-                                        <span className={config.color}>{config.label}</span>
-                                        <span className="font-medium text-slate-300">{count}</span>
-                                    </div>
-                                    <div className="h-1.5 overflow-hidden rounded-full bg-slate-800">
-                                        <div className="h-full rounded-full transition-all duration-500" style={{ width: `${barWidth}%`, backgroundColor: config.barColor }} />
-                                    </div>
+                        <div className="h-36 sm:h-40">
+                            {s.ordersByMonth.some((m) => m.count > 0) ? (
+                                <ResponsiveContainer width="100%" height="100%">
+                                    <BarChart data={s.ordersByMonth} margin={{ top: 5, right: 5, left: -25, bottom: 0 }}>
+                                        <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" vertical={false} />
+                                        <XAxis
+                                            dataKey="month"
+                                            tick={{ fill: '#94a3b8', fontSize: 10 }}
+                                            axisLine={{ stroke: '#334155' }}
+                                            tickLine={false}
+                                        />
+                                        <YAxis
+                                            allowDecimals={false}
+                                            tick={{ fill: '#94a3b8', fontSize: 10 }}
+                                            axisLine={{ stroke: '#334155' }}
+                                            tickLine={false}
+                                        />
+                                        <Tooltip
+                                            cursor={{ fill: '#1e293b', opacity: 0.4 }}
+                                            contentStyle={{ 
+                                                backgroundColor: '#090d16', 
+                                                border: '1px solid #334155', 
+                                                borderRadius: '6px', 
+                                                fontSize: '11px',
+                                                padding: '6px 10px'
+                                            }}
+                                            labelStyle={{ color: '#f1f5f9', fontWeight: 600 }}
+                                            itemStyle={{ color: '#2dd4bf' }}
+                                            formatter={(value) => [`${value} ordem${Number(value) !== 1 ? 'ns' : ''}`, 'Total']}
+                                        />
+                                        <Bar dataKey="count" fill="#14b8a6" radius={[4, 4, 0, 0]} maxBarSize={28} />
+                                    </BarChart>
+                                </ResponsiveContainer>
+                            ) : (
+                                <div className="flex h-full items-center justify-center text-xs text-slate-500 font-mono">
+                                    Nenhuma ordem registrada no período.
                                 </div>
-                            );
-                        })}
-                    </div>
-                </section>
-            </div>
+                            )}
+                        </div>
+                    </section>
 
-            <section className="rounded-2xl border border-slate-800 bg-slate-950/70 p-5">
-                <div className="flex items-end justify-between gap-4">
-                    <div>
-                        <h3 className="text-sm font-medium text-slate-300">Ordens com prazo mais urgente</h3>
-                        <p className="mt-1 text-xs text-slate-500">
-                            Atrasadas e vencimentos dos próximos 7 dias.
-                        </p>
-                    </div>
+                    {/* Ordens com Prazo Urgente */}
+                    <section className="rounded-xl border border-slate-800 bg-slate-900/60 p-3.5 sm:p-4 space-y-2">
+                        <div className="flex items-center justify-between">
+                            <h3 className="text-xs font-bold uppercase tracking-wider text-slate-300">Ordens com prazo mais urgente</h3>
+                            <Link
+                                href="/ordens?sort=due_asc"
+                                className="text-[11px] font-semibold text-teal-400 hover:underline"
+                            >
+                                Ver por prazo
+                            </Link>
+                        </div>
 
-                    <Link
-                        href="/ordens?sort=due_asc"
-                        className="shrink-0 text-xs font-medium text-teal-300 transition hover:text-teal-200"
-                    >
-                        Ver por prazo
-                    </Link>
+                        <div className="space-y-1.5">
+                            {s.urgentOrders.length === 0 ? (
+                                <p className="text-xs text-slate-500 py-1 font-mono">Nenhum prazo urgente no momento.</p>
+                            ) : (
+                                s.urgentOrders.slice(0, 3).map((order) => {
+                                    const equipmentName = Array.isArray(order.equipment)
+                                        ? order.equipment[0]?.name
+                                        : order.equipment?.name;
+
+                                    return (
+                                        <Link
+                                            key={order.id}
+                                            href={`/ordens/${order.id}`}
+                                            className="flex flex-col gap-1.5 rounded-lg border border-slate-800/80 bg-slate-950/40 p-2.5 transition-colors hover:border-slate-700 hover:bg-slate-900/60 sm:flex-row sm:items-center sm:justify-between"
+                                        >
+                                            <div className="min-w-0 flex-1">
+                                                <p className="truncate text-xs font-semibold text-slate-200">
+                                                    {order.title}
+                                                </p>
+                                                <p className="mt-0.5 truncate text-[11px] text-slate-400">
+                                                    {`${equipmentName ?? 'Equipamento não informado'} · ${serviceOrderPriorityLabels[order.priority]}`}
+                                                </p>
+                                            </div>
+
+                                            <ServiceOrderDeadlineBadge
+                                                dueDate={order.due_date}
+                                                status={order.status}
+                                            />
+                                        </Link>
+                                    );
+                                })
+                            )}
+                        </div>
+                    </section>
                 </div>
 
-                <div className="mt-4 space-y-2">
-                    {s.urgentOrders.length === 0 ? (
-                        <p className="rounded-xl border border-dashed border-slate-800 px-4 py-6 text-center text-sm text-slate-500">
-                            Nenhum prazo urgente no momento.
-                        </p>
-                    ) : (
-                        s.urgentOrders.map((order) => {
-                            const equipmentName = Array.isArray(order.equipment)
-                                ? order.equipment[0]?.name
-                                : order.equipment?.name;
+                {/* Coluna Direita (1/3): Prioridades + Últimas Atividades */}
+                <div className="space-y-3.5 flex flex-col justify-between">
+                    {/* Prioridades */}
+                    <section className="rounded-xl border border-slate-800 bg-slate-900/60 p-3.5 sm:p-4">
+                        <h3 className="text-xs font-bold uppercase tracking-wider text-slate-300 mb-2.5">Por Prioridade</h3>
 
-                            return (
-                                <Link
-                                    key={order.id}
-                                    href={`/ordens/${order.id}`}
-                                    className="flex flex-col gap-3 rounded-xl border border-slate-800/70 bg-slate-900/30 p-3 transition hover:border-slate-700 sm:flex-row sm:items-center sm:justify-between"
-                                >
-                                    <div className="min-w-0">
-                                        <p className="truncate text-sm font-medium text-slate-200">
-                                            {order.title}
-                                        </p>
-                                        <p className="mt-0.5 truncate text-xs text-slate-500">
-                                            {equipmentName ?? 'Equipamento não informado'}
-                                            {' · '}
-                                            {serviceOrderPriorityLabels[order.priority]}
-                                        </p>
-                                    </div>
+                        <div className="space-y-2">
+                            {(['critical', 'high', 'medium', 'low'] as const).map((key) => {
+                                const count =
+                                    key === 'critical' ? s.criticalPriorityServiceOrders
+                                    : key === 'high' ? s.highPriorityServiceOrders
+                                    : key === 'medium' ? s.mediumPriorityServiceOrders
+                                    : s.lowPriorityServiceOrders;
 
-                                    <ServiceOrderDeadlineBadge
-                                        dueDate={order.due_date}
-                                        status={order.status}
-                                    />
-                                </Link>
-                            );
-                        })
-                    )}
-                </div>
-            </section>
-
-            {/* Grid: Atividades Recentes */}
-            <div className="grid gap-6 lg:grid-cols-2">
-                {/* Últimas ordens */}
-                <section className="rounded-2xl border border-slate-800 bg-slate-950/70 p-5">
-                    <h3 className="text-sm font-medium text-slate-400">Últimas Ordens de Serviço</h3>
-
-                    <div className="mt-4 space-y-3">
-                        {s.recentOrders.length === 0 ? (
-                            <p className="text-sm text-slate-500">Nenhuma ordem registrada.</p>
-                        ) : (
-                            s.recentOrders.map((order) => {
-                                const equipName = Array.isArray(order.equipment)
-                                    ? order.equipment[0]?.name
-                                    : (order.equipment as { name: string })?.name;
+                                const config = priorityConfig[key];
+                                const maxCount = Math.max(s.criticalPriorityServiceOrders, s.highPriorityServiceOrders, s.mediumPriorityServiceOrders, s.lowPriorityServiceOrders, 1);
+                                const barWidth = maxCount > 0 ? (count / maxCount) * 100 : 0;
 
                                 return (
-                                    <div key={order.id} className="flex items-start gap-3 rounded-xl border border-slate-800/50 bg-slate-900/30 p-3 transition hover:border-slate-700">
-                                        <span className={`mt-0.5 h-2 w-2 shrink-0 rounded-full ${order.status === 'open' ? 'bg-amber-400' : order.status === 'in_progress' ? 'bg-orange-400' : 'bg-emerald-400'}`} />
-                                        <div className="min-w-0 flex-1">
-                                            <p className="truncate text-sm font-medium text-slate-200">{order.title}</p>
-                                            <p className="mt-0.5 text-xs text-slate-500">
-                                                {equipName ?? 'Equipamento não informado'}
-                                                {' · '}
-                                                <span className={order.priority === 'critical' ? 'text-red-400' : order.priority === 'high' ? 'text-orange-400' : 'text-slate-400'}>
-                                                    {priorityConfig[order.priority as keyof typeof priorityConfig]?.label ?? order.priority}
-                                                </span>
-                                            </p>
+                                    <div key={key} className="space-y-0.5">
+                                        <div className="flex items-center justify-between text-[11px]">
+                                            <span className={`font-medium ${config.color}`}>{config.label}</span>
+                                            <span className="font-mono font-bold text-slate-200">{count}</span>
                                         </div>
-                                        <span className="shrink-0 text-xs text-slate-600">{formatDate(order.created_at)}</span>
+                                        <div className="h-1 overflow-hidden rounded-full bg-slate-800">
+                                            <div 
+                                                className="h-full rounded-full" 
+                                                style={{ width: `${barWidth}%`, backgroundColor: config.barColor }} 
+                                            />
+                                        </div>
                                     </div>
                                 );
-                            })
-                        )}
-                    </div>
-                </section>
+                            })}
+                        </div>
+                    </section>
 
-                {/* Últimos equipamentos */}
-                <section className="rounded-2xl border border-slate-800 bg-slate-950/70 p-5">
-                    <h3 className="text-sm font-medium text-slate-400">Últimos Equipamentos Cadastrados</h3>
+                    {/* Atividades Recentes */}
+                    <section className="rounded-xl border border-slate-800 bg-slate-900/60 p-3.5 sm:p-4 space-y-2">
+                        <h3 className="text-xs font-bold uppercase tracking-wider text-slate-300">Atividades Recentes</h3>
 
-                    <div className="mt-4 space-y-3">
-                        {s.recentEquipments.length === 0 ? (
-                            <p className="text-sm text-slate-500">Nenhum equipamento cadastrado.</p>
-                        ) : (
-                            s.recentEquipments.map((equipment) => (
-                                <div key={equipment.id} className="flex items-start gap-3 rounded-xl border border-slate-800/50 bg-slate-900/30 p-3 transition hover:border-slate-700">
-                                    <svg className="mt-0.5 h-4 w-4 shrink-0 text-slate-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-                                        <path strokeLinecap="round" strokeLinejoin="round" d="M9.53 16.122a3 3 0 00-5.78 1.128 2.25 2.25 0 01-2.4 2.245 4.5 4.5 0 008.4-2.245c0-.399-.078-.78-.22-1.128zm0 0a15.998 15.998 0 003.388-1.62m-5.043-.025a15.994 15.994 0 011.622-3.395m3.42 3.42a15.995 15.995 0 004.764-4.648l3.876-5.814a1.151 1.151 0 00-1.597-1.597L14.146 6.32a15.996 15.996 0 00-4.649 4.763m3.42 3.42a6.776 6.776 0 00-3.42-3.42" />
-                                    </svg>
-                                    <div className="min-w-0 flex-1">
-                                        <p className="truncate text-sm font-medium text-slate-200">{equipment.name}</p>
-                                        <p className="mt-0.5 text-xs text-slate-500">
-                                            {equipment.patrimony_code}
-                                            {' · '}
-                                            <span className={equipment.status === 'active' ? 'text-teal-400' : equipment.status === 'maintenance' ? 'text-amber-400' : 'text-slate-400'}>
-                                                {equipment.status === 'active' ? 'Ativo' : equipment.status === 'maintenance' ? 'Em manutenção' : 'Inativo'}
-                                            </span>
-                                        </p>
-                                    </div>
-                                    <span className="shrink-0 text-xs text-slate-600">{formatDate(equipment.created_at)}</span>
-                                </div>
-                            ))
-                        )}
-                    </div>
-                </section>
+                        <div className="space-y-1.5">
+                            {s.recentOrders.length === 0 && s.recentEquipments.length === 0 ? (
+                                <p className="text-xs text-slate-500 py-1 font-mono">Nenhuma atividade recente.</p>
+                            ) : (
+                                <>
+                                    {s.recentOrders.slice(0, 2).map((order) => {
+                                        const equipName = Array.isArray(order.equipment)
+                                            ? order.equipment[0]?.name
+                                            : (order.equipment as { name: string })?.name;
+
+                                        return (
+                                            <div key={order.id} className="rounded-lg border border-slate-800/60 bg-slate-950/40 p-2 space-y-1">
+                                                <p className="truncate text-xs font-medium text-slate-200 leading-tight">{order.title}</p>
+                                                <div className="flex items-center justify-between text-[10px] text-slate-400">
+                                                    <span className="truncate">{equipName ?? 'OS'} · {priorityConfig[order.priority as keyof typeof priorityConfig]?.label ?? order.priority}</span>
+                                                    <span className="shrink-0 font-mono text-slate-500">{formatDate(order.created_at)}</span>
+                                                </div>
+                                            </div>
+                                        );
+                                    })}
+
+                                    {s.recentEquipments.slice(0, 2).map((equipment) => (
+                                        <div key={equipment.id} className="rounded-lg border border-slate-800/60 bg-slate-950/40 p-2 space-y-1">
+                                            <p className="truncate text-xs font-medium text-slate-200 leading-tight">{equipment.name}</p>
+                                            <div className="flex items-center justify-between text-[10px] text-slate-400">
+                                                <span className="font-mono text-slate-400">{equipment.patrimony_code}</span>
+                                                <span className="shrink-0 font-mono text-slate-500">{formatDate(equipment.created_at)}</span>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </>
+                            )}
+                        </div>
+                    </section>
+                </div>
             </div>
         </div>
     );

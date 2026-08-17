@@ -17,6 +17,7 @@ import {
 } from '@/features/equipments/equipment-status-config';
 import { ServiceOrderDeadlineBadge } from '@/features/service-orders/service-order-deadline-badge';
 import { formatDateOnlyPtBr } from '@/features/service-orders/service-order-deadline';
+import { ArrowRight } from 'lucide-react';
 
 type ServiceOrderDetailsPageProps = {
     params: Promise<{
@@ -166,7 +167,7 @@ export default function ServiceOrderDetailsPage({
 
     return (
         <AppShell>
-            <section className="mx-auto max-w-5xl px-4 py-6 sm:px-6 sm:py-10">
+            <section className="mx-auto max-w-5xl px-4 py-6 sm:px-6 sm:py-8 space-y-6">
                 <Breadcrumbs
                     items={[
                         { label: "Ordens", href: "/ordens" },
@@ -175,50 +176,47 @@ export default function ServiceOrderDetailsPage({
                 />
 
                 {isLoading && (
-                    <div className="mt-6 rounded-2xl border border-slate-800 bg-slate-950/70 p-6">
-                        <p className="text-sm text-slate-400">
+                    <div className="rounded-xl border border-slate-800 bg-slate-900/40 p-8 animate-pulse text-center">
+                        <p className="text-xs text-slate-400 font-mono">
                             Carregando detalhes da ordem de serviço...
                         </p>
                     </div>
                 )}
 
                 {!isLoading && errorMessage && (
-                    <div className="mt-6 rounded-2xl border border-red-500/30 bg-red-500/10 p-6">
-                        <h1 className="text-xl font-semibold text-red-300">
+                    <div className="rounded-xl border border-red-500/30 bg-red-500/10 p-5">
+                        <h1 className="text-sm font-semibold text-red-300">
                             Não foi possível carregar a ordem de serviço
                         </h1>
-
-                        <p className="mt-2 text-sm text-red-300">{errorMessage}</p>
+                        <p className="mt-1 text-xs text-red-300/80">{errorMessage}</p>
                     </div>
                 )}
 
                 {!isLoading && serviceOrder && (
                     <>
-                        <div className="mt-4 sm:mt-6 rounded-2xl border border-slate-800 bg-slate-950/70 p-4 sm:p-6">
-                            <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
-                                <div>
-                                    <span className="rounded-full border border-teal-500/30 bg-teal-500/10 px-2 py-0.5 text-[11px] font-medium text-teal-300 sm:px-3 sm:py-1 sm:text-xs">
-                                        Detalhes da ordem
-                                    </span>
-
-                                    <h1 className="mt-2 text-2xl font-bold text-white sm:mt-3 sm:text-3xl">
+                        <div className="rounded-xl border border-slate-800 bg-slate-900/60 p-5 sm:p-6 space-y-5">
+                            <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between border-b border-slate-800 pb-5">
+                                <div className="space-y-1">
+                                    <h1 className="text-xl font-bold text-slate-100 tracking-tight sm:text-2xl">
                                         {serviceOrder.title}
                                     </h1>
 
-                                    <p className="mt-1 text-xs text-slate-400 sm:mt-2 sm:text-sm">
-                                        {serviceOrder.description || 'Sem descrição informada.'}
-                                    </p>
+                                    {serviceOrder.description && (
+                                        <p className="text-xs sm:text-sm text-slate-400 max-w-2xl leading-relaxed">
+                                            {serviceOrder.description}
+                                        </p>
+                                    )}
                                 </div>
 
-                                <div className="flex flex-wrap items-center gap-1.5 sm:gap-2 sm:justify-end">
+                                <div className="flex flex-wrap items-center gap-2 sm:justify-end">
                                     <span
-                                        className={`rounded-full border px-2.5 py-1 text-[11px] font-medium sm:px-3 sm:py-1 sm:text-xs ${serviceOrderStatusStyles[serviceOrder.status]}`}
+                                        className={`rounded-full border px-2.5 py-0.5 text-xs font-medium ${serviceOrderStatusStyles[serviceOrder.status]}`}
                                     >
                                         {serviceOrderStatusLabels[serviceOrder.status]}
                                     </span>
 
                                     <span
-                                        className={`rounded-full border px-2.5 py-1 text-[11px] font-medium sm:px-3 sm:py-1 sm:text-xs ${serviceOrderPriorityStyles[serviceOrder.priority]}`}
+                                        className={`rounded-full border px-2.5 py-0.5 text-xs font-medium ${serviceOrderPriorityStyles[serviceOrder.priority]}`}
                                     >
                                         {serviceOrderPriorityLabels[serviceOrder.priority]}
                                     </span>
@@ -230,41 +228,40 @@ export default function ServiceOrderDetailsPage({
                                 </div>
                             </div>
 
-                            <div className="mt-4 grid grid-cols-2 gap-3 sm:mt-6 sm:gap-4">
-                                <div className="rounded-xl border border-slate-800 bg-slate-950 p-3 sm:p-4">
-                                    <p className="text-[10px] uppercase tracking-wide text-slate-500 sm:text-xs">
+                            {/* 4 Métricas Técnicas */}
+                            <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+                                <div className="rounded-lg border border-slate-800/80 bg-slate-950/40 p-3">
+                                    <p className="text-[10px] font-semibold uppercase tracking-wider text-slate-500">
                                         Status
                                     </p>
-                                    <p className="mt-1 text-xs font-medium text-slate-200 sm:text-sm">
+                                    <p className="mt-1 text-xs sm:text-sm font-semibold text-slate-200">
                                         {serviceOrderStatusLabels[serviceOrder.status]}
                                     </p>
                                 </div>
 
-                                <div className="rounded-xl border border-slate-800 bg-slate-950 p-3 sm:p-4">
-                                    <p className="text-[10px] uppercase tracking-wide text-slate-500 sm:text-xs">
+                                <div className="rounded-lg border border-slate-800/80 bg-slate-950/40 p-3">
+                                    <p className="text-[10px] font-semibold uppercase tracking-wider text-slate-500">
                                         Prioridade
                                     </p>
-                                    <p className="mt-1 text-xs font-medium text-slate-200 sm:text-sm">
+                                    <p className="mt-1 text-xs sm:text-sm font-semibold text-slate-200">
                                         {serviceOrderPriorityLabels[serviceOrder.priority]}
                                     </p>
                                 </div>
 
-                                <div className="rounded-xl border border-slate-800 bg-slate-950 p-3 sm:p-4">
-                                    <p className="text-[10px] uppercase tracking-wide text-slate-500 sm:text-xs">
+                                <div className="rounded-lg border border-slate-800/80 bg-slate-950/40 p-3">
+                                    <p className="text-[10px] font-semibold uppercase tracking-wider text-slate-500">
                                         Criada em
                                     </p>
-                                    <p className="mt-1 text-xs font-medium text-slate-200 sm:text-sm">
-                                        {new Date(serviceOrder.created_at).toLocaleDateString(
-                                            'pt-BR',
-                                        )}
+                                    <p className="mt-1 font-mono text-xs sm:text-sm text-slate-200">
+                                        {new Date(serviceOrder.created_at).toLocaleDateString('pt-BR')}
                                     </p>
                                 </div>
 
-                                <div className="rounded-xl border border-slate-800 bg-slate-950 p-3 sm:p-4">
-                                    <p className="text-[10px] uppercase tracking-wide text-slate-500 sm:text-xs">
-                                        Prazo
+                                <div className="rounded-lg border border-slate-800/80 bg-slate-950/40 p-3">
+                                    <p className="text-[10px] font-semibold uppercase tracking-wider text-slate-500">
+                                        Prazo Limite
                                     </p>
-                                    <p className="mt-1 text-xs font-medium text-slate-200 sm:text-sm">
+                                    <p className="mt-1 font-mono text-xs sm:text-sm font-semibold text-slate-200">
                                         {serviceOrder.due_date
                                             ? formatDateOnlyPtBr(serviceOrder.due_date)
                                             : 'Não definido'}
@@ -272,20 +269,21 @@ export default function ServiceOrderDetailsPage({
                                 </div>
                             </div>
 
+                            {/* Ajuste de Prazo */}
                             <form
-                                className="mt-5 border-t border-slate-800 pt-5"
+                                className="border-t border-slate-800/80 pt-4"
                                 onSubmit={(event) => {
                                     event.preventDefault();
                                     void updateDeadline(dueDateDraft || null);
                                 }}
                             >
                                 <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
-                                    <div className="w-full sm:max-w-xs">
+                                    <div className="w-full sm:max-w-xs space-y-1">
                                         <label
                                             htmlFor="service-order-due-date"
-                                            className="mb-1.5 block text-sm font-medium text-slate-300"
+                                            className="text-xs font-semibold text-slate-300"
                                         >
-                                            Ajustar prazo
+                                            Ajustar prazo de execução
                                         </label>
                                         <input
                                             id="service-order-due-date"
@@ -293,17 +291,17 @@ export default function ServiceOrderDetailsPage({
                                             value={dueDateDraft}
                                             onChange={(event) => setDueDateDraft(event.target.value)}
                                             disabled={isUpdatingDeadline}
-                                            className="w-full rounded-xl border border-slate-700 bg-slate-950 px-3 py-2.5 text-sm text-slate-100 outline-none transition focus:border-teal-500 disabled:opacity-60 [color-scheme:dark]"
+                                            className="w-full rounded-lg border border-slate-700 bg-slate-900 px-3 py-1.5 text-xs text-slate-100 outline-none transition focus:border-teal-500 disabled:opacity-60 [color-scheme:dark]"
                                         />
                                     </div>
 
-                                    <div className="flex flex-wrap gap-2">
+                                    <div className="flex items-center gap-2">
                                         {serviceOrder.due_date && (
                                             <button
                                                 type="button"
                                                 onClick={() => void updateDeadline(null)}
                                                 disabled={isUpdatingDeadline}
-                                                className="rounded-xl border border-slate-700 px-4 py-2.5 text-sm font-medium text-slate-300 transition hover:bg-slate-800 disabled:opacity-60"
+                                                className="rounded-lg border border-slate-700 px-3 py-1.5 text-xs font-medium text-slate-300 transition hover:bg-slate-800 disabled:opacity-60"
                                             >
                                                 Remover prazo
                                             </button>
@@ -312,7 +310,7 @@ export default function ServiceOrderDetailsPage({
                                         <button
                                             type="submit"
                                             disabled={isUpdatingDeadline}
-                                            className="rounded-xl bg-teal-600 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-teal-500 disabled:opacity-60"
+                                            className="rounded-lg bg-teal-500 px-3.5 py-1.5 text-xs font-bold text-slate-950 transition hover:bg-teal-400 disabled:opacity-60"
                                         >
                                             {isUpdatingDeadline ? 'Salvando...' : 'Salvar prazo'}
                                         </button>
@@ -320,134 +318,103 @@ export default function ServiceOrderDetailsPage({
                                 </div>
 
                                 {deadlineError && (
-                                    <p className="mt-3 text-sm text-red-300">{deadlineError}</p>
+                                    <p className="mt-2 text-xs text-red-400">
+                                        {deadlineError}
+                                    </p>
                                 )}
 
                                 {deadlineSuccess && (
-                                    <p className="mt-3 text-sm text-emerald-300">{deadlineSuccess}</p>
+                                    <p className="mt-2 text-xs text-emerald-400">
+                                        {deadlineSuccess}
+                                    </p>
                                 )}
                             </form>
                         </div>
-                        <section className="mt-6 rounded-2xl border border-slate-800 bg-slate-950/70 p-4 sm:mt-8 sm:p-6">
-                            <div>
-                                <span className="rounded-full border border-teal-500/30 bg-teal-500/10 px-2 py-0.5 text-[11px] font-medium text-teal-300 sm:px-3 sm:py-1 sm:text-xs">
-                                    Histórico da ordem
-                                </span>
 
-                                <h2 className="mt-2 text-lg font-semibold text-white sm:mt-3 sm:text-xl">
-                                    Alterações registradas
-                                </h2>
-
-                                <p className="mt-1 text-xs text-slate-400 sm:text-sm">
-                                    Registro das mudanças de status e prazo desta ordem de serviço.
-                                </p>
-                            </div>
-
-                            {serviceOrder.history.length === 0 ? (
-                                <div className="mt-4 rounded-xl border border-slate-800 bg-slate-950 p-3 sm:mt-6 sm:p-4">
-                                    <p className="text-xs text-slate-400 sm:text-sm">
-                                        Nenhuma alteração registrada até o momento.
-                                    </p>
-                                </div>
-                            ) : (
-                                <div className="mt-4 space-y-2 sm:mt-6 sm:space-y-3">
-                                    {serviceOrder.history.map((item) => (
-                                        <article
-                                            key={item.id}
-                                            className="rounded-xl border border-slate-800 bg-slate-950 p-3 sm:p-4"
-                                        >
-                                            <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
-                                                <div className="min-w-0">
-                                                    <p className="text-xs font-medium text-slate-200 sm:text-sm">
-                                                        {getHistoryDescription(item)}
-                                                    </p>
-
-                                                    <p className="mt-1 text-[11px] text-slate-500 sm:text-xs">
-                                                        {new Date(item.created_at).toLocaleString(
-                                                            'pt-BR',
-                                                        )}
-                                                    </p>
-                                                </div>
-
-                                                {item.previous_status && item.new_status && (
-                                                    <div className="flex flex-wrap items-center gap-1.5 sm:gap-2">
-                                                        <span
-                                                            className={`rounded-full border px-2 py-0.5 text-[11px] font-medium sm:px-3 sm:py-1 sm:text-xs ${serviceOrderStatusStyles[item.previous_status]}`}
-                                                        >
-                                                            {serviceOrderStatusLabels[item.previous_status]}
-                                                        </span>
-
-                                                        <span className="text-[11px] text-slate-500 sm:text-xs">→</span>
-
-                                                        <span
-                                                            className={`rounded-full border px-2 py-0.5 text-[11px] font-medium sm:px-3 sm:py-1 sm:text-xs ${serviceOrderStatusStyles[item.new_status]}`}
-                                                        >
-                                                            {serviceOrderStatusLabels[item.new_status]}
-                                                        </span>
-                                                    </div>
-                                                )}
-                                            </div>
-                                        </article>
-                                    ))}
-                                </div>
-                            )}
-                        </section>
-
-                        <section className="mt-6 rounded-2xl border border-slate-800 bg-slate-950/70 p-4 sm:mt-8 sm:p-6">
-                            <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+                        {/* Seção do Equipamento Vinculado */}
+                        <section className="rounded-xl border border-slate-800 bg-slate-900/60 p-5 space-y-3">
+                            <div className="flex items-center justify-between border-b border-slate-800 pb-3">
                                 <div>
-                                    <span className="rounded-full border border-teal-500/30 bg-teal-500/10 px-2 py-0.5 text-[11px] font-medium text-teal-300 sm:px-3 sm:py-1 sm:text-xs">
-                                        Equipamento vinculado
-                                    </span>
-
-                                    <h2 className="mt-2 text-lg font-semibold text-white sm:mt-3 sm:text-xl">
-                                        {serviceOrder.equipment.name}
+                                    <h2 className="text-sm font-bold uppercase tracking-wider text-slate-300">
+                                        Equipamento Vinculado
                                     </h2>
-
-                                    <p className="mt-1 text-xs text-slate-400 sm:text-sm">
-                                        Dados do equipamento associado a esta ordem de serviço.
-                                    </p>
                                 </div>
 
                                 <Link
                                     href={`/equipamentos/${serviceOrder.equipment.id}`}
-                                    className="w-fit rounded-full border border-teal-500/30 px-2.5 py-1 text-[11px] font-medium text-teal-300 transition hover:bg-teal-500/10 sm:px-3 sm:py-1 sm:text-xs"
+                                    className="text-xs font-semibold text-teal-400 hover:underline"
                                 >
-                                    Ver equipamento
+                                    Ver Detalhes do Ativo
                                 </Link>
                             </div>
 
-                            <div className="mt-4 grid grid-cols-2 gap-3 sm:mt-6 sm:grid-cols-3 sm:gap-4">
-                                <div className="rounded-xl border border-slate-800 bg-slate-950 p-3 sm:p-4">
-                                    <p className="text-[10px] uppercase tracking-wide text-slate-500 sm:text-xs">
-                                        Patrimônio
-                                    </p>
-                                    <p className="mt-1 text-xs font-medium text-slate-200 sm:text-sm">
-                                        {serviceOrder.equipment.patrimony_code}
-                                    </p>
+                            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs">
+                                <div className="rounded-lg border border-slate-800/80 bg-slate-950/40 p-3">
+                                    <p className="text-[10px] uppercase tracking-wider text-slate-500">Nome</p>
+                                    <p className="font-semibold text-slate-200 mt-0.5">{serviceOrder.equipment.name}</p>
                                 </div>
 
-                                <div className="rounded-xl border border-slate-800 bg-slate-950 p-3 sm:p-4">
-                                    <p className="text-[10px] uppercase tracking-wide text-slate-500 sm:text-xs">
-                                        Localização
-                                    </p>
-                                    <p className="mt-1 text-xs font-medium text-slate-200 sm:text-sm">
-                                        {serviceOrder.equipment.location}
-                                    </p>
+                                <div className="rounded-lg border border-slate-800/80 bg-slate-950/40 p-3">
+                                    <p className="text-[10px] uppercase tracking-wider text-slate-500">Patrimônio</p>
+                                    <p className="font-mono text-slate-200 mt-0.5">{serviceOrder.equipment.patrimony_code}</p>
                                 </div>
 
-                                <div className="col-span-2 sm:col-span-1 rounded-xl border border-slate-800 bg-slate-950 p-3 sm:p-4">
-                                    <p className="text-[10px] uppercase tracking-wide text-slate-500 sm:text-xs">
-                                        Status do equipamento
+                                <div className="rounded-lg border border-slate-800/80 bg-slate-950/40 p-3">
+                                    <p className="text-[10px] uppercase tracking-wider text-slate-500">Localização / Status</p>
+                                    <p className="text-slate-200 mt-0.5 flex items-center gap-1.5">
+                                        <span>{serviceOrder.equipment.location}</span>
+                                        <span>·</span>
+                                        <span className={equipmentStatusStyles[serviceOrder.equipment.status]}>
+                                            {equipmentStatusLabels[serviceOrder.equipment.status]}
+                                        </span>
                                     </p>
-
-                                    <span
-                                        className={`mt-1.5 inline-flex w-fit rounded-full border px-2.5 py-1 text-[11px] font-medium sm:px-3 sm:py-1 sm:text-xs ${equipmentStatusStyles[serviceOrder.equipment.status]}`}
-                                    >
-                                        {equipmentStatusLabels[serviceOrder.equipment.status]}
-                                    </span>
                                 </div>
                             </div>
+                        </section>
+
+                        {/* Seção do Histórico da Ordem */}
+                        <section className="rounded-xl border border-slate-800 bg-slate-900/60 p-5 space-y-3">
+                            <div className="border-b border-slate-800 pb-3">
+                                <h2 className="text-sm font-bold uppercase tracking-wider text-slate-300">
+                                    Histórico de Alterações ({serviceOrder.history.length})
+                                </h2>
+                            </div>
+
+                            {serviceOrder.history.length === 0 ? (
+                                <p className="text-xs text-slate-500 py-2">
+                                    Nenhuma alteração registrada até o momento.
+                                </p>
+                            ) : (
+                                <div className="space-y-2">
+                                    {serviceOrder.history.map((item) => (
+                                        <article
+                                            key={item.id}
+                                            className="rounded-lg border border-slate-800/70 bg-slate-950/40 p-3 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2"
+                                        >
+                                            <div>
+                                                <p className="text-xs font-semibold text-slate-200">
+                                                    {getHistoryDescription(item)}
+                                                </p>
+                                                <p className="text-[10px] font-mono text-slate-500 mt-0.5">
+                                                    {new Date(item.created_at).toLocaleString('pt-BR')}
+                                                </p>
+                                            </div>
+
+                                            {item.previous_status && item.new_status && (
+                                                <div className="flex items-center gap-1.5 self-start sm:self-auto">
+                                                    <span className={`rounded-full border px-2 py-0.5 text-[10px] font-medium ${serviceOrderStatusStyles[item.previous_status]}`}>
+                                                        {serviceOrderStatusLabels[item.previous_status]}
+                                                    </span>
+                                                    <ArrowRight className="h-3 w-3 text-slate-600" />
+                                                    <span className={`rounded-full border px-2 py-0.5 text-[10px] font-medium ${serviceOrderStatusStyles[item.new_status]}`}>
+                                                        {serviceOrderStatusLabels[item.new_status]}
+                                                    </span>
+                                                </div>
+                                            )}
+                                        </article>
+                                    ))}
+                                </div>
+                            )}
                         </section>
                     </>
                 )}

@@ -1,194 +1,183 @@
 # AGENTS.md — ManutFlow
 
-## Stack
+> Manual Operacional para Agentes de IA · v2.0
 
-| Camada | Tecnologia | Versão |
-|--------|-----------|--------|
-| Framework | Next.js (App Router) | 16.3.0 |
-| UI | React | 19.2.4 |
-| Estilos | Tailwind CSS | 4.x (@tailwindcss/postcss) |
-| Banco/Auth | Supabase (SSR) | ^0.12.0 / ^2.106.2 |
-| Gráficos | Recharts | ^3.9.2 |
-| Testes | Vitest | ^4.1.10 |
-| Linter | ESLint (flat config) | ^9 |
-| TypeScript | strict: true | ^5 |
-| Biblioteca UI nativa | `<dialog>` (modal), Tailwind v4 | — |
-| Gráficos | Recharts | ^3.9.2 |
+Este documento é a **fonte única de verdade** para agentes que trabalham no repositório **ManutFlow**.
 
-## Dependências
+---
 
-| Pacote | Versão | Finalidade |
-|--------|--------|-----------|
-| next | 16.3.0 | Framework |
-| react / react-dom | 19.2.4 | UI |
-| @supabase/ssr | ^0.12.0 | Supabase SSR (client + server) |
-| @supabase/supabase-js | ^2.106.2 | Supabase core |
-| recharts | ^3.9.2 | Gráfico de barras no dashboard |
-| tailwindcss | ^4 | CSS utility-first |
-| @tailwindcss/postcss | ^4 | PostCSS plugin para Tailwind v4 |
-| typescript | ^5 | Type checking |
-| vitest | ^4.1.10 | Test runner |
-| @testing-library/react | ^16.3.2 | Testes de componente |
-| @testing-library/jest-dom | ^6.9.1 | Matchers DOM para testes |
-| jsdom | ^29.1.1 | Ambiente DOM para testes |
-| eslint | ^9 | Linter (flat config) |
-| eslint-config-next | 16.3.0 | Regras Next.js para ESLint |
+## Índice
 
-## Comandos
+1. [Visão Geral](#1-visão-geral)
+2. [Stack Tecnológica](#2-stack-tecnológica)
+3. [Estrutura do Projeto](#3-estrutura-do-projeto)
+4. [Comandos e Scripts](#4-comandos-e-scripts)
+5. [Variáveis de Ambiente](#5-variáveis-de-ambiente)
+6. [Autenticação e Sessão (Supabase SSR)](#6-autenticação-e-sessão-supabase-ssr)
+7. [Banco de Dados e Schema](#7-banco-de-dados-e-schema)
+8. [Regras de Negócio e Domínio](#8-regras-de-negócio-e-domínio)
+9. [APIs e Rotas](#9-apis-e-rotas)
+10. [Testes e Validação](#10-testes-e-validação)
+11. [Padrões de Código e UI](#11-padrões-de-código-e-ui)
+12. [Git Flow e Conventional Commits](#12-git-flow-e-conventional-commits)
+
+---
+
+## 1. Visão Geral
+
+O **ManutFlow** é um sistema CMMS (Computerized Maintenance Management System) para gestão de manutenção industrial, controle de ativos/equipamentos, ordens de serviço (preventivas e corretivas), acompanhamento de prazos com SLAs dinâmicos e auditoria de eventos. Conta com **Landing Page pública com simulador interativo**, **Dashboard operacional compacto sem scroll** e painel completo para técnicos e gestores.
+
+---
+
+## 2. Stack Tecnológica
+
+| Camada | Tecnologia | Versão / Detalhes |
+|--------|-----------|-------------------|
+| **Framework** | Next.js (App Router) | 16.3.x |
+| **Linguagem / UI** | TypeScript (strict: true) / React | 19.2.x |
+| **Estilização** | Tailwind CSS v4 (@tailwindcss/postcss) | 4.x |
+| **Banco / Auth / Storage** | Supabase SSR (`@supabase/ssr`, `@supabase/supabase-js`) | PostgreSQL + Bucket `equipment-photos` |
+| **Ícones** | Lucide React | ^1.16.x |
+| **Gráficos** | Recharts | ^3.9.x (BarChart semestral) |
+| **Testes Unitários** | Vitest + Testing Library | 15 arquivos / 161 testes / jsdom |
+| **Linter** | ESLint (flat config) + eslint-config-next | 9.x / 16.3.x |
+
+---
+
+## 3. Estrutura do Projeto
+
+```
+manutflow/
+├── src/
+│   ├── __tests__/             # Setup global Vitest e mocks
+│   ├── app/
+│   │   ├── api/               # 8 rotas de API (App Router, dynamic: force-dynamic)
+│   │   │   ├── dashboard-summary/ # Consolidação de KPIs, SLAs, gráfico e atividades
+│   │   │   ├── equipments/    # CRUD de equipamentos com paginação e busca
+│   │   │   ├── health/        # Health check
+│   │   │   ├── profile/       # Perfil do usuário logado (nome, cargo, telefone)
+│   │   │   ├── service-orders/# CRUD de ordens de serviço e filtros de SLA
+│   │   │   └── upload/        # Upload de fotos de ativos no Supabase Storage
+│   │   ├── auth/callback/     # Callback OAuth/Magic link com proteção contra open redirect
+│   │   ├── equipamentos/      # Listagem de ativos e [id] para ficha técnica
+│   │   ├── ordens/            # Listagem de ordens com Toolbar e [id] para detalhes/histórico
+│   │   ├── login/ & register/ # Autenticação com credenciais Demo instantâneas
+│   │   ├── perfil/            # Gestão de dados cadastrais do usuário
+│   │   ├── page.tsx           # Landing Page (deslogado) ou Dashboard Operacional (logado)
+│   │   ├── layout.tsx         # RootLayout
+│   │   ├── proxy.ts           # Proxy Next.js 16 para renovação de sessão Supabase
+│   │   └── globals.css        # Tailwind v4 directives e paleta dark
+│   ├── components/
+│   │   ├── landing/           # DemoMaintenanceFlow (simulador), LandingHeader, FeatureCard
+│   │   ├── layout/            # AppShell, AppHeader (navegação desktop/mobile)
+│   │   └── ui/                # Modal (<dialog> nativo), StatusCard, Pagination, Toolbar, Photo
+│   ├── features/              # Módulos de domínio
+│   │   ├── dashboard/         # DashboardOverview, KPIs, gráfico Recharts, SLA Badges
+│   │   ├── equipments/        # EquipmentList, EquipmentForm, StatusConfig
+│   │   └── service-orders/    # ServiceOrderList, ServiceOrderForm, Deadlines, Badges
+│   ├── lib/                   # auth.ts, rate-limit.ts, logger.ts, supabase/(client|server).ts
+│   └── types/                 # equipment.ts, service-order.ts, profile.ts
+└── public/
+    └── previews/              # 8 capturas de tela em alta definição
+```
+
+---
+
+## 4. Comandos e Scripts
 
 ```bash
-npm run dev        # next dev
-npm run build      # next build
-npm run test       # vitest run        (24 testes, setup em src/__tests__/setup.ts)
-npm run test:watch # vitest
-npm run lint       # eslint            (flat config em eslint.config.mjs)
+# Desenvolvimento local
+npm run dev              # Inicia servidor Next.js em http://localhost:3000
+
+# Validação e Testes
+npm test                 # Executa os 161 testes com Vitest
+npm run test:watch       # Modo watch interativo
+npx tsc --noEmit         # Verificação estrita de tipagem TypeScript
+npm run lint             # ESLint (flat config)
+
+# Build de Produção
+npm run build            # Gera build standalone otimizado
+npm start                # Roda o servidor de produção
 ```
 
-## Variáveis de ambiente (`.env.local`)
+---
 
-```
-NEXT_PUBLIC_SUPABASE_URL=
-NEXT_PUBLIC_SUPABASE_ANON_KEY=
-SUPABASE_SERVICE_ROLE_KEY=   # opcional, server-side
-```
+## 5. Variáveis de Ambiente (`.env.local`)
 
-## Estrutura de pastas
-
-```
-src/
-  __tests__/              setup + mocks globais
-  app/
-    api/                   8 rotas de API (App Router)
-    (equipamentos|ordens|login|register|perfil)/  páginas "use client"
-  components/
-    layout/               AppShell, AppHeader
-    ui/                   Modal (<dialog> nativo), StatusCard, Pagination, Breadcrumbs
-  features/               Componentes de domínio (dashboard, equipments, service-orders)
-  lib/                    auth.ts, rate-limit.ts, logger.ts, supabase/*
-  types/                  equipment.ts, service-order.ts, profile.ts, equipment-details.ts
-scripts/                  Migrations SQL de referência (gitignored)
-docs/                     Planos de implementação (gitignored)
+```env
+NEXT_PUBLIC_SUPABASE_URL=https://sua-instancia.supabase.co
+NEXT_PUBLIC_SUPABASE_ANON_KEY=sua-chave-publica-anon
+SUPABASE_SERVICE_ROLE_KEY=sua-service-role-key # opcional para scripts administrativos
 ```
 
-## Convenções não-óbvias
+---
 
-- **Todas as páginas são `"use client"`** — não há React Server Components de domínio neste projeto.
-- **Toda API route exporta `export const dynamic = "force-dynamic"`** — nenhuma usa geração estática.
-- **Respostas da API são sempre `wrapadas`** em objeto nomeado:
-  - `GET list` → `{ equipments: [...], total, page, totalPages }` / `{ serviceOrders: [...], ... }`
-  - `GET single` → `{ equipment: {...} }` / `{ serviceOrder: {...}, history: [...] }` / `{ profile: {...} }`
-  - `POST` → `{ equipment: {...} }` (status 201) / `{ serviceOrder: {...} }` (status 201)
-  - `PATCH` → `{ serviceOrder: {...} }`
-  - `DELETE` → `{ message: "..." }`
-  - `Erro` → `{ error: "mensagem" }` (status 4xx/5xx)
-- **Status de equipamento**: `"active" | "inactive" | "maintenance"` — config central em `equipment-status-config.ts`.
-- **Status de ordem**: `"open" | "in_progress" | "closed"` — config central em `service-order-config.ts`.
-- **Prioridade de ordem**: `"low" | "medium" | "high" | "critical"` — mesma config.
-- **Modal de confirmação** usa `<dialog>` nativo + `showModal()`, não biblioteca externa.
-- **Tema escuro** com fundo `bg-slate-950` e texto `text-slate-100`. Gradiente via classe `bg-gradient-theme` no CSS.
-- **Cores de status**: active=emerald, inactive=slate, maintenance=amber
-- **Cores de prioridade**: low=slate, medium=yellow, high=orange, critical=red
-- **Cores de ação**: teal (primário/criar), sky (editar), red (excluir/perigo)
+## 6. Autenticação e Sessão (Supabase SSR)
 
-## Auth & Segurança
+- **Clientes separados**:
+  - `src/lib/supabase/client.ts` → `createBrowserClient` (Browser).
+  - `src/lib/supabase/server.ts` → `createServerClient` com manipulação assíncrona de cookies (`cookies()`).
+- **Extração de Usuário**: Toda API route usa `getUser()` de `@/lib/auth`, garantindo verificação segura do JWT no servidor.
+- **Conta de Demonstração**:
+  - `demo@manutflow.com` / `demo1234` (Gestor de Manutenção).
 
-- **Autenticação**: Supabase SSR (`@supabase/ssr`). Clientes separados: `server.ts` (server component / API route) e `client.ts` (browser).
-- **Toda API route** extrai o usuário com `getUser()` de `@/lib/auth` — retorna 401 se não autenticado.
-- **Toda query do banco** filtra por `user_id` — RLS no Supabase é redundância, mas a segurança é feita no código.
-- **Trigger automático de profiles**: quando um usuário se cadastra no Supabase Auth, um trigger (DB webhook ou trigger nativo) cria automaticamente um registro em `profiles` com `id = auth.uid()` e `email = auth.email()`. Os campos `full_name`, `phone` e `role` são opcionais.
-- **Rate limiter em memória** (30 req/min por usuário em POST/PATCH/DELETE) — **volátil**: reiniciar o servidor zera os contadores; não funciona em múltiplas instâncias.
-- **Logging**: `logger('level', 'event', data?)` imprime JSON no stdout/stderr.
+---
 
-## Testes
+## 7. Banco de Dados e Schema (Supabase PostgreSQL)
 
-**15 arquivos de teste (161 testes no total):**
-As suítes cobrem health, autenticação, redirects, armazenamento de fotos, validação, dashboard, equipamentos, upload, ordens de serviço, regras de prazo e componentes de dashboard/listagem.
+### Tabelas:
+1. **`profiles`**: `id` (uuid PK = auth.uid), `email`, `full_name`, `phone`, `role`, `created_at`, `updated_at`.
+2. **`equipments`**: `id` (uuid PK), `name`, `patrimony_code` (único por user_id), `location`, `status` (`active` | `inactive` | `maintenance`), `photo_url`, `user_id` (FK auth.users), timestamps.
+3. **`service_orders`**: `id` (uuid PK), `title`, `description`, `status` (`open` | `in_progress` | `closed`), `priority` (`low` | `medium` | `high` | `critical`), `due_date`, `equipment_id` (FK equipments), `user_id` (FK auth.users), timestamps.
+4. **`service_order_history`**: `id` (uuid PK), `service_order_id` (FK), `user_id`, `event_type`, `previous_status`, `new_status`, `description`, `created_at`.
+5. **Storage**: Bucket `equipment-photos` para imagens de ativos industriais.
 
-- Mocks do Supabase são manuais (objeto `from()` encadeado com `.eq()`, `.order()`, `.limit()`).
-- Setup em `src/__tests__/setup.ts` importa `@testing-library/jest-dom/vitest`.
-- Há testes de componentes com Testing Library; testes E2E ainda não existem.
+---
 
-## Banco de Dados
+## 8. Regras de Negócio e Domínio
 
-Tabelas do Supabase (Postgres):
-```
-profiles
-  id              uuid PK          = auth.uid()
-  email           text             preenchido pelo trigger
-  full_name       text | null      editável via /api/profile
-  phone           text | null      editável via /api/profile
-  role            text | null      editável via /api/profile
-  avatar_url      text | null      (não usado no momento)
-  created_at      timestamptz
-  updated_at      timestamptz
+- **Prazos e SLAs de Ordens (`ServiceOrderDeadlineBadge`)**:
+  - **Atrasadas (`overdue`)**: `due_date < hoje` e status !== `closed` → Destaque vermelho / alerta imediato.
+  - **Vencem Hoje (`today`)**: `due_date === hoje` e status !== `closed` → Destaque dourado / ação imediata.
+  - **Próximos 7 Dias (`next_7_days`)**: `due_date` entre amanhã e 7 dias → Destaque azul / programadas.
+- **Convenções de Resposta da API**:
+  - Todas as respostas são retornadas em objeto nomeado: `{ equipments: [...], total, page, totalPages }`, `{ serviceOrder: {...}, history: [...] }`, `{ error: "mensagem" }`.
 
-equipments
-  id              uuid PK
-  name            text             obrigatório (max 255)
-  patrimony_code  text             obrigatório (max 100, único por user_id)
-  location        text             obrigatório (max 255)
-  status          text             active | inactive | maintenance
-  user_id         uuid FK → auth.users
-  created_at      timestamptz
-  updated_at      timestamptz
+---
 
-service_orders
-  id              uuid PK
-  title           text             obrigatório (max 255)
-  description     text | null      opcional (max 2000)
-  status          text             open | in_progress | closed
-  priority        text             low | medium | high | critical
-  equipment_id    uuid FK → equipments
-  user_id         uuid FK → auth.users
-  created_at      timestamptz
+## 9. APIs e Rotas
 
-service_order_history
-  id              uuid PK
-  service_order_id uuid FK → service_orders
-  user_id         uuid FK → auth.users
-  event_type      text
-  previous_status text | null
-  new_status      text | null
-  description     text | null
-  created_at      timestamptz
-```
+- `GET /api/dashboard-summary` — Agrega contadores de ativos, ordens abertas/fechadas, métricas de SLA, gráfico semestral e atividades recentes.
+- `GET /api/equipments` & `POST /api/equipments` — Listagem com paginação e criação de ativos.
+- `GET /api/equipments/[id]`, `PUT /api/equipments/[id]`, `DELETE /api/equipments/[id]` — Gestão completa do ativo.
+- `GET /api/service-orders` & `POST /api/service-orders` — Listagem com filtros por status, prioridade, prazo e criação de ordens.
+- `GET /api/service-orders/[id]`, `PATCH /api/service-orders/[id]`, `DELETE /api/service-orders/[id]` — Detalhes, transição de status com auditoria e exclusão.
+- `POST /api/upload` — Upload multipart/form-data com validação de tipo de imagem e salvamento no bucket Supabase.
+- `GET /api/profile` & `PUT /api/profile` — Consulta e atualização cadastral do perfil.
 
-## Limitações / Gotchas
+---
 
-- **Rate limiter**: em memória, perdido no restart. Não escala horizontalmente. `setInterval` de cleanup roda apenas em ambiente Node.js tradicional, não em serverless.
-- **Proxy de sessão**: `src/proxy.ts` usa a convenção do Next.js 16 para renovar a sessão SSR e proteger páginas; as APIs continuam validando a autenticação por conta própria.
-- **`scripts/` e `docs/` estão no `.gitignore`**: migrations SQL e planos ficam só em disco como referência.
-- **Migration manual necessária**: para ativar `phone` e `role` na tabela `profiles`, execute no SQL Editor do Supabase:
-  ```sql
-  ALTER TABLE public.profiles
-    ADD COLUMN IF NOT EXISTS phone TEXT,
-    ADD COLUMN IF NOT EXISTS role TEXT;
-  ```
-- **`next.config.ts`** com `output: "standalone"` — para build Docker/deploy autônomo.
-- **Vitest v4** usa `environment: 'node'` (não `jsdom` para testes de API). O setup global só importa `@testing-library/jest-dom/vitest`.
-- **Todas as queries do dashboard** disparam 12 `Promise.all` em paralelo — pode ser custoso com muitos dados.
-- **TS strict mode** ativo — tipos `unknown` em alguns places (ex: `request.json()` com `as` cast).
+## 10. Testes e Validação
 
-## Commits
+- **15 arquivos de teste (161 testes 100% passando)** cobrindo:
+  - Validações de domínio, cálculos de prazos e badges de SLA.
+  - API Routes de autenticação, perfil, equipamentos, ordens e upload.
+  - Renderização e comportamento de componentes (Dashboard, Toolbar, Equipamentos, Ordens).
 
-Usar [Conventional Commits](https://www.conventionalcommits.org/). Exemplos reais do projeto:
-```
-feat: melhorias no dashboard com gráfico, atividades recentes e cards com insight
-feat: criar perfil do usuário com API, página e link no header
-feat: adicionar rate limiting e logging estruturado nas APIs
-fix: remover detalhes de erro expostos nas APIs de equipamentos
-fix: corrigir open redirect no auth callback validando parâmetro next
-refactor: padronizar respostas da API de service-orders para formato wrapado
-refactor: otimizar getUser() para retornar client Supabase e evitar criação dupla
-docs: atualizar README com menções a segurança e acessibilidade
-```
+Execute `npm test && npx tsc --noEmit && npm run lint` antes de commits.
 
-<!-- BEGIN:nextjs-agent-rules -->
+---
 
-# This is NOT the Next.js you know
+## 11. Padrões de Código e UI
 
-This version has breaking changes — APIs, conventions, and file structure may all differ from your training data. Read the relevant guide in `node_modules/next/dist/docs/` (resolved from this file's directory; in monorepos the `next` package may not be visible from the repo root) before writing any code. Heed deprecation notices.
+- **Dashboard Sem Scroll**: Densidade visual equilibrada com layout de 2 colunas no desktop (`lg:col-span-2` para gráfico e urgências, `1/3` para prioridades e atividades).
+- **Toolbar Simétrico**: Grid uniforme de 4 colunas para filtros (`Status`, `Prioridade`, `Prazo`, `Ordenar`).
+- **Paleta Industrial**: Fundo `slate-950`, cards `slate-900/60`, bordas `slate-800` e acentos semânticos (`teal-500`, `amber-400`, `red-400`, `sky-400`, `emerald-400`).
 
-This block is written and re-added by `next dev` — verify at `node_modules/next/dist/server/lib/generate-agent-files.js`. Removing it from a diff only re-creates the uncommitted change; committing it with your work keeps the tree clean.
+---
 
-<!-- END:nextjs-agent-rules -->
+## 12. Git Flow e Conventional Commits
+
+- Branches temáticas: `feat/`, `fix/`, `refactor/`, `docs/`.
+- Commits atômicos no padrão: `tipo(escopo): descrição concisa`.
+- Pull Request obrigatório com CI verde antes do merge na `main`.

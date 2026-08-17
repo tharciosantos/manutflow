@@ -50,14 +50,14 @@ export default function Home() {
     if (user) {
         return (
             <AppShell>
-                <section className="mx-auto max-w-5xl px-4 py-6 sm:px-6 sm:py-8 space-y-6">
+                <section className="mx-auto max-w-6xl px-4 py-4 sm:px-6 sm:py-5 space-y-4">
                     {/* Header do Painel */}
-                    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b border-slate-800 pb-5">
+                    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 border-b border-slate-800/80 pb-3">
                         <div>
-                            <h1 className="text-xl sm:text-2xl font-bold text-slate-100 tracking-tight">
+                            <h1 className="text-lg sm:text-xl font-bold text-slate-100 tracking-tight">
                                 Olá, {user.name ?? "Gestor"}
                             </h1>
-                            <p className="text-xs sm:text-sm text-slate-400 mt-0.5">
+                            <p className="text-xs text-slate-400">
                                 Indicadores operacionais e ordens de manutenção em aberto.
                             </p>
                         </div>
@@ -65,7 +65,7 @@ export default function Home() {
                         <div className="flex items-center gap-2">
                             <Link
                                 href="/equipamentos"
-                                className="inline-flex items-center gap-1.5 rounded-lg border border-slate-700 bg-slate-900 px-3 py-1.5 text-xs font-semibold text-slate-200 transition hover:bg-slate-800 hover:text-white"
+                                className="inline-flex items-center gap-1.5 rounded-lg border border-slate-700 bg-slate-900 px-2.5 py-1.5 text-xs font-semibold text-slate-200 transition hover:bg-slate-800 hover:text-white"
                             >
                                 <Plus className="h-3.5 w-3.5" />
                                 <span>Equipamento</span>

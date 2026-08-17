@@ -170,9 +170,9 @@ export function DashboardOverview() {
     const s = summary!;
 
     return (
-        <div className="space-y-6">
+        <div className="space-y-3.5">
             {/* 3 Stat Cards Principais */}
-            <div className="grid grid-cols-1 gap-3.5 sm:grid-cols-3">
+            <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-3">
                 <StatusCard
                     title="Equipamentos"
                     value={String(s.totalEquipments)}
@@ -192,7 +192,7 @@ export function DashboardOverview() {
                 <StatusCard
                     title="Concluídas"
                     value={String(s.closedServiceOrders)}
-                    description={`${s.completionRate}% de taxa de resolução`}
+                    description={`${s.completionRate}% taxa de resolução`}
                     trend={s.totalServiceOrders > 0 ? `${s.totalServiceOrders} total` : ''}
                     trendUp
                     valueClassName="text-emerald-400"
@@ -200,244 +200,239 @@ export function DashboardOverview() {
             </div>
 
             {/* Prazos das Ordens */}
-            <section className="space-y-3">
+            <section className="space-y-1.5">
                 <div className="flex items-center justify-between">
-                    <h2 className="text-sm font-bold uppercase tracking-wider text-slate-300">Prazos das ordens</h2>
+                    <h2 className="text-xs font-bold uppercase tracking-wider text-slate-400">Prazos das ordens</h2>
                     <Link
                         href="/ordens"
-                        className="inline-flex items-center gap-1 text-xs font-semibold text-teal-400 hover:underline"
+                        className="inline-flex items-center gap-1 text-[11px] font-semibold text-teal-400 hover:underline"
                     >
                         <span>Ver todas</span>
                         <ArrowUpRight className="h-3 w-3" />
                     </Link>
                 </div>
 
-                <div className="grid gap-3 sm:grid-cols-3">
+                <div className="grid grid-cols-3 gap-2.5">
                     <Link
                         href="/ordens?deadline=overdue"
-                        className="rounded-xl border border-slate-800 bg-slate-900/60 p-4 transition-colors hover:border-red-500/50 hover:bg-slate-900/90"
+                        className="rounded-lg border border-slate-800/80 bg-slate-900/50 p-2.5 sm:p-3 transition-colors hover:border-red-500/50 hover:bg-slate-900/80"
                     >
                         <div className="flex items-center justify-between">
-                            <span className="text-xs font-semibold uppercase tracking-wider text-red-400">Atrasadas</span>
-                            <span className="text-[10px] font-mono text-red-400/80">SLA expirado</span>
+                            <span className="text-[11px] font-semibold uppercase tracking-wider text-red-400">Atrasadas</span>
+                            <span className="hidden sm:inline text-[9px] font-mono text-red-400/80">SLA expirado</span>
                         </div>
-                        <strong className="mt-2 block font-mono text-2xl font-bold tabular-nums text-red-300">
+                        <strong className="mt-0.5 block font-mono text-lg sm:text-xl font-bold tabular-nums text-red-300">
                             {s.overdueServiceOrders}
                         </strong>
                     </Link>
 
                     <Link
                         href="/ordens?deadline=today"
-                        className="rounded-xl border border-slate-800 bg-slate-900/60 p-4 transition-colors hover:border-amber-500/50 hover:bg-slate-900/90"
+                        className="rounded-lg border border-slate-800/80 bg-slate-900/50 p-2.5 sm:p-3 transition-colors hover:border-amber-500/50 hover:bg-slate-900/80"
                     >
                         <div className="flex items-center justify-between">
-                            <span className="text-xs font-semibold uppercase tracking-wider text-amber-400">Vencem hoje</span>
-                            <span className="text-[10px] font-mono text-amber-400/80">Ação imediata</span>
+                            <span className="text-[11px] font-semibold uppercase tracking-wider text-amber-400">Vencem hoje</span>
+                            <span className="hidden sm:inline text-[9px] font-mono text-amber-400/80">Ação imediata</span>
                         </div>
-                        <strong className="mt-2 block font-mono text-2xl font-bold tabular-nums text-amber-300">
+                        <strong className="mt-0.5 block font-mono text-lg sm:text-xl font-bold tabular-nums text-amber-300">
                             {s.dueTodayServiceOrders}
                         </strong>
                     </Link>
 
                     <Link
                         href="/ordens?deadline=next_7_days"
-                        className="rounded-xl border border-slate-800 bg-slate-900/60 p-4 transition-colors hover:border-sky-500/50 hover:bg-slate-900/90"
+                        className="rounded-lg border border-slate-800/80 bg-slate-900/50 p-2.5 sm:p-3 transition-colors hover:border-sky-500/50 hover:bg-slate-900/80"
                     >
                         <div className="flex items-center justify-between">
-                            <span className="text-xs font-semibold uppercase tracking-wider text-sky-400">Próximos 7 dias</span>
-                            <span className="text-[10px] font-mono text-sky-400/80">Programadas</span>
+                            <span className="text-[11px] font-semibold uppercase tracking-wider text-sky-400">Próximos 7 dias</span>
+                            <span className="hidden sm:inline text-[9px] font-mono text-sky-400/80">Programadas</span>
                         </div>
-                        <strong className="mt-2 block font-mono text-2xl font-bold tabular-nums text-sky-300">
+                        <strong className="mt-0.5 block font-mono text-lg sm:text-xl font-bold tabular-nums text-sky-300">
                             {s.dueNextSevenDaysServiceOrders}
                         </strong>
                     </Link>
                 </div>
             </section>
 
-            {/* Grid: Gráfico + Prioridades */}
-            <div className="grid gap-4 lg:grid-cols-3">
-                {/* Gráfico de ordens por mês */}
-                <section className="rounded-xl border border-slate-800 bg-slate-900/60 p-4 sm:p-5 lg:col-span-2">
-                    <div className="flex items-center justify-between mb-4">
-                        <h3 className="text-xs font-bold uppercase tracking-wider text-slate-300">Ordens nos últimos 6 meses</h3>
-                        <span className="text-xs font-mono text-slate-500">Histórico</span>
-                    </div>
+            {/* Grid Principal: Gráfico + Prioridades & Ordens Urgentes */}
+            <div className="grid gap-3.5 lg:grid-cols-3">
+                {/* Coluna Esquerda (2/3): Gráfico + Ordens com Prazo Urgente */}
+                <div className="space-y-3.5 lg:col-span-2">
+                    {/* Gráfico de ordens por mês */}
+                    <section className="rounded-xl border border-slate-800 bg-slate-900/60 p-3.5 sm:p-4">
+                        <div className="flex items-center justify-between mb-2">
+                            <h3 className="text-xs font-bold uppercase tracking-wider text-slate-300">Ordens nos últimos 6 meses</h3>
+                            <span className="text-[10px] font-mono text-slate-500">Histórico</span>
+                        </div>
 
-                    <div className="h-52">
-                        {s.ordersByMonth.some((m) => m.count > 0) ? (
-                            <ResponsiveContainer width="100%" height="100%">
-                                <BarChart data={s.ordersByMonth} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
-                                    <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" vertical={false} />
-                                    <XAxis
-                                        dataKey="month"
-                                        tick={{ fill: '#94a3b8', fontSize: 11 }}
-                                        axisLine={{ stroke: '#334155' }}
-                                        tickLine={false}
-                                    />
-                                    <YAxis
-                                        allowDecimals={false}
-                                        tick={{ fill: '#94a3b8', fontSize: 11 }}
-                                        axisLine={{ stroke: '#334155' }}
-                                        tickLine={false}
-                                    />
-                                    <Tooltip
-                                        cursor={{ fill: '#1e293b', opacity: 0.4 }}
-                                        contentStyle={{ 
-                                            backgroundColor: '#090d16', 
-                                            border: '1px solid #334155', 
-                                            borderRadius: '8px', 
-                                            fontSize: '12px'
-                                        }}
-                                        labelStyle={{ color: '#f1f5f9', fontWeight: 600 }}
-                                        itemStyle={{ color: '#2dd4bf' }}
-                                        formatter={(value) => [`${value} ordem${Number(value) !== 1 ? 'ns' : ''}`, 'Total']}
-                                    />
-                                    <Bar dataKey="count" fill="#14b8a6" radius={[4, 4, 0, 0]} maxBarSize={32} />
-                                </BarChart>
-                            </ResponsiveContainer>
-                        ) : (
-                            <div className="flex h-full items-center justify-center text-xs text-slate-500 font-mono">
-                                Nenhuma ordem registrada no período.
-                            </div>
-                        )}
-                    </div>
-                </section>
-
-                {/* Prioridades */}
-                <section className="rounded-xl border border-slate-800 bg-slate-900/60 p-4 sm:p-5">
-                    <h3 className="text-xs font-bold uppercase tracking-wider text-slate-300 mb-4">Por Prioridade</h3>
-
-                    <div className="space-y-3.5">
-                        {(['critical', 'high', 'medium', 'low'] as const).map((key) => {
-                            const count =
-                                key === 'critical' ? s.criticalPriorityServiceOrders
-                                : key === 'high' ? s.highPriorityServiceOrders
-                                : key === 'medium' ? s.mediumPriorityServiceOrders
-                                : s.lowPriorityServiceOrders;
-
-                            const config = priorityConfig[key];
-                            const maxCount = Math.max(s.criticalPriorityServiceOrders, s.highPriorityServiceOrders, s.mediumPriorityServiceOrders, s.lowPriorityServiceOrders, 1);
-                            const barWidth = maxCount > 0 ? (count / maxCount) * 100 : 0;
-
-                            return (
-                                <div key={key} className="space-y-1">
-                                    <div className="flex items-center justify-between text-xs">
-                                        <span className={`font-medium ${config.color}`}>{config.label}</span>
-                                        <span className="font-mono font-bold text-slate-200">{count}</span>
-                                    </div>
-                                    <div className="h-1.5 overflow-hidden rounded-full bg-slate-800">
-                                        <div 
-                                            className="h-full rounded-full" 
-                                            style={{ width: `${barWidth}%`, backgroundColor: config.barColor }} 
+                        <div className="h-36 sm:h-40">
+                            {s.ordersByMonth.some((m) => m.count > 0) ? (
+                                <ResponsiveContainer width="100%" height="100%">
+                                    <BarChart data={s.ordersByMonth} margin={{ top: 5, right: 5, left: -25, bottom: 0 }}>
+                                        <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" vertical={false} />
+                                        <XAxis
+                                            dataKey="month"
+                                            tick={{ fill: '#94a3b8', fontSize: 10 }}
+                                            axisLine={{ stroke: '#334155' }}
+                                            tickLine={false}
                                         />
-                                    </div>
+                                        <YAxis
+                                            allowDecimals={false}
+                                            tick={{ fill: '#94a3b8', fontSize: 10 }}
+                                            axisLine={{ stroke: '#334155' }}
+                                            tickLine={false}
+                                        />
+                                        <Tooltip
+                                            cursor={{ fill: '#1e293b', opacity: 0.4 }}
+                                            contentStyle={{ 
+                                                backgroundColor: '#090d16', 
+                                                border: '1px solid #334155', 
+                                                borderRadius: '6px', 
+                                                fontSize: '11px',
+                                                padding: '6px 10px'
+                                            }}
+                                            labelStyle={{ color: '#f1f5f9', fontWeight: 600 }}
+                                            itemStyle={{ color: '#2dd4bf' }}
+                                            formatter={(value) => [`${value} ordem${Number(value) !== 1 ? 'ns' : ''}`, 'Total']}
+                                        />
+                                        <Bar dataKey="count" fill="#14b8a6" radius={[3, 3, 0, 0]} maxBarSize={28} />
+                                    </BarChart>
+                                </ResponsiveContainer>
+                            ) : (
+                                <div className="flex h-full items-center justify-center text-xs text-slate-500 font-mono">
+                                    Nenhuma ordem registrada no período.
                                 </div>
-                            );
-                        })}
-                    </div>
-                </section>
-            </div>
+                            )}
+                        </div>
+                    </section>
 
-            {/* Ordens com Prazo Urgente */}
-            <section className="rounded-xl border border-slate-800 bg-slate-900/60 p-4 sm:p-5 space-y-3">
-                <div className="flex items-center justify-between">
-                    <h3 className="text-xs font-bold uppercase tracking-wider text-slate-300">Ordens com prazo mais urgente</h3>
-                    <Link
-                        href="/ordens?sort=due_asc"
-                        className="text-xs font-semibold text-teal-400 hover:underline"
-                    >
-                        Ver por prazo
-                    </Link>
+                    {/* Ordens com Prazo Urgente */}
+                    <section className="rounded-xl border border-slate-800 bg-slate-900/60 p-3.5 sm:p-4 space-y-2.5">
+                        <div className="flex items-center justify-between">
+                            <h3 className="text-xs font-bold uppercase tracking-wider text-slate-300">Ordens com prazo mais urgente</h3>
+                            <Link
+                                href="/ordens?sort=due_asc"
+                                className="text-[11px] font-semibold text-teal-400 hover:underline"
+                            >
+                                Ver por prazo
+                            </Link>
+                        </div>
+
+                        <div className="space-y-1.5">
+                            {s.urgentOrders.length === 0 ? (
+                                <p className="text-xs text-slate-500 py-1 font-mono">Nenhum prazo urgente no momento.</p>
+                            ) : (
+                                s.urgentOrders.slice(0, 3).map((order) => {
+                                    const equipmentName = Array.isArray(order.equipment)
+                                        ? order.equipment[0]?.name
+                                        : order.equipment?.name;
+
+                                    return (
+                                        <Link
+                                            key={order.id}
+                                            href={`/ordens/${order.id}`}
+                                            className="flex flex-col gap-1.5 rounded-lg border border-slate-800/80 bg-slate-950/40 p-2.5 transition-colors hover:border-slate-700 hover:bg-slate-900/60 sm:flex-row sm:items-center sm:justify-between"
+                                        >
+                                            <div className="min-w-0">
+                                                <p className="truncate text-xs font-semibold text-slate-200">
+                                                    {order.title}
+                                                </p>
+                                                <p className="mt-0.5 truncate text-[11px] text-slate-400">
+                                                    {`${equipmentName ?? 'Equipamento não informado'} · ${serviceOrderPriorityLabels[order.priority]}`}
+                                                </p>
+                                            </div>
+
+                                            <ServiceOrderDeadlineBadge
+                                                dueDate={order.due_date}
+                                                status={order.status}
+                                            />
+                                        </Link>
+                                    );
+                                })
+                            )}
+                        </div>
+                    </section>
                 </div>
 
-                <div className="space-y-2">
-                    {s.urgentOrders.length === 0 ? (
-                        <p className="text-xs text-slate-500 py-2">Nenhum prazo urgente no momento.</p>
-                    ) : (
-                        s.urgentOrders.map((order) => {
-                            const equipmentName = Array.isArray(order.equipment)
-                                ? order.equipment[0]?.name
-                                : order.equipment?.name;
+                {/* Coluna Direita (1/3): Prioridades + Últimas Atividades */}
+                <div className="space-y-3.5">
+                    {/* Prioridades */}
+                    <section className="rounded-xl border border-slate-800 bg-slate-900/60 p-3.5 sm:p-4">
+                        <h3 className="text-xs font-bold uppercase tracking-wider text-slate-300 mb-2.5">Por Prioridade</h3>
 
-                            return (
-                                <Link
-                                    key={order.id}
-                                    href={`/ordens/${order.id}`}
-                                    className="flex flex-col gap-2 rounded-lg border border-slate-800/80 bg-slate-950/40 p-3 transition-colors hover:border-slate-700 hover:bg-slate-900/60 sm:flex-row sm:items-center sm:justify-between"
-                                >
-                                    <div className="min-w-0">
-                                        <p className="truncate text-xs sm:text-sm font-semibold text-slate-200">
-                                            {order.title}
-                                        </p>
-                                        <p className="mt-0.5 truncate text-xs text-slate-400">
-                                            {`${equipmentName ?? 'Equipamento não informado'} · ${serviceOrderPriorityLabels[order.priority]}`}
-                                        </p>
-                                    </div>
+                        <div className="space-y-2">
+                            {(['critical', 'high', 'medium', 'low'] as const).map((key) => {
+                                const count =
+                                    key === 'critical' ? s.criticalPriorityServiceOrders
+                                    : key === 'high' ? s.highPriorityServiceOrders
+                                    : key === 'medium' ? s.mediumPriorityServiceOrders
+                                    : s.lowPriorityServiceOrders;
 
-                                    <ServiceOrderDeadlineBadge
-                                        dueDate={order.due_date}
-                                        status={order.status}
-                                    />
-                                </Link>
-                            );
-                        })
-                    )}
-                </div>
-            </section>
-
-            {/* Grid: Atividades Recentes */}
-            <div className="grid gap-4 lg:grid-cols-2">
-                {/* Últimas ordens */}
-                <section className="rounded-xl border border-slate-800 bg-slate-900/60 p-4 sm:p-5">
-                    <h3 className="text-xs font-bold uppercase tracking-wider text-slate-300 mb-3">Últimas Ordens de Serviço</h3>
-
-                    <div className="space-y-2">
-                        {s.recentOrders.length === 0 ? (
-                            <p className="text-xs text-slate-500">Nenhuma ordem registrada.</p>
-                        ) : (
-                            s.recentOrders.map((order) => {
-                                const equipName = Array.isArray(order.equipment)
-                                    ? order.equipment[0]?.name
-                                    : (order.equipment as { name: string })?.name;
+                                const config = priorityConfig[key];
+                                const maxCount = Math.max(s.criticalPriorityServiceOrders, s.highPriorityServiceOrders, s.mediumPriorityServiceOrders, s.lowPriorityServiceOrders, 1);
+                                const barWidth = maxCount > 0 ? (count / maxCount) * 100 : 0;
 
                                 return (
-                                    <div key={order.id} className="flex items-center justify-between gap-3 rounded-lg border border-slate-800/60 bg-slate-950/40 px-3 py-2.5">
-                                        <div className="min-w-0 flex-1">
-                                            <p className="truncate text-xs font-semibold text-slate-200">{order.title}</p>
-                                            <p className="text-[11px] text-slate-400 truncate">
-                                                {equipName ?? 'Equipamento não informado'} · {priorityConfig[order.priority as keyof typeof priorityConfig]?.label ?? order.priority}
-                                            </p>
+                                    <div key={key} className="space-y-0.5">
+                                        <div className="flex items-center justify-between text-[11px]">
+                                            <span className={`font-medium ${config.color}`}>{config.label}</span>
+                                            <span className="font-mono font-bold text-slate-200">{count}</span>
                                         </div>
-                                        <span className="shrink-0 font-mono text-[10px] text-slate-500">{formatDate(order.created_at)}</span>
+                                        <div className="h-1 overflow-hidden rounded-full bg-slate-800">
+                                            <div 
+                                                className="h-full rounded-full" 
+                                                style={{ width: `${barWidth}%`, backgroundColor: config.barColor }} 
+                                            />
+                                        </div>
                                     </div>
                                 );
-                            })
-                        )}
-                    </div>
-                </section>
+                            })}
+                        </div>
+                    </section>
 
-                {/* Últimos equipamentos */}
-                <section className="rounded-xl border border-slate-800 bg-slate-900/60 p-4 sm:p-5">
-                    <h3 className="text-xs font-bold uppercase tracking-wider text-slate-300 mb-3">Últimos Equipamentos</h3>
+                    {/* Atividades Recentes */}
+                    <section className="rounded-xl border border-slate-800 bg-slate-900/60 p-3.5 sm:p-4 space-y-2">
+                        <h3 className="text-xs font-bold uppercase tracking-wider text-slate-300">Atividades Recentes</h3>
 
-                    <div className="space-y-2">
-                        {s.recentEquipments.length === 0 ? (
-                            <p className="text-xs text-slate-500">Nenhum equipamento cadastrado.</p>
-                        ) : (
-                            s.recentEquipments.map((equipment) => (
-                                <div key={equipment.id} className="flex items-center justify-between gap-3 rounded-lg border border-slate-800/60 bg-slate-950/40 px-3 py-2.5">
-                                    <div className="min-w-0 flex-1">
-                                        <p className="truncate text-xs font-semibold text-slate-200">{equipment.name}</p>
-                                        <p className="text-[11px] font-mono text-slate-400 truncate">
-                                            {equipment.patrimony_code} · {equipment.status === 'active' ? 'Ativo' : equipment.status === 'maintenance' ? 'Em manutenção' : 'Inativo'}
-                                        </p>
-                                    </div>
-                                    <span className="shrink-0 font-mono text-[10px] text-slate-500">{formatDate(equipment.created_at)}</span>
-                                </div>
-                            ))
-                        )}
-                    </div>
-                </section>
+                        <div className="space-y-1.5">
+                            {s.recentOrders.length === 0 && s.recentEquipments.length === 0 ? (
+                                <p className="text-xs text-slate-500 py-1 font-mono">Nenhuma atividade recente.</p>
+                            ) : (
+                                <>
+                                    {s.recentOrders.slice(0, 2).map((order) => {
+                                        const equipName = Array.isArray(order.equipment)
+                                            ? order.equipment[0]?.name
+                                            : (order.equipment as { name: string })?.name;
+
+                                        return (
+                                            <div key={order.id} className="flex items-center justify-between gap-2 rounded-lg border border-slate-800/60 bg-slate-950/40 px-2.5 py-1.5">
+                                                <div className="min-w-0 flex-1">
+                                                    <p className="truncate text-xs font-medium text-slate-200">{order.title}</p>
+                                                    <p className="text-[10px] text-slate-400 truncate">
+                                                        {equipName ?? 'OS'} · {priorityConfig[order.priority as keyof typeof priorityConfig]?.label ?? order.priority}
+                                                    </p>
+                                                </div>
+                                                <span className="shrink-0 font-mono text-[9px] text-slate-500">{formatDate(order.created_at)}</span>
+                                            </div>
+                                        );
+                                    })}
+
+                                    {s.recentEquipments.slice(0, 2).map((equipment) => (
+                                        <div key={equipment.id} className="flex items-center justify-between gap-2 rounded-lg border border-slate-800/60 bg-slate-950/40 px-2.5 py-1.5">
+                                            <div className="min-w-0 flex-1">
+                                                <p className="truncate text-xs font-medium text-slate-200">{equipment.name}</p>
+                                                <p className="text-[10px] font-mono text-slate-400 truncate">
+                                                    {equipment.patrimony_code}
+                                                </p>
+                                            </div>
+                                            <span className="shrink-0 font-mono text-[9px] text-slate-500">{formatDate(equipment.created_at)}</span>
+                                        </div>
+                                    ))}
+                                </>
+                            )}
+                        </div>
+                    </section>
+                </div>
             </div>
         </div>
     );

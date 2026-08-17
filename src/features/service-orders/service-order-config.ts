@@ -27,24 +27,24 @@ export const serviceOrderPriorityLabels: Record<ServiceOrderPriority, string> = 
 };
 
 export const serviceOrderStatusStyles: Record<ServiceOrderStatus, string> = {
-    open: 'border-teal-500/30 bg-teal-500/10 text-teal-300',
-    in_progress: 'border-amber-500/30 bg-amber-500/10 text-amber-300',
-    closed: 'border-slate-500/30 bg-slate-500/10 text-slate-300',
+    open: 'border-teal-500/30 bg-teal-500/10 text-teal-700 dark:text-teal-300',
+    in_progress: 'border-amber-500/30 bg-amber-500/10 text-amber-700 dark:text-amber-300',
+    closed: 'border-slate-300 bg-slate-100 text-slate-700 dark:border-slate-500/30 dark:bg-slate-500/10 dark:text-slate-300',
 };
 
 export const serviceOrderPriorityStyles: Record<ServiceOrderPriority, string> = {
-    low: 'border-slate-500/30 bg-slate-500/10 text-slate-300',
-    medium: 'border-yellow-500/30 bg-yellow-500/10 text-yellow-300',
-    high: 'border-orange-500/30 bg-orange-500/10 text-orange-300',
-    critical: 'border-red-500/30 bg-red-500/10 text-red-300',
+    low: 'border-slate-300 bg-slate-100 text-slate-700 dark:border-slate-500/30 dark:bg-slate-500/10 dark:text-slate-300',
+    medium: 'border-yellow-500/30 bg-yellow-500/10 text-yellow-700 dark:text-yellow-300',
+    high: 'border-orange-500/30 bg-orange-500/10 text-orange-700 dark:text-orange-300',
+    critical: 'border-red-500/30 bg-red-500/10 text-red-700 dark:text-red-300',
 };
 
 export const serviceOrderDeadlineStyles: Record<ServiceOrderDeadlineState, string> = {
-    none: 'border-slate-500/30 bg-slate-500/10 text-slate-400',
-    overdue: 'border-red-500/30 bg-red-500/10 text-red-300',
-    today: 'border-amber-500/30 bg-amber-500/10 text-amber-300',
-    upcoming: 'border-sky-500/30 bg-sky-500/10 text-sky-300',
-    closed: 'border-slate-500/30 bg-slate-500/10 text-slate-300',
+    none: 'border-slate-300 bg-slate-100 text-slate-600 dark:border-slate-500/30 dark:bg-slate-500/10 dark:text-slate-400',
+    overdue: 'border-red-500/30 bg-red-500/10 text-red-700 dark:text-red-300',
+    today: 'border-amber-500/30 bg-amber-500/10 text-amber-700 dark:text-amber-300',
+    upcoming: 'border-sky-500/30 bg-sky-500/10 text-sky-700 dark:text-sky-300',
+    closed: 'border-slate-300 bg-slate-100 text-slate-700 dark:border-slate-500/30 dark:bg-slate-500/10 dark:text-slate-300',
 };
 
 export const serviceOrderStatusFilterOptions: Array<{

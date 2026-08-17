@@ -211,19 +211,19 @@ export function EquipmentForm({ onEquipmentCreated, editingEquipment, onEditCanc
     <form
       id="equipment-form"
       onSubmit={handleSubmit}
-      className={`rounded-2xl border border-slate-800 bg-slate-950/70 p-4 shadow-sm sm:p-5 ${inModal ? '' : 'mt-6 scroll-mt-24 sm:mt-8'}`}
+      className={`rounded-2xl border border-slate-200 bg-white p-4 shadow-sm sm:p-5 dark:border-slate-800 dark:bg-slate-950/70 ${inModal ? '' : 'mt-6 scroll-mt-24 sm:mt-8'}`}
       aria-describedby="equipment-form-help equipment-form-feedback"
     >
       <div>
-        <span className="rounded-full border border-teal-500/30 bg-teal-500/10 px-3 py-1 text-xs font-medium text-teal-300">
+        <span className="rounded-full border border-teal-500/30 bg-teal-500/10 px-3 py-1 text-xs font-medium text-teal-700 dark:text-teal-300">
           {isEditing ? "Editar equipamento" : "Novo equipamento"}
         </span>
 
-        <h2 className="mt-3 text-xl font-semibold text-white">
+        <h2 className="mt-3 text-xl font-semibold text-slate-900 dark:text-white">
           {isEditing ? "Editar equipamento" : "Cadastrar equipamento"}
         </h2>
 
-        <p className="mt-1 text-sm text-slate-400">
+        <p className="mt-1 text-sm text-slate-600 dark:text-slate-400">
           {isEditing
             ? `Editando: ${editingEquipment?.name}`
             : "Preencha os dados abaixo para adicionar um novo equipamento."}
@@ -237,7 +237,7 @@ export function EquipmentForm({ onEquipmentCreated, editingEquipment, onEditCanc
         <div>
           <label
             htmlFor="name"
-            className="mb-2 block text-sm font-medium text-slate-300"
+            className="mb-2 block text-sm font-medium text-slate-700 dark:text-slate-300"
           >
             Nome do equipamento *
           </label>
@@ -253,14 +253,14 @@ export function EquipmentForm({ onEquipmentCreated, editingEquipment, onEditCanc
             placeholder="Ex: Motor Elétrico"
             required
             disabled={isBusy}
-            className="w-full rounded-xl border border-slate-700 bg-slate-950 px-4 py-3 text-slate-100 outline-none transition placeholder:text-slate-500 focus:border-teal-500"
+            className="w-full rounded-xl border border-slate-300 bg-slate-50 px-4 py-3 text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-teal-500 focus:bg-white dark:border-slate-700 dark:bg-slate-950 dark:text-slate-100 dark:placeholder:text-slate-500"
           />
         </div>
 
         <div>
           <label
             htmlFor="patrimonyCode"
-            className="mb-2 block text-sm font-medium text-slate-300"
+            className="mb-2 block text-sm font-medium text-slate-700 dark:text-slate-300"
           >
             Código de patrimônio *
           </label>
@@ -276,14 +276,14 @@ export function EquipmentForm({ onEquipmentCreated, editingEquipment, onEditCanc
             placeholder="Ex: MOTOR-001"
             required
             disabled={isBusy}
-            className="w-full rounded-xl border border-slate-700 bg-slate-950 px-4 py-3 text-slate-100 outline-none transition placeholder:text-slate-500 focus:border-teal-500"
+            className="w-full rounded-xl border border-slate-300 bg-slate-50 px-4 py-3 text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-teal-500 focus:bg-white dark:border-slate-700 dark:bg-slate-950 dark:text-slate-100 dark:placeholder:text-slate-500"
           />
         </div>
 
         <div>
           <label
             htmlFor="location"
-            className="mb-2 block text-sm font-medium text-slate-300"
+            className="mb-2 block text-sm font-medium text-slate-700 dark:text-slate-300"
           >
             Localização *
           </label>
@@ -299,14 +299,14 @@ export function EquipmentForm({ onEquipmentCreated, editingEquipment, onEditCanc
             placeholder="Ex: Setor C"
             required
             disabled={isBusy}
-            className="w-full rounded-xl border border-slate-700 bg-slate-950 px-4 py-3 text-slate-100 outline-none transition placeholder:text-slate-500 focus:border-teal-500"
+            className="w-full rounded-xl border border-slate-300 bg-slate-50 px-4 py-3 text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-teal-500 focus:bg-white dark:border-slate-700 dark:bg-slate-950 dark:text-slate-100 dark:placeholder:text-slate-500"
           />
         </div>
 
         <div>
           <label
             htmlFor="status"
-            className="mb-2 block text-sm font-medium text-slate-300"
+            className="mb-2 block text-sm font-medium text-slate-700 dark:text-slate-300"
           >
             Status
           </label>
@@ -317,7 +317,7 @@ export function EquipmentForm({ onEquipmentCreated, editingEquipment, onEditCanc
             value={status}
             disabled={isBusy}
             onChange={(event) => setStatus(event.target.value as Equipment['status'])}
-            className="w-full rounded-xl border border-slate-700 bg-slate-950 px-4 py-3 text-slate-100 outline-none transition focus:border-teal-500"
+            className="w-full rounded-xl border border-slate-300 bg-slate-50 px-4 py-3 text-slate-900 outline-none transition focus:border-teal-500 cursor-pointer dark:border-slate-700 dark:bg-slate-950 dark:text-slate-100"
           >
             <option value="active">Ativo</option>
             <option value="inactive">Inativo</option>
@@ -327,7 +327,7 @@ export function EquipmentForm({ onEquipmentCreated, editingEquipment, onEditCanc
 
         {/* Upload de foto */}
         <div className="sm:col-span-2">
-          <label className="mb-2 block text-sm font-medium text-slate-300">
+          <label className="mb-2 block text-sm font-medium text-slate-700 dark:text-slate-300">
             Foto do equipamento
           </label>
 
@@ -336,24 +336,24 @@ export function EquipmentForm({ onEquipmentCreated, editingEquipment, onEditCanc
               <EquipmentPhoto
                 src={previewUrl}
                 alt={`Prévia da foto de ${name || "equipamento"}`}
-                className="h-32 w-32 rounded-xl border border-slate-700 object-cover"
+                className="h-32 w-32 rounded-xl border border-slate-300 object-cover dark:border-slate-700"
               />
               <button
                 type="button"
                 onClick={handleRemovePhoto}
                 disabled={isBusy}
                 aria-label="Remover foto do equipamento"
-                className="absolute -right-2 -top-2 flex h-6 w-6 items-center justify-center rounded-full bg-red-600 text-xs text-white transition hover:bg-red-500 disabled:opacity-60"
+                className="absolute -right-2 -top-2 flex h-6 w-6 items-center justify-center rounded-full bg-red-600 text-xs text-white transition hover:bg-red-500 disabled:opacity-60 cursor-pointer"
               >
                 ✕
               </button>
             </div>
           ) : (
-            <label className="flex cursor-pointer items-center gap-3 rounded-xl border border-dashed border-slate-700 bg-slate-950 px-4 py-6 transition hover:border-teal-500/50 hover:bg-slate-900/50">
-              <svg className="h-6 w-6 shrink-0 text-slate-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+            <label className="flex cursor-pointer items-center gap-3 rounded-xl border border-dashed border-slate-300 bg-slate-50 px-4 py-6 transition hover:border-teal-500/50 hover:bg-slate-100 dark:border-slate-700 dark:bg-slate-950 dark:hover:bg-slate-900/50">
+              <svg className="h-6 w-6 shrink-0 text-slate-400 dark:text-slate-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5" />
               </svg>
-              <span className="text-sm text-slate-400">
+              <span className="text-sm text-slate-600 dark:text-slate-400">
                 Clique para selecionar uma foto
               </span>
               <input
@@ -373,13 +373,13 @@ export function EquipmentForm({ onEquipmentCreated, editingEquipment, onEditCanc
 
       <div id="equipment-form-feedback" aria-live="polite" aria-atomic="true">
       {successMessage && (
-        <p className="mt-4 rounded-xl border border-emerald-500/30 bg-emerald-500/10 p-3 text-sm text-emerald-300">
+        <p className="mt-4 rounded-xl border border-emerald-500/30 bg-emerald-500/10 p-3 text-sm text-emerald-700 dark:text-emerald-300">
           {successMessage}
         </p>
       )}
 
       {errorMessage && (
-        <p role="alert" className="mt-4 rounded-xl border border-red-500/30 bg-red-500/10 p-3 text-sm text-red-300">
+        <p role="alert" className="mt-4 rounded-xl border border-red-500/30 bg-red-500/10 p-3 text-sm text-red-700 dark:text-red-300">
           {errorMessage}
         </p>
       )}
@@ -391,7 +391,7 @@ export function EquipmentForm({ onEquipmentCreated, editingEquipment, onEditCanc
             type="button"
             onClick={handleCancel}
             disabled={isBusy}
-            className="rounded-xl border border-slate-700 px-4 py-2.5 text-sm font-medium text-slate-300 transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-60"
+            className="rounded-xl border border-slate-300 px-4 py-2.5 text-sm font-medium text-slate-700 transition hover:bg-slate-100 disabled:cursor-not-allowed disabled:opacity-60 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800 cursor-pointer"
           >
             Cancelar
           </button>
@@ -400,7 +400,7 @@ export function EquipmentForm({ onEquipmentCreated, editingEquipment, onEditCanc
         <button
           type="submit"
           disabled={isBusy}
-          className="rounded-xl bg-teal-600 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-teal-500 disabled:cursor-not-allowed disabled:opacity-60"
+          className="rounded-xl bg-teal-600 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-teal-500 disabled:cursor-not-allowed disabled:opacity-60 cursor-pointer shadow-xs"
         >
           {isUploading
             ? "Enviando foto..."

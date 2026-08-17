@@ -114,18 +114,18 @@ export default function EquipmentDetailsPage({
                 />
 
                 {isLoading && (
-                    <div aria-label="Carregando detalhes do equipamento" className="animate-pulse rounded-xl border border-slate-800 bg-slate-900/40 p-8 text-center">
-                        <p className="text-xs text-slate-400 font-mono">Carregando dados do equipamento...</p>
+                    <div aria-label="Carregando detalhes do equipamento" className="animate-pulse rounded-xl border border-slate-200 bg-white p-8 text-center shadow-xs dark:border-slate-800 dark:bg-slate-900/40">
+                        <p className="text-xs text-slate-500 font-mono dark:text-slate-400">Carregando dados do equipamento...</p>
                     </div>
                 )}
 
                 {!isLoading && errorMessage && (
                     <div className="rounded-xl border border-red-500/30 bg-red-500/10 p-5">
-                        <h1 className="text-sm font-semibold text-red-300">
+                        <h1 className="text-sm font-semibold text-red-600 dark:text-red-300">
                             Não foi possível carregar o equipamento
                         </h1>
-                        <p className="mt-1 text-xs text-red-300/80">{errorMessage}</p>
-                        <Link href="/equipamentos" className="mt-3 inline-block text-xs font-semibold text-red-200 underline">
+                        <p className="mt-1 text-xs text-red-600/80 dark:text-red-300/80">{errorMessage}</p>
+                        <Link href="/equipamentos" className="mt-3 inline-block text-xs font-semibold text-red-600 underline dark:text-red-200">
                             Voltar para equipamentos
                         </Link>
                     </div>
@@ -133,29 +133,29 @@ export default function EquipmentDetailsPage({
 
                 {!isLoading && details && (
                     <>
-                        <div className="rounded-xl border border-slate-800 bg-slate-900/60 p-5 sm:p-6 space-y-5">
-                            <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between border-b border-slate-800 pb-5">
+                        <div className="rounded-xl border border-slate-200 bg-white p-5 sm:p-6 space-y-5 shadow-xs dark:border-slate-800 dark:bg-slate-900/60">
+                            <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between border-b border-slate-200 pb-5 dark:border-slate-800">
                                 <div className="flex items-start gap-4">
                                     {details.equipment.photo_url && (
                                         <EquipmentPhoto
                                             src={details.equipment.photo_url}
                                             alt={details.equipment.name}
-                                            className="h-16 w-16 shrink-0 rounded-lg border border-slate-800 object-cover"
+                                            className="h-16 w-16 shrink-0 rounded-lg border border-slate-200 object-cover dark:border-slate-800"
                                         />
                                     )}
 
                                     <div className="space-y-1">
                                         <div className="flex items-center gap-2">
-                                            <span className="font-mono text-xs font-bold text-teal-400">
+                                            <span className="font-mono text-xs font-bold text-teal-600 dark:text-teal-400">
                                                 {details.equipment.patrimony_code}
                                             </span>
-                                            <span className="text-slate-700">·</span>
-                                            <span className="text-xs text-slate-400">
+                                            <span className="text-slate-400 dark:text-slate-700">·</span>
+                                            <span className="text-xs text-slate-500 dark:text-slate-400">
                                                 {details.equipment.location}
                                             </span>
                                         </div>
 
-                                        <h1 className="text-xl font-bold text-slate-100 tracking-tight sm:text-2xl">
+                                        <h1 className="text-xl font-bold text-slate-900 tracking-tight sm:text-2xl dark:text-slate-100">
                                             {details.equipment.name}
                                         </h1>
                                     </div>
@@ -170,38 +170,38 @@ export default function EquipmentDetailsPage({
 
                             {/* 4 Métricas Técnicas */}
                             <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-                                <div className="rounded-lg border border-slate-800/80 bg-slate-950/40 p-3">
+                                <div className="rounded-lg border border-slate-200 bg-slate-50/70 p-3 dark:border-slate-800/80 dark:bg-slate-950/40">
                                     <p className="text-[10px] font-semibold uppercase tracking-wider text-slate-500">
                                         Patrimônio
                                     </p>
-                                    <p className="mt-1 font-mono text-xs sm:text-sm font-bold text-slate-200 truncate">
+                                    <p className="mt-1 font-mono text-xs sm:text-sm font-bold text-slate-800 truncate dark:text-slate-200">
                                         {details.equipment.patrimony_code}
                                     </p>
                                 </div>
 
-                                <div className="rounded-lg border border-slate-800/80 bg-slate-950/40 p-3">
+                                <div className="rounded-lg border border-slate-200 bg-slate-50/70 p-3 dark:border-slate-800/80 dark:bg-slate-950/40">
                                     <p className="text-[10px] font-semibold uppercase tracking-wider text-slate-500">
                                         Localização
                                     </p>
-                                    <p className="mt-1 text-xs sm:text-sm font-medium text-slate-200 truncate">
+                                    <p className="mt-1 text-xs sm:text-sm font-medium text-slate-800 truncate dark:text-slate-200">
                                         {details.equipment.location}
                                     </p>
                                 </div>
 
-                                <div className="rounded-lg border border-slate-800/80 bg-slate-950/40 p-3">
+                                <div className="rounded-lg border border-slate-200 bg-slate-50/70 p-3 dark:border-slate-800/80 dark:bg-slate-950/40">
                                     <p className="text-[10px] font-semibold uppercase tracking-wider text-slate-500">
                                         Cadastro
                                     </p>
-                                    <p className="mt-1 font-mono text-xs sm:text-sm text-slate-200">
+                                    <p className="mt-1 font-mono text-xs sm:text-sm text-slate-800 dark:text-slate-200">
                                         {new Date(details.equipment.created_at).toLocaleDateString("pt-BR")}
                                     </p>
                                 </div>
 
-                                <div className="rounded-lg border border-slate-800/80 bg-slate-950/40 p-3">
+                                <div className="rounded-lg border border-slate-200 bg-slate-50/70 p-3 dark:border-slate-800/80 dark:bg-slate-950/40">
                                     <p className="text-[10px] font-semibold uppercase tracking-wider text-slate-500">
                                         Ordens Vinculadas
                                     </p>
-                                    <p className="mt-1 font-mono text-xs sm:text-sm font-bold text-teal-400">
+                                    <p className="mt-1 font-mono text-xs sm:text-sm font-bold text-teal-600 dark:text-teal-400">
                                         {details.serviceOrders.length}
                                     </p>
                                 </div>
@@ -209,17 +209,17 @@ export default function EquipmentDetailsPage({
                         </div>
 
                         {/* Seção das Ordens Vinculadas */}
-                        <section className="rounded-xl border border-slate-800 bg-slate-900/60 p-5 space-y-4">
-                            <div className="flex items-center justify-between border-b border-slate-800 pb-3">
+                        <section className="rounded-xl border border-slate-200 bg-white p-5 space-y-4 shadow-xs dark:border-slate-800 dark:bg-slate-900/60">
+                            <div className="flex items-center justify-between border-b border-slate-200 pb-3 dark:border-slate-800">
                                 <div>
-                                    <h2 className="text-sm font-bold uppercase tracking-wider text-slate-300">
+                                    <h2 className="text-sm font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300">
                                         Ordens de Serviço ({details.serviceOrders.length})
                                     </h2>
                                 </div>
 
                                 <Link
                                     href="/ordens"
-                                    className="text-xs font-semibold text-teal-400 hover:underline"
+                                    className="text-xs font-semibold text-teal-600 hover:underline dark:text-teal-400"
                                 >
                                     + Nova Ordem
                                 </Link>
@@ -234,10 +234,10 @@ export default function EquipmentDetailsPage({
                                     {details.serviceOrders.map((order) => (
                                         <article
                                             key={order.id}
-                                            className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 rounded-lg border border-slate-800/80 bg-slate-950/40 p-3 transition-colors hover:border-slate-700"
+                                            className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 rounded-lg border border-slate-200 bg-slate-50/70 p-3 transition-colors hover:border-slate-300 dark:border-slate-800/80 dark:bg-slate-950/40 dark:hover:border-slate-700"
                                         >
                                             <div className="min-w-0 space-y-0.5">
-                                                <h3 className="text-xs sm:text-sm font-semibold text-slate-200">
+                                                <h3 className="text-xs sm:text-sm font-semibold text-slate-900 dark:text-slate-200">
                                                     {order.title}
                                                 </h3>
 
@@ -257,7 +257,7 @@ export default function EquipmentDetailsPage({
 
                                                 <Link
                                                     href={`/ordens/${order.id}`}
-                                                    className="text-xs font-semibold text-teal-400 hover:underline px-1"
+                                                    className="text-xs font-semibold text-teal-600 hover:underline px-1 dark:text-teal-400"
                                                 >
                                                     Detalhes
                                                 </Link>
@@ -273,4 +273,3 @@ export default function EquipmentDetailsPage({
         </AppShell>
     );
 }
-

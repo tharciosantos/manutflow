@@ -119,11 +119,11 @@ export function ServiceOrderList({
                 {[1, 2, 3].map((i) => (
                     <div
                         key={i}
-                        className="rounded-xl border border-slate-800 bg-slate-900/40 p-4"
+                        className="rounded-xl border border-slate-200 bg-white p-4 shadow-xs dark:border-slate-800 dark:bg-slate-900/40"
                     >
                         <div className="space-y-2">
-                            <div className="h-4 w-56 animate-pulse rounded bg-slate-800" />
-                            <div className="h-3 w-40 animate-pulse rounded bg-slate-800/60" />
+                            <div className="h-4 w-56 animate-pulse rounded bg-slate-200 dark:bg-slate-800" />
+                            <div className="h-3 w-40 animate-pulse rounded bg-slate-200/60 dark:bg-slate-800/60" />
                         </div>
                     </div>
                 ))}
@@ -134,7 +134,7 @@ export function ServiceOrderList({
     if (errorMessage) {
         return (
             <div className="rounded-xl border border-red-500/30 bg-red-500/10 p-4">
-                <p className="text-xs sm:text-sm text-red-300">{errorMessage}</p>
+                <p className="text-xs sm:text-sm text-red-600 dark:text-red-300">{errorMessage}</p>
             </div>
         );
     }
@@ -143,21 +143,21 @@ export function ServiceOrderList({
         const hasSearch = searchTerm.trim().length > 0;
 
         return (
-            <div className="flex flex-col items-center justify-center rounded-xl border border-dashed border-slate-800 bg-slate-900/30 px-6 py-12 text-center">
-                <p className="text-sm font-semibold text-slate-200">
+            <div className="flex flex-col items-center justify-center rounded-xl border border-dashed border-slate-300 bg-white/50 px-6 py-12 text-center dark:border-slate-800 dark:bg-slate-900/30">
+                <p className="text-sm font-semibold text-slate-800 dark:text-slate-200">
                     {hasActiveFilters
                         ? 'Nenhuma ordem encontrada'
                         : 'Nenhuma ordem de serviço cadastrada'}
                 </p>
 
-                <p className="mt-1 text-xs text-slate-400 max-w-sm">
+                <p className="mt-1 text-xs text-slate-500 max-w-sm dark:text-slate-400">
                     {hasActiveFilters
                         ? 'Tente alterar os filtros aplicados ou o termo de busca.'
                         : 'Crie sua primeira ordem de serviço para iniciar o controle.'}
                 </p>
 
                 {hasActiveFilters && hasSearch && (
-                    <p className="mt-2 text-xs font-mono text-slate-400">
+                    <p className="mt-2 text-xs font-mono text-slate-500 dark:text-slate-400">
                         Busca: &ldquo;{searchTerm.trim()}&rdquo;
                     </p>
                 )}
@@ -166,7 +166,7 @@ export function ServiceOrderList({
                     <button
                         type="button"
                         onClick={onCreateOrder}
-                        className="mt-4 rounded-lg bg-teal-500 px-4 py-2 text-xs font-bold text-slate-950 transition hover:bg-teal-400"
+                        className="mt-4 rounded-lg bg-teal-500 px-4 py-2 text-xs font-bold text-slate-950 transition hover:bg-teal-400 cursor-pointer shadow-xs"
                     >
                         Criar Ordem
                     </button>
@@ -179,7 +179,7 @@ export function ServiceOrderList({
         <>
         <section className="space-y-3">
             <div className="flex items-center justify-between">
-                <h2 className="text-sm font-bold uppercase tracking-wider text-slate-300">
+                <h2 className="text-sm font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300">
                     Ordens ({totalOrders})
                 </h2>
             </div>
@@ -188,13 +188,13 @@ export function ServiceOrderList({
                 {orders.map((order) => (
                     <article
                         key={order.id}
-                        className="rounded-xl border border-slate-800 bg-slate-900/60 p-4 transition-colors hover:border-slate-700 space-y-2.5"
+                        className="rounded-xl border border-slate-200 bg-white p-4 shadow-xs transition-colors hover:border-slate-300 space-y-2.5 dark:border-slate-800 dark:bg-slate-900/60 dark:hover:border-slate-700"
                     >
                         {/* Linha Superior: Título na esquerda e Status + Prioridade + Prazo agrupados na direita */}
                         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2.5">
                             <Link
                                 href={`/ordens/${order.id}`}
-                                className="text-sm font-bold text-slate-100 hover:text-teal-400 transition-colors tracking-tight"
+                                className="text-sm font-bold text-slate-900 hover:text-teal-600 dark:text-slate-100 dark:hover:text-teal-400 transition-colors tracking-tight"
                             >
                                 {order.title}
                             </Link>
@@ -210,15 +210,15 @@ export function ServiceOrderList({
                                         )
                                     }
                                     aria-label={`Alterar status da ordem ${order.title}`}
-                                    className={`rounded-lg border px-2.5 py-1 text-xs font-semibold outline-none transition disabled:cursor-not-allowed disabled:opacity-60 bg-slate-900 cursor-pointer ${serviceOrderStatusStyles[order.status]}`}
+                                    className={`rounded-lg border px-2.5 py-1 text-xs font-semibold outline-none transition disabled:cursor-not-allowed disabled:opacity-60 bg-white dark:bg-slate-900 cursor-pointer ${serviceOrderStatusStyles[order.status]}`}
                                 >
-                                    <option value="open" className="bg-slate-950 text-slate-100">
+                                    <option value="open" className="bg-white text-slate-900 dark:bg-slate-950 dark:text-slate-100">
                                         {serviceOrderStatusLabels.open}
                                     </option>
-                                    <option value="in_progress" className="bg-slate-950 text-slate-100">
+                                    <option value="in_progress" className="bg-white text-slate-900 dark:bg-slate-950 dark:text-slate-100">
                                         {serviceOrderStatusLabels.in_progress}
                                     </option>
-                                    <option value="closed" className="bg-slate-950 text-slate-100">
+                                    <option value="closed" className="bg-white text-slate-900 dark:bg-slate-950 dark:text-slate-100">
                                         {serviceOrderStatusLabels.closed}
                                     </option>
                                 </select>
@@ -238,26 +238,26 @@ export function ServiceOrderList({
 
                         {/* Descrição da Ordem */}
                         {order.description && (
-                            <p className="text-xs text-slate-400 leading-relaxed">
+                            <p className="text-xs text-slate-600 dark:text-slate-400 leading-relaxed">
                                 {order.description}
                             </p>
                         )}
 
                         {/* Rodapé: Ficha do Equipamento Vinculado e Ações */}
-                        <div className="pt-2.5 border-t border-slate-800/80 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 text-xs">
-                            <div className="flex flex-wrap items-center gap-x-2.5 gap-y-1 text-slate-400">
-                                <span className="font-semibold text-slate-300">
+                        <div className="pt-2.5 border-t border-slate-100 dark:border-slate-800/80 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 text-xs">
+                            <div className="flex flex-wrap items-center gap-x-2.5 gap-y-1 text-slate-600 dark:text-slate-400">
+                                <span className="font-semibold text-slate-800 dark:text-slate-300">
                                     {order.equipment.name}
                                 </span>
                                 <span className="font-mono text-[11px] text-slate-500">
                                     ({order.equipment.patrimony_code})
                                 </span>
-                                <span className="text-slate-700">·</span>
+                                <span className="text-slate-300 dark:text-slate-700">·</span>
                                 <span>{order.equipment.location}</span>
                                 {order.due_date && (
                                     <>
-                                        <span className="text-slate-700">·</span>
-                                        <span className="font-mono text-slate-400">
+                                        <span className="text-slate-300 dark:text-slate-700">·</span>
+                                        <span className="font-mono text-slate-600 dark:text-slate-400">
                                             Prazo: {formatDateOnlyPtBr(order.due_date)}
                                         </span>
                                     </>
@@ -267,7 +267,7 @@ export function ServiceOrderList({
                             <div className="flex items-center gap-3 self-end sm:self-auto">
                                 <Link
                                     href={`/ordens/${order.id}`}
-                                    className="font-semibold text-teal-400 hover:underline"
+                                    className="font-semibold text-teal-600 hover:underline dark:text-teal-400"
                                 >
                                     Detalhes
                                 </Link>
@@ -276,7 +276,7 @@ export function ServiceOrderList({
                                     type="button"
                                     onClick={() => openDeleteModal(order.id)}
                                     disabled={deletingOrderId === order.id}
-                                    className="text-red-400/80 hover:text-red-400 transition-colors disabled:opacity-50"
+                                    className="text-red-600/80 hover:text-red-600 transition-colors disabled:opacity-50 dark:text-red-400/80 dark:hover:text-red-400 cursor-pointer"
                                 >
                                     {deletingOrderId === order.id ? 'Excluindo...' : 'Excluir'}
                                 </button>

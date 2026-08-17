@@ -219,9 +219,9 @@ export function DashboardOverview() {
                     >
                         <div className="flex items-center justify-between">
                             <span className="text-[11px] font-semibold uppercase tracking-wider text-red-400">Atrasadas</span>
-                            <span className="hidden sm:inline text-[9px] font-mono text-red-400/80">SLA expirado</span>
+                            <span className="hidden sm:inline text-[9px] font-mono text-slate-500">SLA expirado</span>
                         </div>
-                        <strong className="mt-0.5 block font-mono text-lg sm:text-xl font-bold tabular-nums text-red-300">
+                        <strong className={`mt-0.5 block font-mono text-lg sm:text-xl font-bold tabular-nums ${s.overdueServiceOrders > 0 ? 'text-red-400' : 'text-slate-500'}`}>
                             {s.overdueServiceOrders}
                         </strong>
                     </Link>
@@ -232,9 +232,9 @@ export function DashboardOverview() {
                     >
                         <div className="flex items-center justify-between">
                             <span className="text-[11px] font-semibold uppercase tracking-wider text-amber-400">Vencem hoje</span>
-                            <span className="hidden sm:inline text-[9px] font-mono text-amber-400/80">Ação imediata</span>
+                            <span className="hidden sm:inline text-[9px] font-mono text-slate-500">Ação imediata</span>
                         </div>
-                        <strong className="mt-0.5 block font-mono text-lg sm:text-xl font-bold tabular-nums text-amber-300">
+                        <strong className={`mt-0.5 block font-mono text-lg sm:text-xl font-bold tabular-nums ${s.dueTodayServiceOrders > 0 ? 'text-amber-300' : 'text-slate-500'}`}>
                             {s.dueTodayServiceOrders}
                         </strong>
                     </Link>
@@ -245,9 +245,9 @@ export function DashboardOverview() {
                     >
                         <div className="flex items-center justify-between">
                             <span className="text-[11px] font-semibold uppercase tracking-wider text-sky-400">Próximos 7 dias</span>
-                            <span className="hidden sm:inline text-[9px] font-mono text-sky-400/80">Programadas</span>
+                            <span className="hidden sm:inline text-[9px] font-mono text-slate-500">Programadas</span>
                         </div>
-                        <strong className="mt-0.5 block font-mono text-lg sm:text-xl font-bold tabular-nums text-sky-300">
+                        <strong className={`mt-0.5 block font-mono text-lg sm:text-xl font-bold tabular-nums ${s.dueNextSevenDaysServiceOrders > 0 ? 'text-sky-300' : 'text-slate-500'}`}>
                             {s.dueNextSevenDaysServiceOrders}
                         </strong>
                     </Link>
@@ -257,7 +257,7 @@ export function DashboardOverview() {
             {/* Grid Principal: Gráfico + Prioridades & Ordens Urgentes */}
             <div className="grid gap-3.5 lg:grid-cols-3">
                 {/* Coluna Esquerda (2/3): Gráfico + Ordens com Prazo Urgente */}
-                <div className="space-y-3.5 lg:col-span-2">
+                <div className="space-y-3.5 lg:col-span-2 flex flex-col justify-between">
                     {/* Gráfico de ordens por mês */}
                     <section className="rounded-xl border border-slate-800 bg-slate-900/60 p-3.5 sm:p-4">
                         <div className="flex items-center justify-between mb-2">
@@ -295,7 +295,7 @@ export function DashboardOverview() {
                                             itemStyle={{ color: '#2dd4bf' }}
                                             formatter={(value) => [`${value} ordem${Number(value) !== 1 ? 'ns' : ''}`, 'Total']}
                                         />
-                                        <Bar dataKey="count" fill="#14b8a6" radius={[3, 3, 0, 0]} maxBarSize={28} />
+                                        <Bar dataKey="count" fill="#14b8a6" radius={[4, 4, 0, 0]} maxBarSize={28} />
                                     </BarChart>
                                 </ResponsiveContainer>
                             ) : (
@@ -307,7 +307,7 @@ export function DashboardOverview() {
                     </section>
 
                     {/* Ordens com Prazo Urgente */}
-                    <section className="rounded-xl border border-slate-800 bg-slate-900/60 p-3.5 sm:p-4 space-y-2.5">
+                    <section className="rounded-xl border border-slate-800 bg-slate-900/60 p-3.5 sm:p-4 space-y-2">
                         <div className="flex items-center justify-between">
                             <h3 className="text-xs font-bold uppercase tracking-wider text-slate-300">Ordens com prazo mais urgente</h3>
                             <Link
@@ -333,7 +333,7 @@ export function DashboardOverview() {
                                             href={`/ordens/${order.id}`}
                                             className="flex flex-col gap-1.5 rounded-lg border border-slate-800/80 bg-slate-950/40 p-2.5 transition-colors hover:border-slate-700 hover:bg-slate-900/60 sm:flex-row sm:items-center sm:justify-between"
                                         >
-                                            <div className="min-w-0">
+                                            <div className="min-w-0 flex-1">
                                                 <p className="truncate text-xs font-semibold text-slate-200">
                                                     {order.title}
                                                 </p>
@@ -355,7 +355,7 @@ export function DashboardOverview() {
                 </div>
 
                 {/* Coluna Direita (1/3): Prioridades + Últimas Atividades */}
-                <div className="space-y-3.5">
+                <div className="space-y-3.5 flex flex-col justify-between">
                     {/* Prioridades */}
                     <section className="rounded-xl border border-slate-800 bg-slate-900/60 p-3.5 sm:p-4">
                         <h3 className="text-xs font-bold uppercase tracking-wider text-slate-300 mb-2.5">Por Prioridade</h3>
@@ -405,27 +405,23 @@ export function DashboardOverview() {
                                             : (order.equipment as { name: string })?.name;
 
                                         return (
-                                            <div key={order.id} className="flex items-center justify-between gap-2 rounded-lg border border-slate-800/60 bg-slate-950/40 px-2.5 py-1.5">
-                                                <div className="min-w-0 flex-1">
-                                                    <p className="truncate text-xs font-medium text-slate-200">{order.title}</p>
-                                                    <p className="text-[10px] text-slate-400 truncate">
-                                                        {equipName ?? 'OS'} · {priorityConfig[order.priority as keyof typeof priorityConfig]?.label ?? order.priority}
-                                                    </p>
+                                            <div key={order.id} className="rounded-lg border border-slate-800/60 bg-slate-950/40 p-2 space-y-1">
+                                                <p className="truncate text-xs font-medium text-slate-200 leading-tight">{order.title}</p>
+                                                <div className="flex items-center justify-between text-[10px] text-slate-400">
+                                                    <span className="truncate">{equipName ?? 'OS'} · {priorityConfig[order.priority as keyof typeof priorityConfig]?.label ?? order.priority}</span>
+                                                    <span className="shrink-0 font-mono text-slate-500">{formatDate(order.created_at)}</span>
                                                 </div>
-                                                <span className="shrink-0 font-mono text-[9px] text-slate-500">{formatDate(order.created_at)}</span>
                                             </div>
                                         );
                                     })}
 
                                     {s.recentEquipments.slice(0, 2).map((equipment) => (
-                                        <div key={equipment.id} className="flex items-center justify-between gap-2 rounded-lg border border-slate-800/60 bg-slate-950/40 px-2.5 py-1.5">
-                                            <div className="min-w-0 flex-1">
-                                                <p className="truncate text-xs font-medium text-slate-200">{equipment.name}</p>
-                                                <p className="text-[10px] font-mono text-slate-400 truncate">
-                                                    {equipment.patrimony_code}
-                                                </p>
+                                        <div key={equipment.id} className="rounded-lg border border-slate-800/60 bg-slate-950/40 p-2 space-y-1">
+                                            <p className="truncate text-xs font-medium text-slate-200 leading-tight">{equipment.name}</p>
+                                            <div className="flex items-center justify-between text-[10px] text-slate-400">
+                                                <span className="font-mono text-slate-400">{equipment.patrimony_code}</span>
+                                                <span className="shrink-0 font-mono text-slate-500">{formatDate(equipment.created_at)}</span>
                                             </div>
-                                            <span className="shrink-0 font-mono text-[9px] text-slate-500">{formatDate(equipment.created_at)}</span>
                                         </div>
                                     ))}
                                 </>

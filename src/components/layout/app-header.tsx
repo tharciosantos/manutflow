@@ -47,7 +47,7 @@ export function AppHeader() {
 
   return (
     <header className="sticky top-0 z-50 border-b border-slate-800 bg-slate-950/90 backdrop-blur-md">
-      <div className="mx-auto flex max-w-5xl items-center justify-between px-4 py-2.5 sm:px-6">
+      <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-2.5 sm:px-6">
         {/* Logo Minimalista */}
         <div className="flex items-center gap-6">
           <Link href="/" className="flex items-center gap-2 group">
@@ -87,7 +87,7 @@ export function AppHeader() {
               <span className="flex h-6 w-6 items-center justify-center rounded-full bg-slate-800 text-[11px] font-bold text-slate-200">
                 {userInitial}
               </span>
-              <span className="max-w-[140px] truncate text-slate-300">
+              <span className="max-w-[200px] truncate text-slate-300">
                 {userName || userEmail}
               </span>
             </div>

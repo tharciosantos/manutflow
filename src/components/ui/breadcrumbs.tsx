@@ -20,7 +20,7 @@ export function Breadcrumbs({ items }: BreadcrumbsProps) {
             <li key={index} className="flex items-center gap-1.5">
               {index > 0 && (
                 <svg
-                  className="h-3.5 w-3.5 text-slate-600"
+                  className="h-3.5 w-3.5 text-slate-400 dark:text-slate-600"
                   fill="none"
                   viewBox="0 0 24 24"
                   stroke="currentColor"
@@ -39,8 +39,8 @@ export function Breadcrumbs({ items }: BreadcrumbsProps) {
                 <span
                   className={
                     isLast
-                      ? "font-medium text-slate-100"
-                      : "text-slate-500"
+                      ? "font-medium text-slate-900 dark:text-slate-100"
+                      : "text-slate-500 dark:text-slate-500"
                   }
                   aria-current={isLast ? "page" : undefined}
                 >
@@ -49,7 +49,7 @@ export function Breadcrumbs({ items }: BreadcrumbsProps) {
               ) : (
                 <Link
                   href={item.href}
-                  className="text-slate-400 transition hover:text-teal-300"
+                  className="text-slate-500 transition hover:text-teal-600 dark:text-slate-400 dark:hover:text-teal-300"
                 >
                   {item.label}
                 </Link>

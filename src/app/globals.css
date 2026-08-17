@@ -1,6 +1,13 @@
 @import "tailwindcss";
 
+@custom-variant dark (&:where(.dark, .dark *));
+
 :root {
+  --background: #f8fafc;
+  --foreground: #0f172a;
+}
+
+.dark {
   --background: #020617;
   --foreground: #f1f5f9;
 }
@@ -15,6 +22,7 @@
 body {
   background: var(--background);
   color: var(--foreground);
+  transition: background-color 0.2s ease, color 0.2s ease;
 }
 
 .bg-gradient-theme::before {
@@ -22,6 +30,12 @@ body {
   position: absolute;
   inset: 0;
   pointer-events: none;
+  background:
+    radial-gradient(ellipse 80% 50% at 10% 0%, rgba(20, 184, 166, 0.08), transparent),
+    radial-gradient(ellipse 60% 40% at 90% 100%, rgba(16, 185, 129, 0.06), transparent);
+}
+
+.dark .bg-gradient-theme::before {
   background:
     radial-gradient(ellipse 80% 50% at 10% 0%, rgba(20, 184, 166, 0.06), transparent),
     radial-gradient(ellipse 60% 40% at 90% 100%, rgba(16, 185, 129, 0.04), transparent);

@@ -184,52 +184,22 @@ export function ServiceOrderList({
                 </h2>
             </div>
 
-            <div className="space-y-2.5">
+            <div className="space-y-3">
                 {orders.map((order) => (
                     <article
                         key={order.id}
-                        className="rounded-xl border border-slate-800 bg-slate-900/60 p-4 transition-colors hover:border-slate-700"
+                        className="rounded-xl border border-slate-800 bg-slate-900/60 p-4 transition-colors hover:border-slate-700 space-y-2.5"
                     >
-                        <div>
-                            {/* Top row: Title + Priority */}
-                            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 mb-1.5">
-                                <h3 className="text-sm font-bold text-slate-100">
-                                    {order.title}
-                                </h3>
+                        {/* Linha Superior: Título na esquerda e Status + Prioridade + Prazo agrupados na direita */}
+                        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2.5">
+                            <Link
+                                href={`/ordens/${order.id}`}
+                                className="text-sm font-bold text-slate-100 hover:text-teal-400 transition-colors tracking-tight"
+                            >
+                                {order.title}
+                            </Link>
 
-                                <span
-                                    className={`self-start sm:self-auto rounded-full border px-2 py-0.5 text-[11px] font-medium ${serviceOrderPriorityStyles[order.priority]}`}
-                                >
-                                    {serviceOrderPriorityLabels[order.priority]}
-                                </span>
-                            </div>
-
-                            {order.description && (
-                                <p className="text-xs text-slate-400 line-clamp-1 mb-2">
-                                    {order.description}
-                                </p>
-                            )}
-
-                            {/* Meta Info */}
-                            <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-slate-400 mb-3">
-                                <span>
-                                    <strong className="font-semibold text-slate-300">{order.equipment.name}</strong>
-                                    <span className="font-mono text-slate-500 ml-1">({order.equipment.patrimony_code})</span>
-                                </span>
-                                <span className="text-slate-700">·</span>
-                                <span>{order.equipment.location}</span>
-                                {order.due_date && (
-                                    <>
-                                        <span className="text-slate-700">·</span>
-                                        <span className="font-mono text-slate-400">Prazo: {formatDateOnlyPtBr(order.due_date)}</span>
-                                    </>
-                                )}
-                            </div>
-                        </div>
-
-                        {/* Bottom action bar */}
-                        <div className="pt-2.5 border-t border-slate-800/80 flex flex-wrap items-center justify-between gap-2">
-                            <div className="flex items-center gap-2">
+                            <div className="flex flex-wrap items-center gap-2 self-start sm:self-auto shrink-0">
                                 <select
                                     value={order.status}
                                     disabled={updatingStatusOrderId === order.id}
@@ -253,16 +223,51 @@ export function ServiceOrderList({
                                     </option>
                                 </select>
 
+                                <span
+                                    className={`rounded-full border px-2.5 py-0.5 text-[11px] font-medium ${serviceOrderPriorityStyles[order.priority]}`}
+                                >
+                                    {serviceOrderPriorityLabels[order.priority]}
+                                </span>
+
                                 <ServiceOrderDeadlineBadge
                                     dueDate={order.due_date}
                                     status={order.status}
                                 />
                             </div>
+                        </div>
 
-                            <div className="flex items-center gap-2">
+                        {/* Descrição da Ordem */}
+                        {order.description && (
+                            <p className="text-xs text-slate-400 leading-relaxed">
+                                {order.description}
+                            </p>
+                        )}
+
+                        {/* Rodapé: Ficha do Equipamento Vinculado e Ações */}
+                        <div className="pt-2.5 border-t border-slate-800/80 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 text-xs">
+                            <div className="flex flex-wrap items-center gap-x-2.5 gap-y-1 text-slate-400">
+                                <span className="font-semibold text-slate-300">
+                                    {order.equipment.name}
+                                </span>
+                                <span className="font-mono text-[11px] text-slate-500">
+                                    ({order.equipment.patrimony_code})
+                                </span>
+                                <span className="text-slate-700">·</span>
+                                <span>{order.equipment.location}</span>
+                                {order.due_date && (
+                                    <>
+                                        <span className="text-slate-700">·</span>
+                                        <span className="font-mono text-slate-400">
+                                            Prazo: {formatDateOnlyPtBr(order.due_date)}
+                                        </span>
+                                    </>
+                                )}
+                            </div>
+
+                            <div className="flex items-center gap-3 self-end sm:self-auto">
                                 <Link
                                     href={`/ordens/${order.id}`}
-                                    className="text-xs font-semibold text-teal-400 hover:underline px-1"
+                                    className="font-semibold text-teal-400 hover:underline"
                                 >
                                     Detalhes
                                 </Link>
@@ -271,7 +276,7 @@ export function ServiceOrderList({
                                     type="button"
                                     onClick={() => openDeleteModal(order.id)}
                                     disabled={deletingOrderId === order.id}
-                                    className="rounded px-2 py-1 text-xs text-red-400 hover:bg-red-950/30 transition-colors disabled:opacity-50"
+                                    className="text-red-400/80 hover:text-red-400 transition-colors disabled:opacity-50"
                                 >
                                     {deletingOrderId === order.id ? 'Excluindo...' : 'Excluir'}
                                 </button>

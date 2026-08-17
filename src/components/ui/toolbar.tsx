@@ -45,10 +45,10 @@ export function Toolbar({
   );
 
   return (
-    <div className="flex flex-col gap-3 rounded-2xl border border-slate-800 bg-slate-950/70 p-4 shadow-sm sm:flex-row sm:flex-wrap sm:items-center sm:p-4">
-      {/* Busca (opcional: só renderiza se houver searchPlaceholder) */}
+    <div className="rounded-xl border border-slate-800 bg-slate-900/60 p-3 sm:p-4 space-y-3">
+      {/* Busca */}
       {searchPlaceholder && searchValue !== undefined && onSearchChange && (
-        <div className="relative flex-1 sm:min-w-64">
+        <div className="relative w-full">
           <svg
             className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-500"
             fill="none"
@@ -72,22 +72,24 @@ export function Toolbar({
             value={searchValue}
             onChange={(event) => onSearchChange(event.target.value)}
             placeholder={searchPlaceholder}
-            className="w-full rounded-xl border border-slate-700 bg-slate-950 py-2.5 pl-10 pr-3 text-sm text-slate-100 outline-none transition placeholder:text-slate-500 focus:border-teal-500"
+            className="w-full rounded-lg border border-slate-700 bg-slate-950 py-2 pl-9 pr-3 text-xs sm:text-sm text-slate-100 outline-none transition placeholder:text-slate-500 focus:border-teal-500"
           />
         </div>
       )}
 
+      {/* Grid de Filtros */}
       {activeFilters.length > 0 && (
-        <div className="flex min-w-0 flex-1 flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center sm:justify-end">
+        <div className={activeFilters.length === 1 ? "w-full sm:w-56" : "grid grid-cols-2 gap-2 sm:grid-cols-4"}>
           {activeFilters.map((filter) => (
-            <div key={filter.label} className="flex min-w-0 items-center gap-2">
-              <span className="hidden text-xs text-slate-500 sm:inline">
-                {filter.label}:
-              </span>
+            <div key={filter.label} className="relative">
+              <label htmlFor={`filter-${filter.label}`} className="sr-only">
+                {filter.label}
+              </label>
               <select
+                id={`filter-${filter.label}`}
                 value={filter.value}
                 onChange={(event) => filter.onChange(event.target.value)}
-                className="w-full rounded-xl border border-slate-700 bg-slate-950 px-3 py-2.5 text-sm text-slate-100 outline-none transition focus:border-teal-500 sm:w-auto"
+                className="w-full rounded-lg border border-slate-700 bg-slate-950 px-2.5 py-1.5 text-xs text-slate-200 outline-none transition focus:border-teal-500 cursor-pointer"
                 aria-label={filter.label}
               >
                 {filter.options.map((option) => (
@@ -103,3 +105,4 @@ export function Toolbar({
     </div>
   );
 }
+

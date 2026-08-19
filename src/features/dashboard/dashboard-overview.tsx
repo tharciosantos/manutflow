@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
@@ -18,7 +18,8 @@ import {
     Tooltip,
     ResponsiveContainer,
 } from 'recharts';
-import { ArrowUpRight } from 'lucide-react';
+import { ArrowUpRight, RefreshCw, AlertCircle } from 'lucide-react';
+import { fetchWithRetry } from '@/lib/fetch-with-retry';
 
 type RecentOrder = {
     id: string;
@@ -72,7 +73,7 @@ type DashboardSummary = {
 };
 
 async function fetchDashboardSummary(): Promise<DashboardSummary> {
-    const response = await fetch('/api/dashboard-summary');
+    const response = await fetchWithRetry('/api/dashboard-summary');
 
     if (!response.ok) {
         throw new Error('Erro ao carregar resumo do dashboard.');
@@ -102,6 +103,20 @@ export function DashboardOverview() {
   const [summary, setSummary] = useState<DashboardSummary | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [errorMessage, setErrorMessage] = useState('');
+
+  const loadData = async () => {
+    setIsLoading(true);
+    setErrorMessage('');
+    try {
+      const data = await fetchDashboardSummary();
+      setSummary(data);
+      setErrorMessage('');
+    } catch {
+      setErrorMessage('Não foi possível carregar os indicadores.');
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   useEffect(() => {
     let ignore = false;
@@ -161,8 +176,24 @@ export function DashboardOverview() {
 
     if (errorMessage) {
         return (
-            <div className="rounded-xl border border-red-500/30 bg-red-500/10 p-4">
-                <p className="text-xs sm:text-sm text-red-600 dark:text-red-300">{errorMessage}</p>
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 rounded-xl border border-red-500/30 bg-red-500/10 p-4">
+                <div className="flex items-center gap-3">
+                    <AlertCircle className="h-5 w-5 shrink-0 text-red-500 dark:text-red-400" />
+                    <div>
+                        <p className="text-xs sm:text-sm font-medium text-red-700 dark:text-red-300">{errorMessage}</p>
+                        <p className="text-[11px] text-red-600/80 dark:text-red-400/70 mt-0.5">
+                            Ocorreu uma instabilidade temporária na consulta dos indicadores.
+                        </p>
+                    </div>
+                </div>
+                <button
+                    type="button"
+                    onClick={() => void loadData()}
+                    className="inline-flex items-center justify-center gap-1.5 rounded-lg border border-red-500/30 bg-white px-3.5 py-2 text-xs font-semibold text-red-700 hover:bg-red-50 active:scale-95 transition-all shadow-xs dark:border-red-500/40 dark:bg-slate-900 dark:text-red-300 dark:hover:bg-slate-800 cursor-pointer shrink-0"
+                >
+                    <RefreshCw className="h-3.5 w-3.5" />
+                    <span>Tentar novamente</span>
+                </button>
             </div>
         );
     }
@@ -269,38 +300,24 @@ export function DashboardOverview() {
                             {s.ordersByMonth.some((m) => m.count > 0) ? (
                                 <ResponsiveContainer width="100%" height="100%">
                                     <BarChart data={s.ordersByMonth} margin={{ top: 5, right: 5, left: -25, bottom: 0 }}>
-                                        <CartesianGrid strokeDasharray="3 3" stroke="#94a3b833" vertical={false} />
-                                        <XAxis
-                                            dataKey="month"
-                                            tick={{ fill: '#64748b', fontSize: 10 }}
-                                            axisLine={{ stroke: '#cbd5e1' }}
-                                            tickLine={false}
-                                        />
-                                        <YAxis
-                                            allowDecimals={false}
-                                            tick={{ fill: '#64748b', fontSize: 10 }}
-                                            axisLine={{ stroke: '#cbd5e1' }}
-                                            tickLine={false}
-                                        />
+                                        <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="rgba(148, 163, 184, 0.15)" />
+                                        <XAxis dataKey="month" tick={{ fill: '#94a3b8', fontSize: 10, fontFamily: 'monospace' }} axisLine={false} tickLine={false} />
+                                        <YAxis allowDecimals={false} tick={{ fill: '#94a3b8', fontSize: 10, fontFamily: 'monospace' }} axisLine={false} tickLine={false} width={30} />
                                         <Tooltip
-                                            cursor={{ fill: '#94a3b81a' }}
-                                            contentStyle={{ 
-                                                backgroundColor: 'var(--color-background, #090d16)', 
-                                                border: '1px solid #94a3b844', 
-                                                borderRadius: '6px', 
-                                                fontSize: '11px',
-                                                padding: '6px 10px',
-                                                boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)'
+                                            contentStyle={{
+                                                backgroundColor: 'rgba(15, 23, 42, 0.95)',
+                                                borderColor: '#334155',
+                                                borderRadius: '0.5rem',
+                                                fontSize: '0.75rem',
+                                                color: '#f8fafc',
                                             }}
-                                            labelStyle={{ color: 'var(--color-foreground, #f1f5f9)', fontWeight: 600 }}
-                                            itemStyle={{ color: '#0d9488' }}
-                                            formatter={(value) => [`${value} ordem${Number(value) !== 1 ? 'ns' : ''}`, 'Total']}
+                                            formatter={(value) => [`${value ?? 0} ordens`, 'Total']}
                                         />
-                                        <Bar dataKey="count" fill="#14b8a6" radius={[4, 4, 0, 0]} maxBarSize={28} />
+                                        <Bar dataKey="count" fill="#14b8a6" radius={[4, 4, 0, 0]} maxBarSize={32} />
                                     </BarChart>
                                 </ResponsiveContainer>
                             ) : (
-                                <div className="flex h-full items-center justify-center text-xs text-slate-500 font-mono">
+                                <div className="h-full flex items-center justify-center text-xs text-slate-500 dark:text-slate-400 font-mono">
                                     Nenhuma ordem registrada no período.
                                 </div>
                             )}
@@ -362,27 +379,33 @@ export function DashboardOverview() {
                         <h3 className="text-xs font-bold uppercase tracking-wider text-slate-800 dark:text-slate-300 mb-2.5">Por Prioridade</h3>
 
                         <div className="space-y-2">
-                            {(['critical', 'high', 'medium', 'low'] as const).map((key) => {
+                            {(['critical', 'high', 'medium', 'low'] as const).map((priorityKey) => {
+                                const config = priorityConfig[priorityKey];
                                 const count =
-                                    key === 'critical' ? s.criticalPriorityServiceOrders
-                                    : key === 'high' ? s.highPriorityServiceOrders
-                                    : key === 'medium' ? s.mediumPriorityServiceOrders
-                                    : s.lowPriorityServiceOrders;
+                                    priorityKey === 'critical'
+                                        ? s.criticalPriorityServiceOrders
+                                        : priorityKey === 'high'
+                                            ? s.highPriorityServiceOrders
+                                            : priorityKey === 'medium'
+                                                ? s.mediumPriorityServiceOrders
+                                                : s.lowPriorityServiceOrders;
 
-                                const config = priorityConfig[key];
-                                const maxCount = Math.max(s.criticalPriorityServiceOrders, s.highPriorityServiceOrders, s.mediumPriorityServiceOrders, s.lowPriorityServiceOrders, 1);
-                                const barWidth = maxCount > 0 ? (count / maxCount) * 100 : 0;
+                                const percent = s.totalServiceOrders > 0
+                                    ? Math.round((count / s.totalServiceOrders) * 100)
+                                    : 0;
 
                                 return (
-                                    <div key={key} className="space-y-0.5">
-                                        <div className="flex items-center justify-between text-[11px]">
-                                            <span className={`font-medium ${config.color}`}>{config.label}</span>
-                                            <span className="font-mono font-bold text-slate-800 dark:text-slate-200">{count}</span>
+                                    <div key={priorityKey} className="space-y-1">
+                                        <div className="flex items-center justify-between text-xs">
+                                            <span className={`font-semibold ${config.color}`}>{config.label}</span>
+                                            <span className="font-mono text-slate-600 dark:text-slate-400 text-[11px]">
+                                                {count} <span className="text-slate-400">({percent}%)</span>
+                                            </span>
                                         </div>
-                                        <div className="h-1 overflow-hidden rounded-full bg-slate-100 dark:bg-slate-800">
-                                            <div 
-                                                className="h-full rounded-full" 
-                                                style={{ width: `${barWidth}%`, backgroundColor: config.barColor }} 
+                                        <div className="h-1.5 w-full overflow-hidden rounded-full bg-slate-100 dark:bg-slate-800">
+                                            <div
+                                                className="h-full rounded-full transition-all duration-300"
+                                                style={{ width: `${percent}%`, backgroundColor: config.barColor }}
                                             />
                                         </div>
                                     </div>
@@ -391,41 +414,38 @@ export function DashboardOverview() {
                         </div>
                     </section>
 
-                    {/* Atividades Recentes */}
-                    <section className="rounded-xl border border-slate-200 bg-white p-3.5 sm:p-4 space-y-2 shadow-xs dark:border-slate-800 dark:bg-slate-900/60">
-                        <h3 className="text-xs font-bold uppercase tracking-wider text-slate-800 dark:text-slate-300">Atividades Recentes</h3>
+                    {/* Últimas Atividades */}
+                    <section className="rounded-xl border border-slate-200 bg-white p-3.5 sm:p-4 shadow-xs dark:border-slate-800 dark:bg-slate-900/60">
+                        <div className="flex items-center justify-between mb-2">
+                            <h3 className="text-xs font-bold uppercase tracking-wider text-slate-800 dark:text-slate-300">Últimas Atividades</h3>
+                            <span className="text-[10px] font-mono text-slate-500">Recentes</span>
+                        </div>
 
-                        <div className="space-y-1.5">
-                            {s.recentOrders.length === 0 && s.recentEquipments.length === 0 ? (
+                        <div className="space-y-2">
+                            {s.recentOrders.length === 0 ? (
                                 <p className="text-xs text-slate-500 py-1 font-mono">Nenhuma atividade recente.</p>
                             ) : (
-                                <>
-                                    {s.recentOrders.slice(0, 2).map((order) => {
-                                        const equipName = Array.isArray(order.equipment)
-                                            ? order.equipment[0]?.name
-                                            : (order.equipment as { name: string })?.name;
+                                s.recentOrders.slice(0, 3).map((order) => {
+                                    const equipmentName = Array.isArray(order.equipment)
+                                        ? order.equipment[0]?.name
+                                        : order.equipment?.name;
 
-                                        return (
-                                            <div key={order.id} className="rounded-lg border border-slate-200 bg-slate-50/70 p-2 space-y-1 dark:border-slate-800/60 dark:bg-slate-950/40">
-                                                <p className="truncate text-xs font-medium text-slate-900 dark:text-slate-200 leading-tight">{order.title}</p>
-                                                <div className="flex items-center justify-between text-[10px] text-slate-500 dark:text-slate-400">
-                                                    <span className="truncate">{equipName ?? 'OS'} · {priorityConfig[order.priority as keyof typeof priorityConfig]?.label ?? order.priority}</span>
-                                                    <span className="shrink-0 font-mono text-slate-400 dark:text-slate-500">{formatDate(order.created_at)}</span>
-                                                </div>
+                                    return (
+                                        <div key={order.id} className="flex items-start justify-between gap-2 border-b border-slate-100 dark:border-slate-800/80 pb-2 last:border-0 last:pb-0">
+                                            <div className="min-w-0 flex-1">
+                                                <p className="truncate text-xs font-medium text-slate-900 dark:text-slate-200">
+                                                    {order.title}
+                                                </p>
+                                                <p className="truncate text-[10px] text-slate-500">
+                                                    {equipmentName ?? 'Equipamento'}
+                                                </p>
                                             </div>
-                                        );
-                                    })}
-
-                                    {s.recentEquipments.slice(0, 2).map((equipment) => (
-                                        <div key={equipment.id} className="rounded-lg border border-slate-200 bg-slate-50/70 p-2 space-y-1 dark:border-slate-800/60 dark:bg-slate-950/40">
-                                            <p className="truncate text-xs font-medium text-slate-900 dark:text-slate-200 leading-tight">{equipment.name}</p>
-                                            <div className="flex items-center justify-between text-[10px] text-slate-500 dark:text-slate-400">
-                                                <span className="font-mono text-slate-600 dark:text-slate-400">{equipment.patrimony_code}</span>
-                                                <span className="shrink-0 font-mono text-slate-400 dark:text-slate-500">{formatDate(equipment.created_at)}</span>
-                                            </div>
+                                            <span className="font-mono text-[10px] text-slate-500 shrink-0">
+                                                {formatDate(order.created_at)}
+                                            </span>
                                         </div>
-                                    ))}
-                                </>
+                                    );
+                                })
                             )}
                         </div>
                     </section>

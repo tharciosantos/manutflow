@@ -1,6 +1,7 @@
 'use client';
 
 import { useCallback, useEffect, useState } from 'react';
+import { fetchWithRetry } from '@/lib/fetch-with-retry';
 import { useSearchParams } from 'next/navigation';
 import type { ServiceOrder } from '@/types/service-order';
 
@@ -92,7 +93,7 @@ export function ServiceOrderPageContent({ isFormModalOpen, setIsFormModalOpen }:
             setIsLoading(true);
             setErrorMessage('');
 
-            const response = await fetch(buildUrl());
+            const response = await fetchWithRetry(buildUrl());
             const result = (await response.json()) as ServiceOrdersApiResponse;
 
             if (!response.ok) {
@@ -117,7 +118,7 @@ export function ServiceOrderPageContent({ isFormModalOpen, setIsFormModalOpen }:
             try {
                 setIsLoading(true);
 
-                const response = await fetch(buildUrl());
+                const response = await fetchWithRetry(buildUrl());
                 const result = (await response.json()) as ServiceOrdersApiResponse;
 
                 if (!response.ok) {

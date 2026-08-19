@@ -1,6 +1,6 @@
-// @vitest-environment jsdom
+﻿// @vitest-environment jsdom
 
-import { render, screen, waitFor } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { getDateOnlyInTimeZone } from '@/features/service-orders/service-order-deadline';
 import { DashboardOverview } from '../dashboard-overview';
@@ -89,5 +89,31 @@ describe('DashboardOverview', () => {
         );
         expect(screen.getByText('Vence hoje')).toBeInTheDocument();
         expect(screen.getByText('Compressor principal · Crítica')).toBeInTheDocument();
+    });
+    it('exibe botao de tentar novamente em caso de erro e recarrega dados', async () => {
+        const fetchMock = vi
+            .fn()
+            .mockRejectedValueOnce(new Error('Network error 1'))
+            .mockRejectedValueOnce(new Error('Network error 2'))
+            .mockRejectedValueOnce(new Error('Network error 3'))
+            .mockResolvedValue({
+                ok: true,
+                json: async () => summary,
+            });
+        vi.stubGlobal('fetch', fetchMock);
+
+        render(<DashboardOverview />);
+
+        await waitFor(() => {
+            expect(screen.getByText('Não foi possível carregar os indicadores.')).toBeInTheDocument();
+            expect(screen.getByRole('button', { name: /Tentar novamente/i })).toBeInTheDocument();
+        }, { timeout: 4000 });
+
+        const retryButton = screen.getByRole('button', { name: /Tentar novamente/i });
+        fireEvent.click(retryButton);
+
+        await waitFor(() => {
+            expect(screen.getByText('Prazos das ordens')).toBeInTheDocument();
+        });
     });
 });

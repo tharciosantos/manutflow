@@ -1,7 +1,8 @@
-'use client';
+﻿'use client';
 
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
+import { fetchWithRetry } from '@/lib/fetch-with-retry';
 import { AppShell } from '@/components/layout/app-shell';
 import { Breadcrumbs } from '@/components/ui/breadcrumbs';
 import {
@@ -79,7 +80,7 @@ export default function ServiceOrderDetailsPage({
             setIsLoading(true);
 
             try {
-                const response = await fetch(`/api/service-orders/${serviceOrderId}`);
+                const response = await fetchWithRetry(`/api/service-orders/${serviceOrderId}`);
                 const result = (await response.json()) as ServiceOrderDetailsResponse;
 
                 if (!response.ok) {

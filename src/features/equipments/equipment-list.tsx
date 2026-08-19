@@ -11,6 +11,7 @@ import type { Equipment } from "@/types/equipment";
 import { Modal } from "@/components/ui/modal";
 import { Pagination } from "@/components/ui/pagination";
 import { EquipmentPhoto } from "@/components/ui/equipment-photo";
+import { RefreshCw, AlertCircle } from "lucide-react";
 
 type EquipmentListProps = {
     equipments: Equipment[];
@@ -115,8 +116,24 @@ export function EquipmentList({
 
     if (errorMessage) {
         return (
-            <div className="mt-6 rounded-xl border border-red-500/30 bg-red-500/10 p-4">
-                <p className="text-xs sm:text-sm text-red-600 dark:text-red-300">{errorMessage}</p>
+            <div className="mt-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 rounded-xl border border-red-500/30 bg-red-500/10 p-4">
+                <div className="flex items-center gap-3">
+                    <AlertCircle className="h-5 w-5 shrink-0 text-red-500 dark:text-red-400" />
+                    <div>
+                        <p className="text-xs sm:text-sm font-medium text-red-700 dark:text-red-300">{errorMessage}</p>
+                        <p className="text-[11px] text-red-600/80 dark:text-red-400/70 mt-0.5">
+                            Ocorreu uma instabilidade temporária na consulta de equipamentos.
+                        </p>
+                    </div>
+                </div>
+                <button
+                    type="button"
+                    onClick={() => void onRefresh()}
+                    className="inline-flex items-center justify-center gap-1.5 rounded-lg border border-red-500/30 bg-white px-3.5 py-2 text-xs font-semibold text-red-700 hover:bg-red-50 active:scale-95 transition-all shadow-xs dark:border-red-500/40 dark:bg-slate-900 dark:text-red-300 dark:hover:bg-slate-800 cursor-pointer shrink-0"
+                >
+                    <RefreshCw className="h-3.5 w-3.5" />
+                    <span>Tentar novamente</span>
+                </button>
             </div>
         );
     }

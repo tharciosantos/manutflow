@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
+import { fetchWithRetry } from "@/lib/fetch-with-retry";
 import { EquipmentForm } from "@/features/equipments/equipment-form";
 import { EquipmentList } from "@/features/equipments/equipment-list";
 import type { Equipment } from "@/types/equipment";
@@ -56,7 +57,7 @@ export function EquipmentPageContent({ isFormModalOpen, setIsFormModalOpen }: Eq
         setIsLoading(true);
 
         try {
-            const response = await fetch(buildUrl());
+            const response = await fetchWithRetry(buildUrl());
             const result = (await response.json()) as EquipmentsApiResponse;
 
             if (!response.ok) {
@@ -88,7 +89,7 @@ export function EquipmentPageContent({ isFormModalOpen, setIsFormModalOpen }: Eq
             setIsLoading(true);
 
             try {
-                const response = await fetch(buildUrl());
+                const response = await fetchWithRetry(buildUrl());
                 const result = (await response.json()) as EquipmentsApiResponse;
 
                 if (!response.ok) {

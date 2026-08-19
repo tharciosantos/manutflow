@@ -1,6 +1,7 @@
-"use client";
+﻿"use client";
 
 import { useEffect, useState } from "react";
+import { fetchWithRetry } from "@/lib/fetch-with-retry";
 import Link from "next/link";
 
 import { AppShell } from "@/components/layout/app-shell";
@@ -61,7 +62,7 @@ export default function EquipmentDetailsPage({
             setIsLoading(true);
 
             try {
-                const response = await fetch(`/api/equipments/${equipmentId}`);
+                const response = await fetchWithRetry(`/api/equipments/${equipmentId}`);
                 const result = (await response.json()) as EquipmentDetails & {
                     error?: string;
                 };

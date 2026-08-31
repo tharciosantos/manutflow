@@ -196,7 +196,7 @@ manutflow/
 
 ## Demonstração Online
 
-- **Aplicação em produção:** [https://manutflow.vercel.app](https://manutflow.vercel.app)
+- **Aplicação publicada:** [https://manutflow.vercel.app](https://manutflow.vercel.app)
 - **Repositório oficial:** [https://github.com/tharciosantos/manutflow](https://github.com/tharciosantos/manutflow)
 
 ### Acesso Rápido Demo (1-Clique)
@@ -257,7 +257,7 @@ npm run lint
 npm run build
 ```
 
-**Cobertura de Testes**: 161 testes automatizados passando em 15 arquivos de suíte, cobrindo endpoints de API, fluxos de autenticação, cálculos de SLA, rate limiters, storage e componentes de interface.
+**Cobertura de Testes**: 169 testes automatizados passando em 17 arquivos de suíte, cobrindo endpoints de API, fluxos de autenticação, cálculos de SLA, rate limiters, storage e componentes de interface.
 
 ---
 

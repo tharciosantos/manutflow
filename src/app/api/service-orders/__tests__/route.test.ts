@@ -7,7 +7,14 @@ vi.mock('@/lib/auth', () => ({
 import { getUser } from '@/lib/auth';
 import { GET, POST } from '../route';
 
-function createMockSupabase(data?: unknown, error: unknown = null) {
+const EQUIPMENT_ID = '3f8a1b2c-4d5e-4f60-8a7b-9c0d1e2f3a4b';
+
+type MockOptions = {
+  equipmentOwned?: boolean;
+  equipmentError?: { message: string } | null;
+};
+
+function createMockSupabase(data?: unknown, error: unknown = null, options: MockOptions = {}) {
   const resultWithCount = { data: data ?? [], count: Array.isArray(data) ? (data as unknown[]).length : 0, error };
 
   const chainableMock = {
@@ -23,7 +30,11 @@ function createMockSupabase(data?: unknown, error: unknown = null) {
     range: vi.fn().mockResolvedValue(resultWithCount),
     insert: vi.fn().mockReturnThis(),
     single: vi.fn().mockReturnThis(),
-    maybeSingle: vi.fn().mockResolvedValue({ data: null, error: null }),
+    // Consulta de titularidade do equipamento (AUD-03)
+    maybeSingle: vi.fn().mockResolvedValue({
+      data: options.equipmentOwned === false ? null : { id: EQUIPMENT_ID },
+      error: options.equipmentError ?? null,
+    }),
   };
 
   chainableMock.range.mockResolvedValue(resultWithCount);
@@ -178,7 +189,7 @@ describe('Service Orders API', () => {
     const validBody = {
       title: 'Manutenção corretiva',
       description: 'Consertar fonte',
-      equipment_id: 'eq-1',
+      equipment_id: EQUIPMENT_ID,
       priority: 'high',
       due_date: '2026-07-30',
     };
@@ -378,6 +389,94 @@ describe('Service Orders API', () => {
       expect(response.status).toBe(201);
       // Verifica que o user_id usado foi o do token, não o enviado
       expect(body.serviceOrder.user_id).toBe('user-1');
+    });
+
+    it('deve rejeitar equipment_id que não é UUID', async () => {
+      const mockSupabase = createMockSupabase();
+      const mockGetUser = getUser as ReturnType<typeof vi.fn>;
+      mockGetUser.mockResolvedValue({
+        user: { id: 'user-1' },
+        supabase: mockSupabase,
+        error: null,
+      });
+
+      const response = await POST(new Request('http://localhost/api/service-orders', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ ...validBody, equipment_id: 'eq-1' }),
+      }));
+
+      expect(response.status).toBe(400);
+      await expect(response.json()).resolves.toEqual({ error: 'Equipamento inválido.' });
+      expect(mockSupabase.insert).not.toHaveBeenCalled();
+    });
+
+    it('deve rejeitar equipamento que não pertence ao usuário autenticado', async () => {
+      const mockSupabase = createMockSupabase(undefined, null, { equipmentOwned: false });
+      const mockGetUser = getUser as ReturnType<typeof vi.fn>;
+      mockGetUser.mockResolvedValue({
+        user: { id: 'user-1' },
+        supabase: mockSupabase,
+        error: null,
+      });
+
+      const response = await POST(new Request('http://localhost/api/service-orders', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(validBody),
+      }));
+
+      expect(response.status).toBe(400);
+      await expect(response.json()).resolves.toEqual({
+        error: 'Selecione um equipamento válido para a ordem de serviço.',
+      });
+      expect(mockSupabase.insert).not.toHaveBeenCalled();
+    });
+
+    it('deve validar a titularidade do equipamento filtrando por usuário', async () => {
+      const createdOrder = { id: '1', ...validBody, status: 'open', user_id: 'user-1' };
+      const mockSupabase = createMockSupabase(createdOrder);
+      const mockGetUser = getUser as ReturnType<typeof vi.fn>;
+      mockGetUser.mockResolvedValue({
+        user: { id: 'user-1' },
+        supabase: mockSupabase,
+        error: null,
+      });
+
+      const response = await POST(new Request('http://localhost/api/service-orders', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(validBody),
+      }));
+
+      expect(response.status).toBe(201);
+      expect(mockSupabase.from).toHaveBeenCalledWith('equipments');
+      expect(mockSupabase.eq).toHaveBeenCalledWith('id', EQUIPMENT_ID);
+      expect(mockSupabase.eq).toHaveBeenCalledWith('user_id', 'user-1');
+    });
+
+    it('deve retornar 500 quando a validação do equipamento falha', async () => {
+      const mockSupabase = createMockSupabase(undefined, null, {
+        equipmentError: { message: 'DB error' },
+      });
+      const mockGetUser = getUser as ReturnType<typeof vi.fn>;
+      mockGetUser.mockResolvedValue({
+        user: { id: 'user-1' },
+        supabase: mockSupabase,
+        error: null,
+      });
+
+      const response = await POST(new Request('http://localhost/api/service-orders', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(validBody),
+      }));
+
+      expect(response.status).toBe(500);
+      await expect(response.json()).resolves.toEqual({
+        error: 'Erro ao validar o equipamento informado.',
+      });
+      expect(mockSupabase.insert).not.toHaveBeenCalled();
     });
   });
 });

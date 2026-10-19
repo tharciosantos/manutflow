@@ -16,6 +16,8 @@ import { getUser } from '@/lib/auth';
 import { checkRateLimit } from '@/lib/rate-limit';
 import { DELETE, GET, PATCH } from '../route';
 
+const ORDER_ID = '7c9e6679-7425-40de-944b-e07fc1f90ae7';
+
 type QueryResult = {
     data?: unknown;
     error?: { message: string } | null;
@@ -44,7 +46,7 @@ function createSupabaseMock(...queries: ReturnType<typeof createQuery>[]) {
     };
 }
 
-function routeContext(id = 'order-1') {
+function routeContext(id = ORDER_ID) {
     return { params: Promise.resolve({ id }) };
 }
 
@@ -97,20 +99,23 @@ describe('Service Orders Details API', () => {
             await expect(response.json()).resolves.toEqual({ error: 'Não autorizado' });
         });
 
-        it('retorna 400 quando o ID não é informado', async () => {
-            authenticateWith(createSupabaseMock());
+        it.each(['', 'order-1', 'abc', '123e4567-e89b-12d3-a456-42661417400'])(
+            'retorna 400 quando o ID é inválido: %j',
+            async (invalidId) => {
+                authenticateWith(createSupabaseMock());
 
-            const response = await GET(request(), routeContext(''));
+                const response = await GET(request(), routeContext(invalidId));
 
-            expect(response.status).toBe(400);
-            await expect(response.json()).resolves.toEqual({
-                error: 'ID da ordem de serviço não informado.',
-            });
-        });
+                expect(response.status).toBe(400);
+                await expect(response.json()).resolves.toEqual({
+                    error: 'ID da ordem de serviço inválido.',
+                });
+            },
+        );
 
         it('retorna a ordem com histórico e aplica o isolamento por usuário', async () => {
             const serviceOrder = {
-                id: 'order-1',
+                id: ORDER_ID,
                 title: 'Troca de rolamento',
                 status: 'open',
                 priority: 'high',
@@ -128,7 +133,7 @@ describe('Service Orders Details API', () => {
             expect(response.status).toBe(200);
             expect(body.serviceOrder).toEqual({ ...serviceOrder, history });
             expect(supabase.from).toHaveBeenNthCalledWith(1, 'service_orders');
-            expect(orderQuery.eq).toHaveBeenCalledWith('id', 'order-1');
+            expect(orderQuery.eq).toHaveBeenCalledWith('id', ORDER_ID);
             expect(orderQuery.eq).toHaveBeenCalledWith('user_id', 'user-1');
             expect(supabase.from).toHaveBeenNthCalledWith(2, 'service_order_history');
             expect(historyQuery.order).toHaveBeenCalledWith('created_at', { ascending: false });
@@ -155,7 +160,7 @@ describe('Service Orders Details API', () => {
 
         it('retorna 500 quando a consulta do histórico falha', async () => {
             authenticateWith(createSupabaseMock(
-                createQuery({ data: { id: 'order-1' } }),
+                createQuery({ data: { id: ORDER_ID } }),
                 createQuery({ error: { message: 'History error' } }),
             ));
 
@@ -235,9 +240,9 @@ describe('Service Orders Details API', () => {
         });
 
         it('registra o histórico antes de atualizar o status', async () => {
-            const currentQuery = createQuery({ data: { id: 'order-1', status: 'open' } });
+            const currentQuery = createQuery({ data: { id: ORDER_ID, status: 'open' } });
             const historyQuery = createQuery();
-            const updatedOrder = { id: 'order-1', status: 'closed' };
+            const updatedOrder = { id: ORDER_ID, status: 'closed' };
             const updateQuery = createQuery({ data: updatedOrder });
             const supabase = createSupabaseMock(currentQuery, historyQuery, updateQuery);
             authenticateWith(supabase);
@@ -253,7 +258,7 @@ describe('Service Orders Details API', () => {
             ]);
             expect(currentQuery.eq).toHaveBeenCalledWith('user_id', 'user-1');
             expect(historyQuery.insert).toHaveBeenCalledWith({
-                service_order_id: 'order-1',
+                service_order_id: ORDER_ID,
                 user_id: 'user-1',
                 event_type: 'status_changed',
                 previous_status: 'open',
@@ -265,8 +270,8 @@ describe('Service Orders Details API', () => {
         });
 
         it('não cria histórico quando o status permanece igual', async () => {
-            const currentQuery = createQuery({ data: { id: 'order-1', status: 'open' } });
-            const updateQuery = createQuery({ data: { id: 'order-1', status: 'open' } });
+            const currentQuery = createQuery({ data: { id: ORDER_ID, status: 'open' } });
+            const updateQuery = createQuery({ data: { id: ORDER_ID, status: 'open' } });
             const supabase = createSupabaseMock(currentQuery, updateQuery);
             authenticateWith(supabase);
 
@@ -279,10 +284,10 @@ describe('Service Orders Details API', () => {
 
         it('registra no histórico a alteração do prazo', async () => {
             const currentQuery = createQuery({
-                data: { id: 'order-1', status: 'open', due_date: '2026-07-20' },
+                data: { id: ORDER_ID, status: 'open', due_date: '2026-07-20' },
             });
             const historyQuery = createQuery();
-            const updatedOrder = { id: 'order-1', status: 'open', due_date: '2026-07-30' };
+            const updatedOrder = { id: ORDER_ID, status: 'open', due_date: '2026-07-30' };
             const updateQuery = createQuery({ data: updatedOrder });
             const supabase = createSupabaseMock(currentQuery, historyQuery, updateQuery);
             authenticateWith(supabase);
@@ -294,7 +299,7 @@ describe('Service Orders Details API', () => {
 
             expect(response.status).toBe(200);
             expect(historyQuery.insert).toHaveBeenCalledWith({
-                service_order_id: 'order-1',
+                service_order_id: ORDER_ID,
                 user_id: 'user-1',
                 event_type: 'due_date_changed',
                 previous_status: null,
@@ -306,10 +311,10 @@ describe('Service Orders Details API', () => {
 
         it('permite remover o prazo da ordem', async () => {
             const currentQuery = createQuery({
-                data: { id: 'order-1', status: 'open', due_date: '2026-07-30' },
+                data: { id: ORDER_ID, status: 'open', due_date: '2026-07-30' },
             });
             const historyQuery = createQuery();
-            const updateQuery = createQuery({ data: { id: 'order-1', due_date: null } });
+            const updateQuery = createQuery({ data: { id: ORDER_ID, due_date: null } });
             const supabase = createSupabaseMock(currentQuery, historyQuery, updateQuery);
             authenticateWith(supabase);
 
@@ -325,11 +330,11 @@ describe('Service Orders Details API', () => {
 
         it('registra status e prazo em uma única inserção de histórico', async () => {
             const currentQuery = createQuery({
-                data: { id: 'order-1', status: 'open', due_date: null },
+                data: { id: ORDER_ID, status: 'open', due_date: null },
             });
             const historyQuery = createQuery();
             const updateQuery = createQuery({
-                data: { id: 'order-1', status: 'in_progress', due_date: '2026-08-01' },
+                data: { id: ORDER_ID, status: 'in_progress', due_date: '2026-08-01' },
             });
             const supabase = createSupabaseMock(currentQuery, historyQuery, updateQuery);
             authenticateWith(supabase);
@@ -351,7 +356,7 @@ describe('Service Orders Details API', () => {
         });
 
         it('não atualiza o status quando o histórico falha', async () => {
-            const currentQuery = createQuery({ data: { id: 'order-1', status: 'open' } });
+            const currentQuery = createQuery({ data: { id: ORDER_ID, status: 'open' } });
             const historyQuery = createQuery({ error: { message: 'History error' } });
             const supabase = createSupabaseMock(currentQuery, historyQuery);
             authenticateWith(supabase);
@@ -367,7 +372,7 @@ describe('Service Orders Details API', () => {
 
         it('retorna 500 quando a atualização falha', async () => {
             authenticateWith(createSupabaseMock(
-                createQuery({ data: { id: 'order-1', status: 'open' } }),
+                createQuery({ data: { id: ORDER_ID, status: 'open' } }),
                 createQuery(),
                 createQuery({ error: { message: 'Update error' } }),
             ));
@@ -402,7 +407,7 @@ describe('Service Orders Details API', () => {
         });
 
         it('exclui a ordem aplicando o isolamento por usuário', async () => {
-            const deleteQuery = createQuery({ data: { id: 'order-1' } });
+            const deleteQuery = createQuery({ data: { id: ORDER_ID } });
             const supabase = createSupabaseMock(deleteQuery);
             authenticateWith(supabase);
 
@@ -413,7 +418,7 @@ describe('Service Orders Details API', () => {
                 message: 'Ordem de serviço excluída com sucesso.',
             });
             expect(deleteQuery.delete).toHaveBeenCalledOnce();
-            expect(deleteQuery.eq).toHaveBeenCalledWith('id', 'order-1');
+            expect(deleteQuery.eq).toHaveBeenCalledWith('id', ORDER_ID);
             expect(deleteQuery.eq).toHaveBeenCalledWith('user_id', 'user-1');
         });
 

@@ -2,6 +2,7 @@ import { getUser } from "@/lib/auth";
 import { checkRateLimit } from "@/lib/rate-limit";
 import { logger } from "@/lib/logger";
 import { isOwnedEquipmentPhotoUrl } from "@/lib/equipment-photo-storage";
+import { toPostgrestSearchTerm } from "@/lib/validation";
 
 export const dynamic = "force-dynamic";
 
@@ -47,11 +48,15 @@ export async function GET(request: Request) {
     query = query.eq("status", statusFilter);
   }
 
-  // Filtro por busca textual
+  // Filtro por busca textual (termo sanitizado: AUD-06)
   if (searchQuery) {
-    query = query.or(
-      `name.ilike.%${searchQuery}%,patrimony_code.ilike.%${searchQuery}%,location.ilike.%${searchQuery}%`
-    );
+    const searchTerm = toPostgrestSearchTerm(searchQuery);
+
+    if (searchTerm) {
+      query = query.or(
+        `name.ilike.%${searchTerm}%,patrimony_code.ilike.%${searchTerm}%,location.ilike.%${searchTerm}%`
+      );
+    }
   }
 
   const { data, error, count } = await query

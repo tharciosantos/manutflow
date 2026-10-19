@@ -2,10 +2,7 @@ import { NextResponse } from 'next/server';
 import { getUser } from "@/lib/auth";
 import { checkRateLimit } from "@/lib/rate-limit";
 import { logger } from "@/lib/logger";
-import {
-    formatDateOnlyPtBr,
-    isValidDateOnly,
-} from '@/features/service-orders/service-order-deadline';
+import { isValidDateOnly } from '@/features/service-orders/service-order-deadline';
 import { isUuid } from '@/lib/validation';
 
 export const dynamic = "force-dynamic";
@@ -159,94 +156,16 @@ export async function PATCH(request: Request, { params }: RouteParams) {
         );
     }
 
-    const { data: currentServiceOrder, error: currentServiceOrderError } =
-        await supabase
-            .from('service_orders')
-            .select('id, status, due_date')
-            .eq('id', id)
-            .eq("user_id", user.id)
-            .maybeSingle();
-
-    if (currentServiceOrderError) {
-        logger('error', 'api.error', { route: 'service-orders/[id]', method: 'PATCH', error: currentServiceOrderError.message });
-
-        return NextResponse.json(
-            { error: 'Erro ao buscar ordem de serviço atual.' },
-            { status: 500 },
-        );
-    }
-
-    if (!currentServiceOrder) {
-        return NextResponse.json(
-            { error: 'Ordem de serviço não encontrada.' },
-            { status: 404 },
-        );
-    }
-
-    const updateData: { status?: string; due_date?: string | null } = {};
-    const historyEntries: Array<{
-        service_order_id: string;
-        user_id: string;
-        event_type: string;
-        previous_status: string | null;
-        new_status: string | null;
-        description: string;
-    }> = [];
-
-    if (status !== null) {
-        updateData.status = status;
-
-        if (currentServiceOrder.status !== status) {
-            historyEntries.push({
-                service_order_id: id,
-                user_id: user.id,
-                event_type: 'status_changed',
-                previous_status: currentServiceOrder.status,
-                new_status: status,
-                description: `Status alterado de ${currentServiceOrder.status} para ${status}.`,
-            });
-        }
-    }
-
-    if (hasDueDate) {
-        updateData.due_date = dueDate ?? null;
-        const currentDueDate = currentServiceOrder.due_date ?? null;
-
-        if (currentDueDate !== dueDate) {
-            historyEntries.push({
-                service_order_id: id,
-                user_id: user.id,
-                event_type: 'due_date_changed',
-                previous_status: null,
-                new_status: null,
-                description: `Prazo alterado de ${formatDateOnlyPtBr(currentDueDate)} para ${formatDateOnlyPtBr(dueDate ?? null)}.`,
-            });
-        }
-    }
-
-    // Inserir histórico primeiro para não aplicar mudanças sem rastreabilidade.
-    if (historyEntries.length > 0) {
-        const { error: historyError } = await supabase
-            .from('service_order_history')
-            .insert(historyEntries.length === 1 ? historyEntries[0] : historyEntries);
-
-        if (historyError) {
-            logger('error', 'api.error', { route: 'service-orders/[id]', method: 'PATCH', error: historyError.message });
-
-            return NextResponse.json(
-                { error: 'Erro ao registrar histórico. Alterações não foram aplicadas.' },
-                { status: 500 },
-            );
-        }
-    }
-
-    const { data, error } = await supabase
-        .from('service_orders')
-        .update(updateData)
-        .eq('id', id)
-        .eq('user_id', user.id)
-        .select()
-        .maybeSingle();
+    // AUD-04: status/prazo e histórico são gravados na MESMA transação, dentro da
+    // RPC public.update_service_order. Antes, o histórico era inserido primeiro e o
+    // UPDATE depois, o que permitia registrar uma mudança que não aconteceu.
+    // A função também valida a titularidade (auth.uid()) e bloqueia a linha.
+    const { data, error } = await supabase.rpc('update_service_order', {
+        p_order_id: id,
+        p_status: hasStatus ? status : null,
+        p_due_date: dueDate ?? null,
+        p_set_due_date: hasDueDate,
+    });
 
     if (error) {
         logger('error', 'api.error', { route: 'service-orders/[id]', method: 'PATCH', error: error.message });
@@ -257,6 +176,7 @@ export async function PATCH(request: Request, { params }: RouteParams) {
         );
     }
 
+    // A RPC devolve null quando a ordem não existe ou não pertence ao usuário.
     if (!data) {
         return NextResponse.json(
             { error: 'Ordem de serviço não encontrada.' },

@@ -14,6 +14,7 @@ function createMockSupabase(data?: unknown, error: unknown = null) {
   const chainableMock = {
     select: vi.fn().mockReturnThis(),
     eq: vi.fn().mockReturnThis(),
+    or: vi.fn().mockReturnThis(),
     order: vi.fn().mockReturnThis(),
     range: vi.fn().mockResolvedValue(resultWithCount),
     insert: vi.fn().mockReturnThis(),
@@ -108,6 +109,40 @@ describe('Equipments API', () => {
       const request = new Request('http://localhost/api/equipments?page=1&limit=10');
       const response = await GET(request);
       expect(response.status).toBe(500);
+    });
+
+    it('sanitiza o termo de busca antes de montar o filtro', async () => {
+      const mockSupabase = createMockSupabase([]);
+      const mockGetUser = getUser as ReturnType<typeof vi.fn>;
+      mockGetUser.mockResolvedValue({
+        user: { id: 'user-1' },
+        supabase: mockSupabase,
+        error: null,
+      });
+
+      const injected = encodeURIComponent('motor,user_id.neq.00000000-0000-4000-8000-000000000000)');
+      const response = await GET(new Request(`http://localhost/api/equipments?q=${injected}`));
+
+      expect(response.status).toBe(200);
+      const filter = mockSupabase.or.mock.calls[0][0] as string;
+      expect(filter).not.toContain(',user_id');
+      expect(filter).not.toContain(')');
+      expect(filter).toContain('name.ilike.%motor user');
+    });
+
+    it('não aplica filtro quando o termo só tem sintaxe', async () => {
+      const mockSupabase = createMockSupabase([]);
+      const mockGetUser = getUser as ReturnType<typeof vi.fn>;
+      mockGetUser.mockResolvedValue({
+        user: { id: 'user-1' },
+        supabase: mockSupabase,
+        error: null,
+      });
+
+      const response = await GET(new Request('http://localhost/api/equipments?q=%2C%28%29'));
+
+      expect(response.status).toBe(200);
+      expect(mockSupabase.or).not.toHaveBeenCalled();
     });
   });
 

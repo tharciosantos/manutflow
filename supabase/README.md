@@ -10,7 +10,8 @@ vazamento cross-tenant (AUD-01) não foi notado.
 |---|---|---|
 | `migrations/0000_baseline.sql` | Baseline idempotente do schema já existente (tabelas, CHECKs, FKs, triggers, índices, RLS de `profiles`, bucket). Só **adiciona** o que falta. | Ambientes novos (staging/CI/dev). Em produção é seguro, mas não obrigatório. |
 | `migrations/0001_rls_hardening.sql` | Habilita RLS nas 3 tabelas, cria as políticas de dono, remove os GRANTs do `anon` e bloqueia OS apontando para equipamento de outro usuário. | **Aplicado em 2026-10-19.** |
-| `migrations/0002_drop_legacy_policies.sql` | Remove políticas legadas permissivas (`to public using (true)`) que se somavam às de dono, e recria apenas as de dono. | **Produção — pendente.** |
+| `migrations/0002_drop_legacy_policies.sql` | Remove políticas legadas permissivas (`to public using (true)`) que se somavam às de dono, e recria apenas as de dono. | **Aplicado em 2026-10-19.** |
+| `migrations/0003_update_service_order_rpc.sql` | RPC `update_service_order`: atualiza status/prazo e grava o histórico na mesma transação. | **Aplicado em 2026-10-19** (validado manualmente). |
 
 ## Como aplicar
 
@@ -48,6 +49,20 @@ aceite é:
 | JWT do dono → `GET /rest/v1/equipments` | 44 linhas | só as linhas dele |
 | JWT → `POST /rest/v1/service_orders` com `equipment_id` alheio | 201 | `401` (42501) |
 | App logado (login → dashboard → equipamentos → ordens) | ok | ok — nada muda na UI |
+
+**Para a `0003`** — a função deve existir, estar restrita a `authenticated` e ser
+transacional:
+
+```sql
+select proname, proacl from pg_proc where proname = 'update_service_order';
+```
+
+| Teste (autenticado, ordem própria) | Esperado |
+|---|---|
+| `select update_service_order('<id>', 'in_progress')` | retorna a linha e cria **1** registro em `service_order_history` |
+| `select update_service_order('<id>', 'in_progress')` de novo | retorna a linha e **não** cria histórico (sem mudança) |
+| `select update_service_order('<id-alheio-ou-inexistente>', 'closed')` | `null` |
+| PATCH pela UI em `/ordens/[id]` | status/prazo mudam e o histórico aparece na tela |
 
 ## Rollback
 

@@ -183,6 +183,25 @@ describe('Service Orders API', () => {
       const response = await GET(request);
       expect(response.status).toBe(500);
     });
+
+    it('sanitiza o termo de busca antes de montar o filtro', async () => {
+      const mockSupabase = createMockSupabase([]);
+      const mockGetUser = getUser as ReturnType<typeof vi.fn>;
+      mockGetUser.mockResolvedValue({
+        user: { id: 'user-1' },
+        supabase: mockSupabase,
+        error: null,
+      });
+
+      const injected = encodeURIComponent('bomba,value);select');
+      const response = await GET(new Request(`http://localhost/api/service-orders?q=${injected}`));
+
+      expect(response.status).toBe(200);
+      const filter = mockSupabase.or.mock.calls[0][0] as string;
+      expect(filter).not.toContain(',value');
+      expect(filter).not.toContain(')');
+      expect(filter).not.toContain('(');
+    });
   });
 
   describe('POST', () => {

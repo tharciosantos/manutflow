@@ -40,7 +40,7 @@ O **ManutFlow** é um sistema CMMS (Computerized Maintenance Management System) 
 | **Banco / Auth / Storage** | Supabase SSR (`@supabase/ssr`, `@supabase/supabase-js`) | PostgreSQL + Bucket `equipment-photos` |
 | **Ícones** | Lucide React | ^1.31.x |
 | **Gráficos** | Recharts | ^3.9.x (BarChart semestral) |
-| **Testes** | Vitest + Testing Library | 17 arquivos / 176 testes / jsdom |
+| **Testes** | Vitest + Testing Library | 17 arquivos / 184 testes / jsdom |
 | **Linter** | ESLint (flat config) + eslint-config-next | 9.x / 16.3.x |
 
 ---
@@ -79,7 +79,7 @@ manutflow/
 │   │   └── service-orders/    # ServiceOrderList/Form, deadlines, badges, filtros, PageContent
 │   ├── lib/
 │   │   ├── auth.ts            # getUser(): sessão + client Supabase ou 401
-│   │   ├── validation.ts      # isUuid()
+│   │   ├── validation.ts      # isUuid() e sanitização de termo de busca
 │   │   ├── rate-limit.ts      # Rate limit em memória (por processo)
 │   │   ├── logger.ts          # Logger JSON (info | warn | error)
 │   │   ├── equipment-photo-storage.ts # Ownership e remoção no bucket
@@ -89,7 +89,7 @@ manutflow/
 │   ├── types/                 # equipment.ts, equipment-details.ts, service-order.ts, profile.ts
 │   └── proxy.ts               # Proxy do Next.js 16: renova sessão e protege rotas
 ├── supabase/
-│   ├── migrations/            # 0000_baseline, 0001_rls_hardening, 0002_drop_legacy_policies
+│   ├── migrations/            # 0000 a 0003 (baseline, RLS e RPC transacional)
 │   └── README.md              # Runbook: aplicar, verificar, rollback
 └── public/
     └── previews/              # 2 capturas usadas no README
@@ -106,7 +106,7 @@ manutflow/
 npm run dev              # Next.js em http://localhost:3000
 
 # Validação e Testes
-npm test                 # Executa os 176 testes (Vitest, single run)
+npm test                 # Executa os 184 testes (Vitest, single run)
 npm run test:watch       # Modo watch interativo
 npx tsc --noEmit         # Verificação estrita de tipagem
 npm run lint             # ESLint (flat config)
@@ -159,6 +159,7 @@ O schema é versionado em `supabase/migrations/`. **Toda mudança de schema deve
 | `0000_baseline.sql` | Baseline idempotente (tabelas, CHECKs, FKs, triggers, índices, RLS de `profiles`, bucket) |
 | `0001_rls_hardening.sql` | RLS + políticas de dono + `revoke` do `anon` + trigger anti-IDOR |
 | `0002_drop_legacy_policies.sql` | Remove políticas legadas permissivas e recria as de dono |
+| `0003_update_service_order_rpc.sql` | RPC `update_service_order`: UPDATE + histórico na mesma transação |
 
 Runbook (aplicar, verificar, rollback): [`supabase/README.md`](supabase/README.md).
 
@@ -193,6 +194,12 @@ Runbook (aplicar, verificar, rollback): [`supabase/README.md`](supabase/README.m
 - Nunca confie em `equipment_id`, `user_id` ou id vindo do body — valide formato e titularidade.
 - Não crie policy nova sem remover a equivalente permissiva.
 - Mudança de schema = migration nova + atualização do `supabase/README.md` se o runbook mudar.
+
+### 7.6 RPCs
+
+| Função | Contrato |
+|---|---|
+| `public.update_service_order(p_order_id uuid, p_status text, p_due_date date, p_set_due_date boolean)` | Atualiza status e/ou prazo e grava o histórico na **mesma transação**, com `for update` na linha. `SECURITY INVOKER` (RLS vale). Retorna `jsonb` com a ordem ou `null` quando não existe/não pertence ao usuário. `EXECUTE` restrito a `authenticated`. |
 
 ---
 
@@ -243,7 +250,7 @@ Paginação: `page` ≥ 1, `limit` entre 1 e 50 (padrão 10), `totalPages = ceil
 | `GET` `POST` | `/api/equipments` | Busca em `name`, `patrimony_code`, `location`; filtro por status |
 | `GET` `PATCH` `DELETE` | `/api/equipments/[id]` | Exclusão bloqueada se houver ordem vinculada |
 | `GET` `POST` | `/api/service-orders` | Filtros: status, priority, deadline, sort; busca em `title`/`description` |
-| `GET` `PATCH` `DELETE` | `/api/service-orders/[id]` | PATCH aceita `status` e/ou `due_date` e grava histórico |
+| `GET` `PATCH` `DELETE` | `/api/service-orders/[id]` | PATCH delega à RPC `update_service_order` (status/prazo + histórico transacionais) |
 | `GET` `PATCH` | `/api/profile` | Nome, cargo (`role`) e telefone |
 | `POST` `DELETE` | `/api/upload` | JPEG/PNG/WebP até 5 MB; 10 req/min |
 | `GET` | `/auth/callback` | `exchangeCodeForSession` + redirect seguro |
@@ -254,7 +261,7 @@ Rate limit: 30 req/min por usuário nas mutações de equipamentos e ordens; 10 
 
 ## 10. Testes e Validação
 
-- **17 arquivos / 176 testes**, todos passando, cobrindo:
+- **17 arquivos / 184 testes**, todos passando, cobrindo:
   - domínio: prazos, badges de SLA, config de status, redirect seguro, validação de UUID, retry;
   - API routes: auth, perfil, equipamentos, ordens, upload, dashboard e rate limit;
   - componentes: dashboard, toolbar, listas, tema.

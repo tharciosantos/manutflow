@@ -7,7 +7,7 @@ import {
     getDateOnlyInTimeZone,
     isValidDateOnly,
 } from '@/features/service-orders/service-order-deadline';
-import { isUuid } from '@/lib/validation';
+import { isUuid, toPostgrestSearchTerm } from '@/lib/validation';
 
 export const dynamic = "force-dynamic";
 
@@ -78,11 +78,15 @@ export async function GET(request: Request) {
         }
     }
 
-    // Filtro por busca textual
+    // Filtro por busca textual (termo sanitizado: AUD-06)
     if (searchQuery) {
-        query = query.or(
-          `title.ilike.%${searchQuery}%,description.ilike.%${searchQuery}%`
-        );
+        const searchTerm = toPostgrestSearchTerm(searchQuery);
+
+        if (searchTerm) {
+            query = query.or(
+                `title.ilike.%${searchTerm}%,description.ilike.%${searchTerm}%`
+            );
+        }
     }
 
     if (sort === 'due_asc' || sort === 'due_desc') {

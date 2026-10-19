@@ -43,6 +43,8 @@ function createQuery(result: QueryResult = { data: null, error: null }) {
 function createSupabaseMock(...queries: ReturnType<typeof createQuery>[]) {
     return {
         from: vi.fn().mockImplementation(() => queries.shift()),
+        // A atualização de status/prazo passou a ser uma RPC transacional (AUD-04).
+        rpc: vi.fn().mockResolvedValue({ data: null, error: null }),
     };
 }
 
@@ -231,112 +233,63 @@ describe('Service Orders Details API', () => {
             });
         });
 
-        it('retorna 404 quando a ordem atual não existe para o usuário', async () => {
-            authenticateWith(createSupabaseMock(createQuery()));
+        it('retorna 404 quando a RPC não encontra a ordem para o usuário', async () => {
+            const supabase = createSupabaseMock();
+            supabase.rpc.mockResolvedValue({ data: null, error: null });
+            authenticateWith(supabase);
 
             const response = await PATCH(request('PATCH', { status: 'closed' }), routeContext());
 
             expect(response.status).toBe(404);
+            await expect(response.json()).resolves.toEqual({
+                error: 'Ordem de serviço não encontrada.',
+            });
         });
 
-        it('registra o histórico antes de atualizar o status', async () => {
-            const currentQuery = createQuery({ data: { id: ORDER_ID, status: 'open' } });
-            const historyQuery = createQuery();
+        it('atualiza o status chamando a RPC transacional', async () => {
             const updatedOrder = { id: ORDER_ID, status: 'closed' };
-            const updateQuery = createQuery({ data: updatedOrder });
-            const supabase = createSupabaseMock(currentQuery, historyQuery, updateQuery);
+            const supabase = createSupabaseMock();
+            supabase.rpc.mockResolvedValue({ data: updatedOrder, error: null });
             authenticateWith(supabase);
 
             const response = await PATCH(request('PATCH', { status: 'closed' }), routeContext());
+            const body = await response.json();
 
             expect(response.status).toBe(200);
-            await expect(response.json()).resolves.toEqual(updatedOrder);
-            expect(supabase.from.mock.calls.map(([table]) => table)).toEqual([
-                'service_orders',
-                'service_order_history',
-                'service_orders',
-            ]);
-            expect(currentQuery.eq).toHaveBeenCalledWith('user_id', 'user-1');
-            expect(historyQuery.insert).toHaveBeenCalledWith({
-                service_order_id: ORDER_ID,
-                user_id: 'user-1',
-                event_type: 'status_changed',
-                previous_status: 'open',
-                new_status: 'closed',
-                description: 'Status alterado de open para closed.',
+            expect(body).toEqual(updatedOrder);
+            expect(supabase.rpc).toHaveBeenCalledWith('update_service_order', {
+                p_order_id: ORDER_ID,
+                p_status: 'closed',
+                p_due_date: null,
+                p_set_due_date: false,
             });
-            expect(updateQuery.update).toHaveBeenCalledWith({ status: 'closed' });
-            expect(updateQuery.eq).toHaveBeenCalledWith('user_id', 'user-1');
         });
 
-        it('não cria histórico quando o status permanece igual', async () => {
-            const currentQuery = createQuery({ data: { id: ORDER_ID, status: 'open' } });
-            const updateQuery = createQuery({ data: { id: ORDER_ID, status: 'open' } });
-            const supabase = createSupabaseMock(currentQuery, updateQuery);
-            authenticateWith(supabase);
-
-            const response = await PATCH(request('PATCH', { status: 'open' }), routeContext());
-
-            expect(response.status).toBe(200);
-            expect(supabase.from).toHaveBeenCalledTimes(2);
-            expect(supabase.from).not.toHaveBeenCalledWith('service_order_history');
-        });
-
-        it('registra no histórico a alteração do prazo', async () => {
-            const currentQuery = createQuery({
-                data: { id: ORDER_ID, status: 'open', due_date: '2026-07-20' },
-            });
-            const historyQuery = createQuery();
-            const updatedOrder = { id: ORDER_ID, status: 'open', due_date: '2026-07-30' };
-            const updateQuery = createQuery({ data: updatedOrder });
-            const supabase = createSupabaseMock(currentQuery, historyQuery, updateQuery);
-            authenticateWith(supabase);
-
-            const response = await PATCH(
-                request('PATCH', { due_date: '2026-07-30' }),
-                routeContext(),
-            );
-
-            expect(response.status).toBe(200);
-            expect(historyQuery.insert).toHaveBeenCalledWith({
-                service_order_id: ORDER_ID,
-                user_id: 'user-1',
-                event_type: 'due_date_changed',
-                previous_status: null,
-                new_status: null,
-                description: 'Prazo alterado de 20/07/2026 para 30/07/2026.',
-            });
-            expect(updateQuery.update).toHaveBeenCalledWith({ due_date: '2026-07-30' });
-        });
-
-        it('permite remover o prazo da ordem', async () => {
-            const currentQuery = createQuery({
+        it('atualiza o prazo sem tocar no status', async () => {
+            const supabase = createSupabaseMock();
+            supabase.rpc.mockResolvedValue({
                 data: { id: ORDER_ID, status: 'open', due_date: '2026-07-30' },
+                error: null,
             });
-            const historyQuery = createQuery();
-            const updateQuery = createQuery({ data: { id: ORDER_ID, due_date: null } });
-            const supabase = createSupabaseMock(currentQuery, historyQuery, updateQuery);
             authenticateWith(supabase);
 
-            const response = await PATCH(request('PATCH', { due_date: null }), routeContext());
+            const response = await PATCH(request('PATCH', { due_date: '2026-07-30' }), routeContext());
 
             expect(response.status).toBe(200);
-            expect(historyQuery.insert).toHaveBeenCalledWith(expect.objectContaining({
-                event_type: 'due_date_changed',
-                description: 'Prazo alterado de 30/07/2026 para sem prazo.',
-            }));
-            expect(updateQuery.update).toHaveBeenCalledWith({ due_date: null });
+            expect(supabase.rpc).toHaveBeenCalledWith('update_service_order', {
+                p_order_id: ORDER_ID,
+                p_status: null,
+                p_due_date: '2026-07-30',
+                p_set_due_date: true,
+            });
         });
 
-        it('registra status e prazo em uma única inserção de histórico', async () => {
-            const currentQuery = createQuery({
-                data: { id: ORDER_ID, status: 'open', due_date: null },
-            });
-            const historyQuery = createQuery();
-            const updateQuery = createQuery({
+        it('envia status e prazo na mesma chamada', async () => {
+            const supabase = createSupabaseMock();
+            supabase.rpc.mockResolvedValue({
                 data: { id: ORDER_ID, status: 'in_progress', due_date: '2026-08-01' },
+                error: null,
             });
-            const supabase = createSupabaseMock(currentQuery, historyQuery, updateQuery);
             authenticateWith(supabase);
 
             const response = await PATCH(request('PATCH', {
@@ -345,37 +298,47 @@ describe('Service Orders Details API', () => {
             }), routeContext());
 
             expect(response.status).toBe(200);
-            expect(historyQuery.insert).toHaveBeenCalledWith([
-                expect.objectContaining({ event_type: 'status_changed' }),
-                expect.objectContaining({ event_type: 'due_date_changed' }),
-            ]);
-            expect(updateQuery.update).toHaveBeenCalledWith({
-                status: 'in_progress',
-                due_date: '2026-08-01',
+            expect(supabase.rpc).toHaveBeenCalledWith('update_service_order', {
+                p_order_id: ORDER_ID,
+                p_status: 'in_progress',
+                p_due_date: '2026-08-01',
+                p_set_due_date: true,
             });
         });
 
-        it('não atualiza o status quando o histórico falha', async () => {
-            const currentQuery = createQuery({ data: { id: ORDER_ID, status: 'open' } });
-            const historyQuery = createQuery({ error: { message: 'History error' } });
-            const supabase = createSupabaseMock(currentQuery, historyQuery);
+        it('permite remover o prazo enviando p_set_due_date com valor nulo', async () => {
+            const supabase = createSupabaseMock();
+            supabase.rpc.mockResolvedValue({
+                data: { id: ORDER_ID, status: 'open', due_date: null },
+                error: null,
+            });
             authenticateWith(supabase);
 
-            const response = await PATCH(request('PATCH', { status: 'closed' }), routeContext());
+            const response = await PATCH(request('PATCH', { due_date: null }), routeContext());
 
-            expect(response.status).toBe(500);
-            expect(supabase.from).toHaveBeenCalledTimes(2);
-            await expect(response.json()).resolves.toEqual({
-                error: 'Erro ao registrar histórico. Alterações não foram aplicadas.',
+            expect(response.status).toBe(200);
+            expect(supabase.rpc).toHaveBeenCalledWith('update_service_order', {
+                p_order_id: ORDER_ID,
+                p_status: null,
+                p_due_date: null,
+                p_set_due_date: true,
             });
         });
 
-        it('retorna 500 quando a atualização falha', async () => {
-            authenticateWith(createSupabaseMock(
-                createQuery({ data: { id: ORDER_ID, status: 'open' } }),
-                createQuery(),
-                createQuery({ error: { message: 'Update error' } }),
-            ));
+        it('não chama a RPC quando o status é inválido', async () => {
+            const supabase = createSupabaseMock();
+            authenticateWith(supabase);
+
+            const response = await PATCH(request('PATCH', { status: 'arquivada' }), routeContext());
+
+            expect(response.status).toBe(400);
+            expect(supabase.rpc).not.toHaveBeenCalled();
+        });
+
+        it('retorna 500 quando a RPC falha', async () => {
+            const supabase = createSupabaseMock();
+            supabase.rpc.mockResolvedValue({ data: null, error: { message: 'RPC error' } });
+            authenticateWith(supabase);
 
             const response = await PATCH(request('PATCH', { status: 'closed' }), routeContext());
 

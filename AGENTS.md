@@ -261,6 +261,25 @@ Rate limit: 30 req/min por usuário nas mutações de equipamentos e ordens; 10 
 
 ## 10. Testes e Validação
 
+### 10.1 Gate obrigatório antes de commit
+
+Nenhum commit é criado sem passar, nesta ordem:
+
+1. **Implementar** na working tree, sem commit.
+2. **Automatizado**: `npm test && npx tsc --noEmit && npm run lint` — todos verdes.
+3. **Schema**: se a mudança depende de migration, o SQL precisa estar aplicado no
+   Supabase pelo responsável. Não se commita código que chama função inexistente.
+4. **Roteiro manual**: o agente entrega um checklist numerado (passo, ação,
+   resultado esperado) referente exatamente ao que mudou.
+5. **Validação do responsável**: ele executa e responde com o resultado.
+6. **Aprovação explícita**: só depois do "ok" o agente cria o commit.
+
+O agente não commita, não faz push e não aplica migration por conta própria.
+Ao encontrar um problema na validação, o agente corrige e o roteiro é repetido
+desde o passo 2.
+
+### 10.2 Suíte automatizada
+
 - **17 arquivos / 184 testes**, todos passando, cobrindo:
   - domínio: prazos, badges de SLA, config de status, redirect seguro, validação de UUID, retry;
   - API routes: auth, perfil, equipamentos, ordens, upload, dashboard e rate limit;
@@ -285,5 +304,7 @@ Rate limit: 30 req/min por usuário nas mutações de equipamentos e ordens; 10 
 
 - Branches temáticas: `feat/`, `fix/`, `refactor/`, `docs/`.
 - Commits atômicos no padrão: `tipo(escopo): descrição concisa`.
+- Commit apenas depois do gate da seção 10.1 (validação manual do responsável).
+- Push e abertura de PR são feitos pelo responsável, nunca pelo agente.
 - Pull Request obrigatório com CI verde antes do merge na `main`.
 - CI (`.github/workflows/ci.yml`): `npm run lint` → `npm run test` → `npm run build`, em Node 22.

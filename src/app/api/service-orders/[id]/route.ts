@@ -6,6 +6,7 @@ import {
     formatDateOnlyPtBr,
     isValidDateOnly,
 } from '@/features/service-orders/service-order-deadline';
+import { isUuid } from '@/lib/validation';
 
 export const dynamic = "force-dynamic";
 
@@ -22,9 +23,11 @@ export async function GET(_request: Request, { params }: RouteParams) {
     if (authError) return authError;
     const { id } = await params;
 
-    if (!id) {
+    // Um ID fora do formato UUID não é "não encontrado": é inválido. Sem esta
+    // checagem o PostgREST devolve 22P02 e a rota responde 500.
+    if (!isUuid(id)) {
         return NextResponse.json(
-            { error: 'ID da ordem de serviço não informado.' },
+            { error: 'ID da ordem de serviço inválido.' },
             { status: 400 },
         );
     }
@@ -117,9 +120,11 @@ export async function PATCH(request: Request, { params }: RouteParams) {
 
     const { id } = await params;
 
-    if (!id) {
+    // Um ID fora do formato UUID não é "não encontrado": é inválido. Sem esta
+    // checagem o PostgREST devolve 22P02 e a rota responde 500.
+    if (!isUuid(id)) {
         return NextResponse.json(
-            { error: 'ID da ordem de serviço não informado.' },
+            { error: 'ID da ordem de serviço inválido.' },
             { status: 400 },
         );
     }
@@ -280,9 +285,11 @@ export async function DELETE(_request: Request, { params }: RouteParams) {
 
     const { id } = await params;
 
-    if (!id) {
+    // Um ID fora do formato UUID não é "não encontrado": é inválido. Sem esta
+    // checagem o PostgREST devolve 22P02 e a rota responde 500.
+    if (!isUuid(id)) {
         return NextResponse.json(
-            { error: 'ID da ordem de serviço não informado.' },
+            { error: 'ID da ordem de serviço inválido.' },
             { status: 400 },
         );
     }

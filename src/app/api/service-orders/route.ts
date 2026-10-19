@@ -7,6 +7,7 @@ import {
     getDateOnlyInTimeZone,
     isValidDateOnly,
 } from '@/features/service-orders/service-order-deadline';
+import { isUuid } from '@/lib/validation';
 
 export const dynamic = "force-dynamic";
 
@@ -188,6 +189,43 @@ export async function POST(request: Request) {
     if (hasDueDate && (dueDate === undefined || (dueDate !== null && !isValidDateOnly(dueDate)))) {
         return NextResponse.json(
             { error: 'Prazo inválido. Use uma data no formato AAAA-MM-DD.' },
+            { status: 400 },
+        );
+    }
+
+    // AUD-03: o cliente nunca aponta uma OS para um equipamento de outro usuário.
+    // A validação é feita aqui (mensagem clara) e reforçada no banco pelo trigger
+    // enforce_order_equipment_owner (supabase/migrations/0001_rls_hardening.sql).
+    if (!isUuid(equipmentId)) {
+        return NextResponse.json(
+            { error: 'Equipamento inválido.' },
+            { status: 400 },
+        );
+    }
+
+    const { data: ownedEquipment, error: equipmentLookupError } = await supabase
+        .from('equipments')
+        .select('id')
+        .eq('id', equipmentId)
+        .eq('user_id', user.id)
+        .maybeSingle();
+
+    if (equipmentLookupError) {
+        logger('error', 'api.error', {
+            route: 'service-orders',
+            method: 'POST',
+            error: equipmentLookupError.message,
+        });
+
+        return NextResponse.json(
+            { error: 'Erro ao validar o equipamento informado.' },
+            { status: 500 },
+        );
+    }
+
+    if (!ownedEquipment) {
+        return NextResponse.json(
+            { error: 'Selecione um equipamento válido para a ordem de serviço.' },
             { status: 400 },
         );
     }

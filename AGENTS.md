@@ -40,7 +40,7 @@ O **ManutFlow** é um sistema CMMS (Computerized Maintenance Management System) 
 | **Banco / Auth / Storage** | Supabase SSR (`@supabase/ssr`, `@supabase/supabase-js`) | PostgreSQL + Bucket `equipment-photos` |
 | **Ícones** | Lucide React | ^1.31.x |
 | **Gráficos** | Recharts | ^3.9.x (BarChart semestral) |
-| **Testes** | Vitest + Testing Library | 17 arquivos / 184 testes / jsdom |
+| **Testes** | Vitest + Testing Library | 18 arquivos / 189 testes / jsdom |
 | **Linter** | ESLint (flat config) + eslint-config-next | 9.x / 16.3.x |
 
 ---
@@ -52,8 +52,9 @@ manutflow/
 ├── src/
 │   ├── __tests__/             # Setup global do Vitest
 │   ├── app/
-│   │   ├── api/               # 16 route handlers REST (dynamic: force-dynamic)
+│   │   ├── api/               # 17 route handlers REST (dynamic: force-dynamic)
 │   │   │   ├── dashboard-summary/ # KPIs, SLAs, gráfico e ordens recentes
+│   │   │   ├── demo-login/    # Cria a sessão da demo (público, 5 req/min por IP)
 │   │   │   ├── equipments/    # Listagem/criação + [id] (GET, PATCH, DELETE)
 │   │   │   ├── health/        # Health check
 │   │   │   ├── profile/       # Perfil do usuário logado (GET, PATCH)
@@ -106,7 +107,7 @@ manutflow/
 npm run dev              # Next.js em http://localhost:3000
 
 # Validação e Testes
-npm test                 # Executa os 184 testes (Vitest, single run)
+npm test                 # Executa os 189 testes (Vitest, single run)
 npm run test:watch       # Modo watch interativo
 npx tsc --noEmit         # Verificação estrita de tipagem
 npm run lint             # ESLint (flat config)
@@ -128,10 +129,13 @@ O Next.js lê tanto `.env` quanto `.env.local`.
 NEXT_PUBLIC_SUPABASE_URL=https://sua-instancia.supabase.co
 NEXT_PUBLIC_SUPABASE_ANON_KEY=sua-chave-publica-anon
 SUPABASE_SERVICE_ROLE_KEY=sua-service-role-key # apenas server-side
+DEMO_EMAIL=demo@manutflow.com                  # conta do botão de demonstração
+DEMO_PASSWORD=sua-senha-demo                   # apenas server-side
 ```
 
 - `NEXT_PUBLIC_*` vai para o bundle do browser — nunca coloque segredo ali.
 - `SUPABASE_SERVICE_ROLE_KEY` **ignora RLS**. Usada somente em `src/app/api/upload/route.ts` e em `src/lib/equipment-photo-storage.ts`. Não pode chegar ao client, a logs ou ao repositório.
+- `DEMO_PASSWORD` alimenta `POST /api/demo-login`. **Nunca** referencie essas variáveis em componente client nem caia em senha padrão no código: sem a env a rota responde `503`.
 
 ---
 
@@ -142,8 +146,8 @@ SUPABASE_SERVICE_ROLE_KEY=sua-service-role-key # apenas server-side
   - `src/lib/supabase/server.ts` → `createServerClient` com cookies assíncronos (`cookies()`).
   - `src/lib/supabase/middleware.ts` → `updateSession()`, consumido por `src/proxy.ts`.
 - **Extração de usuário**: toda API route usa `getUser()` de `@/lib/auth`, que valida o JWT no servidor e devolve `401` quando não há sessão.
-- **Proteção de rotas** (`src/proxy.ts`): `/` é pública; `/login`, `/register` e `/auth/callback` são públicas; o resto exige sessão e redireciona para `/login?redirect=...`.
-- **Conta de demonstração**: `demo@manutflow.com` / `Demo@123456` (Gestor de Manutenção). As credenciais estão embutidas em `src/app/login/page.tsx`; mover para um route handler server-side é uma pendência conhecida.
+- **Proteção de rotas** (`src/proxy.ts`): `/` é pública; `/login`, `/register`, `/auth/callback` e `/api/demo-login` são públicas; o resto exige sessão e redireciona para `/login?redirect=...`.
+- **Conta de demonstração**: `demo@manutflow.com` (Gestor de Manutenção). A senha vive em `DEMO_PASSWORD` e é usada no servidor por `POST /api/demo-login`, que cria a sessão e grava os cookies. Nenhuma credencial de demo pode existir em componente client — o bundle é público.
 - **Perfis**: criados automaticamente por trigger (`handle_new_user`) no signup.
 
 ---
@@ -194,6 +198,7 @@ Runbook (aplicar, verificar, rollback): [`supabase/README.md`](supabase/README.m
 - Nunca confie em `equipment_id`, `user_id` ou id vindo do body — valide formato e titularidade.
 - Não crie policy nova sem remover a equivalente permissiva.
 - Mudança de schema = migration nova + atualização do `supabase/README.md` se o runbook mudar.
+- **Segredo nunca em componente client.** O bundle é público: qualquer string em `src/app/**` com `"use client"` pode ser lida no DevTools. Credenciais de demo ficam em env server-side e são usadas só em route handler.
 
 ### 7.6 RPCs
 
@@ -234,6 +239,7 @@ Runbook (aplicar, verificar, rollback): [`supabase/README.md`](supabase/README.m
 | `PATCH /api/service-orders/[id]` | objeto cru (pendência: padronizar como `{ serviceOrder }`) |
 | `GET/PATCH /api/profile` | `{ profile }` |
 | `POST /api/upload` | `{ url, path }` |
+| `POST /api/demo-login` | `{ ok: true }` |
 | `DELETE` (equipments, service-orders, upload) | `{ message }` |
 | Erros | `{ error: "mensagem" }` |
 
@@ -253,6 +259,7 @@ Paginação: `page` ≥ 1, `limit` entre 1 e 50 (padrão 10), `totalPages = ceil
 | `GET` `PATCH` `DELETE` | `/api/service-orders/[id]` | PATCH delega à RPC `update_service_order` (status/prazo + histórico transacionais) |
 | `GET` `PATCH` | `/api/profile` | Nome, cargo (`role`) e telefone |
 | `POST` `DELETE` | `/api/upload` | JPEG/PNG/WebP até 5 MB; 10 req/min |
+| `POST` | `/api/demo-login` | Público: cria a sessão da demo (5 req/min por IP; 503 sem `DEMO_PASSWORD`) |
 | `GET` | `/auth/callback` | `exchangeCodeForSession` + redirect seguro |
 
 Rate limit: 30 req/min por usuário nas mutações de equipamentos e ordens; 10 req/min no upload. É em memória, por instância — em serverless não é um limite global.
@@ -280,7 +287,7 @@ desde o passo 2.
 
 ### 10.2 Suíte automatizada
 
-- **17 arquivos / 184 testes**, todos passando, cobrindo:
+- **18 arquivos / 189 testes**, todos passando, cobrindo:
   - domínio: prazos, badges de SLA, config de status, redirect seguro, validação de UUID, retry;
   - API routes: auth, perfil, equipamentos, ordens, upload, dashboard e rate limit;
   - componentes: dashboard, toolbar, listas, tema.

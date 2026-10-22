@@ -77,7 +77,7 @@ O ManutFlow foi desenvolvido para equipes operacionais e gestores de manutençã
 | **Storage** | Supabase Storage | Fotos de equipamentos com controle de permissão |
 | **Gráficos** | Recharts | Gráfico de barras do volume mensal de ordens |
 | **Ícones** | Lucide React | Ícones funcionais |
-| **Testes** | Vitest + Testing Library | 184 testes automatizados em 17 arquivos |
+| **Testes** | Vitest + Testing Library | 189 testes automatizados em 18 arquivos |
 | **Qualidade** | ESLint 9 (Flat Config) | Padronização e análise estática de código |
 
 ---
@@ -134,6 +134,7 @@ Schema versionado em [`supabase/migrations`](supabase/migrations). O runbook de 
 | `PATCH` | `/api/profile` | Atualização de nome, cargo e telefone |
 | `POST` | `/api/upload` | Upload de imagem (JPEG/PNG/WebP, até 5 MB, 10/min) |
 | `DELETE` | `/api/upload` | Remoção de foto no bucket |
+| `POST` | `/api/demo-login` | Cria a sessão da conta demo (público, 5 tentativas por IP/min) |
 | `GET` | `/auth/callback` | Troca de código por sessão (OAuth/magic link) |
 
 ---
@@ -188,7 +189,13 @@ manutflow/
 
 ### Acesso Rápido Demo (1-Clique)
 
-Na tela de login, o botão **"Acessar como Gestor (Demo)"** preenche as credenciais da conta `demo@manutflow.com` e entra com ativos, ordens e histórico já cadastrados.
+Na tela de login, o botão **"Acessar como Gestor (Demo)"** cria uma sessão para a conta
+`demo@manutflow.com` e entra com ativos, ordens e histórico já cadastrados.
+
+A sessão é criada no servidor por `POST /api/demo-login`, que lê as credenciais de
+`DEMO_EMAIL` / `DEMO_PASSWORD`. A senha não existe no JavaScript do navegador e pode
+ser rotacionada sem redeploy. A rota aceita 5 tentativas por IP por minuto e responde
+`503` quando a variável não está configurada.
 
 ---
 
@@ -225,6 +232,8 @@ O Next.js lê tanto `.env` quanto `.env.local` — use o que preferir.
 NEXT_PUBLIC_SUPABASE_URL=https://seu-projeto.supabase.co
 NEXT_PUBLIC_SUPABASE_ANON_KEY=sua-chave-anonima
 SUPABASE_SERVICE_ROLE_KEY=sua-service-role-key  # apenas no servidor: upload e remoção de fotos
+DEMO_EMAIL=demo@manutflow.com                   # conta usada pelo botão de demonstração
+DEMO_PASSWORD=sua-senha-demo                    # apenas server-side; sem ela a rota responde 503
 ```
 
 ### Banco de dados em um projeto novo
@@ -248,7 +257,7 @@ npm run lint          # ESLint
 npm run build         # build de produção
 ```
 
-**Suíte de testes:** 184 testes automatizados em 17 arquivos, cobrindo rotas de API, autenticação, cálculos de SLA, rate limiting, storage e componentes de interface.
+**Suíte de testes:** 189 testes automatizados em 18 arquivos, cobrindo rotas de API, autenticação, cálculos de SLA, rate limiting, storage e componentes de interface.
 
 ---
 

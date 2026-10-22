@@ -11,7 +11,10 @@ export async function proxy(request: NextRequest) {
     // ==========================================
     // ROTAS PÚBLICAS (não precisam de autenticação)
     // ==========================================
-    const publicRoutes = ["/login", "/register", "/auth/callback"];
+    // /api/demo-login é pública de propósito: é ela que cria a sessão da demo,
+    // antes de existir qualquer usuário autenticado. Sem isso o proxy
+    // redirecionaria o POST para /login e o botão da landing nunca funcionaria.
+    const publicRoutes = ["/login", "/register", "/auth/callback", "/api/demo-login"];
     const isPublicRoute = pathname === "/" || publicRoutes.some((route) => pathname.startsWith(route));
 
     // ==========================================

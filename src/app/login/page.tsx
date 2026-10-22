@@ -37,27 +37,28 @@ function LoginForm() {
     const searchParams = useSearchParams();
     const redirectTo = getSafeRedirectPath(searchParams.get("redirect"));
 
+    // AUD-05: a sessão da demo é criada no servidor (/api/demo-login).
+    // A senha não existe mais neste arquivo — nada sensível vai para o bundle.
     const handleDemoLogin = async () => {
-        const demoEmail = "demo@manutflow.com";
-        const demoPassword = "Demo@123456";
-        setEmail(demoEmail);
-        setPassword(demoPassword);
         setLoading(true);
         setError(null);
 
-        const { error } = await supabase.auth.signInWithPassword({
-            email: demoEmail,
-            password: demoPassword,
-        });
+        try {
+            const response = await fetch("/api/demo-login", { method: "POST" });
 
-        if (error) {
-            setError("Conta demo não encontrada ou credenciais inválidas. Verifique se o usuário foi criado no Supabase Auth.");
+            if (!response.ok) {
+                const result = (await response.json().catch(() => ({}))) as { error?: string };
+                setError(result.error ?? "Demonstração indisponível no momento.");
+                setLoading(false);
+                return;
+            }
+
+            router.push(redirectTo);
+            router.refresh();
+        } catch {
+            setError("Não foi possível conectar. Verifique sua rede e tente novamente.");
             setLoading(false);
-            return;
         }
-
-        router.push(redirectTo);
-        router.refresh();
     };
 
     const handleLogin = async (e: React.FormEvent) => {

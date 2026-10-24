@@ -14,6 +14,7 @@ import {
     getEquipmentPhotoPath,
     isOwnedEquipmentPhotoPath,
     removeEquipmentPhotoByPath,
+    toEquipmentPhotoUrl,
 } from '@/lib/equipment-photo-storage';
 
 describe('Equipment photo storage', () => {
@@ -77,6 +78,39 @@ describe('Equipment photo storage', () => {
         'not-a-url',
     ])('não extrai caminhos de uma URL externa ou inválida: %s', (url) => {
         expect(getEquipmentPhotoPath(url, 'user-1', 'https://project.supabase.co')).toBeNull();
+    });
+
+    describe('URL interna do proxy (AUD-15)', () => {
+        it('monta a URL do proxy a partir do caminho', () => {
+            expect(toEquipmentPhotoUrl('user-1/1712345678-a1b2c3.jpg'))
+                .toBe('/api/photos/user-1/1712345678-a1b2c3.jpg');
+        });
+
+        it('codifica cada segmento do caminho', () => {
+            expect(toEquipmentPhotoUrl('user-1/foto com espaço.jpg'))
+                .toBe('/api/photos/user-1/foto%20com%20espa%C3%A7o.jpg');
+        });
+
+        it('extrai o caminho de uma URL do proxy', () => {
+            expect(getEquipmentPhotoPath('/api/photos/user-1/photo.jpg', 'user-1', ''))
+                .toBe('user-1/photo.jpg');
+        });
+
+        it('rejeita nome de arquivo com caractere fora da lista permitida', () => {
+            // A lista é [A-Za-z0-9._-]; espaço decodificado não passa.
+            expect(getEquipmentPhotoPath('/api/photos/user-1/foto%20a.jpg', 'user-1', ''))
+                .toBeNull();
+        });
+
+        it.each([
+            '/api/photos/user-2/photo.jpg',
+            '/api/photos/user-1/../photo.jpg',
+            '/api/photos/user-1/photo.svg',
+            '/api/photos/user-1',
+            '/api/photos/user-1/%E0%A4%A',
+        ])('rejeita URL do proxy de outro usuário ou malformada: %s', (url) => {
+            expect(getEquipmentPhotoPath(url, 'user-1', '')).toBeNull();
+        });
     });
 
     it('remove uma foto válida do bucket', async () => {

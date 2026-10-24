@@ -77,7 +77,7 @@ O ManutFlow foi desenvolvido para equipes operacionais e gestores de manutençã
 | **Storage** | Supabase Storage | Fotos de equipamentos com controle de permissão |
 | **Gráficos** | Recharts | Gráfico de barras do volume mensal de ordens |
 | **Ícones** | Lucide React | Ícones funcionais |
-| **Testes** | Vitest + Testing Library | 189 testes automatizados em 18 arquivos |
+| **Testes** | Vitest + Testing Library | 207 testes automatizados em 19 arquivos |
 | **Qualidade** | ESLint 9 (Flat Config) | Padronização e análise estática de código |
 
 ---
@@ -95,7 +95,9 @@ Schema versionado em [`supabase/migrations`](supabase/migrations). O runbook de 
 
 - RLS habilitada com políticas de dono nas três tabelas de dados.
 - Trigger `enforce_order_equipment_owner` impede ordem vinculada a ativo de outro usuário.
-- Bucket `equipment-photos` no Storage, com pasta por `user_id`.
+- Bucket `equipment-photos` **privado**, com pasta por `user_id`. As imagens são
+  servidas por `GET /api/photos/[...path]`, que exige sessão e confere a
+  titularidade — não existe mais URL pública do Storage.
 
 ---
 
@@ -135,6 +137,7 @@ Schema versionado em [`supabase/migrations`](supabase/migrations). O runbook de 
 | `POST` | `/api/upload` | Upload de imagem (JPEG/PNG/WebP, até 5 MB, 10/min) |
 | `DELETE` | `/api/upload` | Remoção de foto no bucket |
 | `POST` | `/api/demo-login` | Cria a sessão da conta demo (público, 5 tentativas por IP/min) |
+| `GET` | `/api/photos/[...path]` | Serve a foto do bucket privado, exigindo sessão e titularidade |
 | `GET` | `/auth/callback` | Troca de código por sessão (OAuth/magic link) |
 
 ---
@@ -257,7 +260,7 @@ npm run lint          # ESLint
 npm run build         # build de produção
 ```
 
-**Suíte de testes:** 189 testes automatizados em 18 arquivos, cobrindo rotas de API, autenticação, cálculos de SLA, rate limiting, storage e componentes de interface.
+**Suíte de testes:** 207 testes automatizados em 19 arquivos, cobrindo rotas de API, autenticação, cálculos de SLA, rate limiting, storage e componentes de interface.
 
 ---
 

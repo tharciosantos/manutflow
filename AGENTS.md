@@ -40,7 +40,7 @@ O **ManutFlow** é um sistema CMMS (Computerized Maintenance Management System) 
 | **Banco / Auth / Storage** | Supabase SSR (`@supabase/ssr`, `@supabase/supabase-js`) | PostgreSQL + Bucket `equipment-photos` |
 | **Ícones** | Lucide React | ^1.31.x |
 | **Gráficos** | Recharts | ^3.9.x (BarChart semestral) |
-| **Testes** | Vitest + Testing Library | 18 arquivos / 189 testes / jsdom |
+| **Testes** | Vitest + Testing Library | 19 arquivos / 207 testes / jsdom |
 | **Linter** | ESLint (flat config) + eslint-config-next | 9.x / 16.3.x |
 
 ---
@@ -52,11 +52,12 @@ manutflow/
 ├── src/
 │   ├── __tests__/             # Setup global do Vitest
 │   ├── app/
-│   │   ├── api/               # 17 route handlers REST (dynamic: force-dynamic)
+│   │   ├── api/               # 18 route handlers REST (dynamic: force-dynamic)
 │   │   │   ├── dashboard-summary/ # KPIs, SLAs, gráfico e ordens recentes
 │   │   │   ├── demo-login/    # Cria a sessão da demo (público, 5 req/min por IP)
 │   │   │   ├── equipments/    # Listagem/criação + [id] (GET, PATCH, DELETE)
 │   │   │   ├── health/        # Health check
+│   │   │   ├── photos/        # Proxy autenticado das fotos (bucket privado)
 │   │   │   ├── profile/       # Perfil do usuário logado (GET, PATCH)
 │   │   │   ├── service-orders/# Listagem/criação + [id] (GET, PATCH, DELETE)
 │   │   │   └── upload/        # Upload e remoção de fotos (POST, DELETE)
@@ -90,7 +91,7 @@ manutflow/
 │   ├── types/                 # equipment.ts, equipment-details.ts, service-order.ts, profile.ts
 │   └── proxy.ts               # Proxy do Next.js 16: renova sessão e protege rotas
 ├── supabase/
-│   ├── migrations/            # 0000 a 0003 (baseline, RLS e RPC transacional)
+│   ├── migrations/            # 0000 a 0004 (baseline, RLS, RPC e Storage)
 │   └── README.md              # Runbook: aplicar, verificar, rollback
 └── public/
     └── previews/              # 2 capturas usadas no README
@@ -107,7 +108,7 @@ manutflow/
 npm run dev              # Next.js em http://localhost:3000
 
 # Validação e Testes
-npm test                 # Executa os 189 testes (Vitest, single run)
+npm test                 # Executa os 207 testes (Vitest, single run)
 npm run test:watch       # Modo watch interativo
 npx tsc --noEmit         # Verificação estrita de tipagem
 npm run lint             # ESLint (flat config)
@@ -164,6 +165,7 @@ O schema é versionado em `supabase/migrations/`. **Toda mudança de schema deve
 | `0001_rls_hardening.sql` | RLS + políticas de dono + `revoke` do `anon` + trigger anti-IDOR |
 | `0002_drop_legacy_policies.sql` | Remove políticas legadas permissivas e recria as de dono |
 | `0003_update_service_order_rpc.sql` | RPC `update_service_order`: UPDATE + histórico na mesma transação |
+| `0004_storage_hardening.sql` | Bucket privado, limites de tamanho/MIME e políticas de dono no Storage |
 
 Runbook (aplicar, verificar, rollback): [`supabase/README.md`](supabase/README.md).
 
@@ -173,7 +175,7 @@ Runbook (aplicar, verificar, rollback): [`supabase/README.md`](supabase/README.m
 2. **`equipments`**: `id` (uuid PK), `name`, `patrimony_code` (único por `user_id`), `location`, `status` (`active` | `inactive` | `maintenance`), `photo_url`, `user_id` (FK `auth.users`), `created_at`, `updated_at`.
 3. **`service_orders`**: `id` (uuid PK), `title`, `description`, `status` (`open` | `in_progress` | `closed`), `priority` (`low` | `medium` | `high` | `critical`), `due_date` (`date`, nullable), `equipment_id` (FK `equipments`), `user_id` (FK `auth.users`), `created_at`. **Não possui `updated_at`.**
 4. **`service_order_history`**: `id` (uuid PK), `service_order_id` (FK `service_orders`), `user_id`, `event_type`, `previous_status`, `new_status`, `description`, `created_at`. Append-only.
-5. **Storage**: bucket `equipment-photos`, arquivos em `<user_id>/<timestamp-random>.<ext>`.
+5. **Storage**: bucket `equipment-photos` **privado** desde a migration `0004`. Arquivos em `<user_id>/<timestamp-random>.<ext>`. O banco guarda `/api/photos/<path>`, e a imagem só é servida por `GET /api/photos/[...path]`, que exige sessão e confere a titularidade. Não existe mais URL pública do Storage.
 
 ### 7.3 Constraints e triggers
 
@@ -240,6 +242,7 @@ Runbook (aplicar, verificar, rollback): [`supabase/README.md`](supabase/README.m
 | `GET/PATCH /api/profile` | `{ profile }` |
 | `POST /api/upload` | `{ url, path }` |
 | `POST /api/demo-login` | `{ ok: true }` |
+| `GET /api/photos/[...path]` | binário, com `Content-Type`, `Content-Length` e `Cache-Control: private` |
 | `DELETE` (equipments, service-orders, upload) | `{ message }` |
 | Erros | `{ error: "mensagem" }` |
 
@@ -260,6 +263,7 @@ Paginação: `page` ≥ 1, `limit` entre 1 e 50 (padrão 10), `totalPages = ceil
 | `GET` `PATCH` | `/api/profile` | Nome, cargo (`role`) e telefone |
 | `POST` `DELETE` | `/api/upload` | JPEG/PNG/WebP até 5 MB; 10 req/min |
 | `POST` | `/api/demo-login` | Público: cria a sessão da demo (5 req/min por IP; 503 sem `DEMO_PASSWORD`) |
+| `GET` | `/api/photos/[...path]` | Única porta para as imagens: exige sessão e confere a pasta do dono (404 caso contrário) |
 | `GET` | `/auth/callback` | `exchangeCodeForSession` + redirect seguro |
 
 Rate limit: 30 req/min por usuário nas mutações de equipamentos e ordens; 10 req/min no upload. É em memória, por instância — em serverless não é um limite global.
@@ -287,7 +291,7 @@ desde o passo 2.
 
 ### 10.2 Suíte automatizada
 
-- **18 arquivos / 189 testes**, todos passando, cobrindo:
+- **19 arquivos / 207 testes**, todos passando, cobrindo:
   - domínio: prazos, badges de SLA, config de status, redirect seguro, validação de UUID, retry;
   - API routes: auth, perfil, equipamentos, ordens, upload, dashboard e rate limit;
   - componentes: dashboard, toolbar, listas, tema.

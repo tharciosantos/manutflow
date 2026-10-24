@@ -12,6 +12,7 @@ vazamento cross-tenant (AUD-01) não foi notado.
 | `migrations/0001_rls_hardening.sql` | Habilita RLS nas 3 tabelas, cria as políticas de dono, remove os GRANTs do `anon` e bloqueia OS apontando para equipamento de outro usuário. | **Aplicado em 2026-10-19.** |
 | `migrations/0002_drop_legacy_policies.sql` | Remove políticas legadas permissivas (`to public using (true)`) que se somavam às de dono, e recria apenas as de dono. | **Aplicado em 2026-10-19.** |
 | `migrations/0003_update_service_order_rpc.sql` | RPC `update_service_order`: atualiza status/prazo e grava o histórico na mesma transação. | **Aplicado em 2026-10-19** (validado manualmente). |
+| `migrations/0004_storage_hardening.sql` | Torna o bucket `equipment-photos` **privado**, define limites de tamanho/MIME e cria as políticas de dono no Storage (removendo permissivas legadas). | **Produção — pendente.** |
 
 ## Como aplicar
 
@@ -63,6 +64,25 @@ select proname, proacl from pg_proc where proname = 'update_service_order';
 | `select update_service_order('<id>', 'in_progress')` de novo | retorna a linha e **não** cria histórico (sem mudança) |
 | `select update_service_order('<id-alheio-ou-inexistente>', 'closed')` | `null` |
 | PATCH pela UI em `/ordens/[id]` | status/prazo mudam e o histórico aparece na tela |
+
+**Para a `0004`** — o bucket precisa ficar privado, com limites e políticas de dono:
+
+```sql
+select id, public, file_size_limit, allowed_mime_types
+  from storage.buckets where id = 'equipment-photos';
+-- esperado: public = false | 5242880 | {image/jpeg,image/png,image/webp}
+
+select policyname, cmd, roles from pg_policies
+ where schemaname = 'storage' and tablename = 'objects' order by policyname;
+-- esperado: photos_own_select/insert/update/delete, todas para {authenticated}
+```
+
+| Teste | Esperado |
+|---|---|
+| `POST /storage/v1/object/list/equipment-photos` com a chave `anon` | vazio ou erro — sem pastas |
+| A mesma chamada com JWT de outro usuário | vazio — não enxerga pasta alheia |
+| Abrir uma URL `storage/v1/object/public/equipment-photos/...` | `400`/`404` — bucket privado |
+| Upload de foto pela UI e abrir a imagem | `GET /api/photos/...` responde `200` com `Cache-Control: private` |
 
 ## Rollback
 

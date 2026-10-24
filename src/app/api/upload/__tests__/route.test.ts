@@ -2,7 +2,6 @@ import { beforeEach, describe, expect, it, vi, type Mock } from 'vitest';
 
 const storageMocks = vi.hoisted(() => ({
     upload: vi.fn(),
-    getPublicUrl: vi.fn(),
     from: vi.fn(),
 }));
 
@@ -27,6 +26,8 @@ vi.mock('@/lib/logger', () => ({
 vi.mock('@/lib/equipment-photo-storage', () => ({
     EQUIPMENT_PHOTOS_BUCKET: 'equipment-photos',
     removeEquipmentPhotoByPath: vi.fn(),
+    // AUD-15: o upload devolve a URL interna do proxy, não a URL pública do bucket.
+    toEquipmentPhotoUrl: vi.fn((path: string) => `/api/photos/${path}`),
 }));
 
 import { getUser } from '@/lib/auth';
@@ -56,12 +57,8 @@ describe('Upload API DELETE', () => {
         process.env.NEXT_PUBLIC_SUPABASE_URL = 'https://project.supabase.co';
         process.env.SUPABASE_SERVICE_ROLE_KEY = 'service-role-key';
         storageMocks.upload.mockResolvedValue({ error: null });
-        storageMocks.getPublicUrl.mockReturnValue({
-            data: { publicUrl: 'https://project.supabase.co/photo.jpg' },
-        });
         storageMocks.from.mockReturnValue({
             upload: storageMocks.upload,
-            getPublicUrl: storageMocks.getPublicUrl,
         });
         getUserMock.mockResolvedValue({
             user: { id: 'user-1' },
@@ -136,5 +133,21 @@ describe('Upload API DELETE', () => {
         expect(response.status).toBe(200);
         const [path] = storageMocks.upload.mock.calls[0];
         expect(path).toMatch(/^user-1\/\d+-[a-z0-9]{6}\.jpg$/);
+    });
+
+    it('devolve a URL do proxy interno, nunca a URL pública do bucket', async () => {
+        const formData = new FormData();
+        formData.append('file', new File(['image'], 'foto.jpg', { type: 'image/jpeg' }));
+
+        const response = await POST(new Request('http://localhost/api/upload', {
+            method: 'POST',
+            body: formData,
+        }));
+
+        const body = await response.json() as { url: string; path: string };
+
+        expect(response.status).toBe(200);
+        expect(body.url).toBe(`/api/photos/${body.path}`);
+        expect(body.url).not.toContain('storage/v1/object/public');
     });
 });

@@ -6,6 +6,7 @@ import { createClient } from "@supabase/supabase-js";
 import {
     EQUIPMENT_PHOTOS_BUCKET,
     removeEquipmentPhotoByPath,
+    toEquipmentPhotoUrl,
 } from '@/lib/equipment-photo-storage';
 
 export const dynamic = "force-dynamic";
@@ -116,14 +117,11 @@ export async function POST(request: Request) {
         );
     }
 
-    // Obter URL pública
-    const { data: { publicUrl } } = serviceClient
-        .storage
-        .from(EQUIPMENT_PHOTOS_BUCKET)
-        .getPublicUrl(fileName);
-
+    // AUD-15: o bucket é privado. Guardamos a URL interna do proxy, que valida a
+    // sessão e a titularidade antes de entregar o arquivo. A URL pública do
+    // Storage deixou de existir quando o bucket passou a privado.
     return NextResponse.json({
-        url: publicUrl,
+        url: toEquipmentPhotoUrl(fileName),
         path: fileName,
     });
 }

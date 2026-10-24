@@ -91,7 +91,7 @@ manutflow/
 │   ├── types/                 # equipment.ts, equipment-details.ts, service-order.ts, profile.ts
 │   └── proxy.ts               # Proxy do Next.js 16: renova sessão e protege rotas
 ├── supabase/
-│   ├── migrations/            # 0000 a 0004 (baseline, RLS, RPC e Storage)
+│   ├── migrations/            # 0000 a 0005 (baseline, RLS, RPC e Storage)
 │   └── README.md              # Runbook: aplicar, verificar, rollback
 └── public/
     └── previews/              # 2 capturas usadas no README
@@ -166,6 +166,7 @@ O schema é versionado em `supabase/migrations/`. **Toda mudança de schema deve
 | `0002_drop_legacy_policies.sql` | Remove políticas legadas permissivas e recria as de dono |
 | `0003_update_service_order_rpc.sql` | RPC `update_service_order`: UPDATE + histórico na mesma transação |
 | `0004_storage_hardening.sql` | Bucket privado, limites de tamanho/MIME e políticas de dono no Storage |
+| `0005_storage_policies_cleanup.sql` | Remove policies legadas de `storage.objects` por varredura (a `0004` não bastou) |
 
 Runbook (aplicar, verificar, rollback): [`supabase/README.md`](supabase/README.md).
 
@@ -193,6 +194,7 @@ Runbook (aplicar, verificar, rollback): [`supabase/README.md`](supabase/README.m
 - `service_order_history` não tem política de `UPDATE`/`DELETE`: é append-only por consequência.
 - O papel `anon` não tem GRANT nas tabelas de dados; qualquer leitura sem JWT retorna `42501`.
 - **Políticas de RLS se combinam com `OR`.** Uma política permissiva antiga anula qualquer política restritiva nova. Ao auditar isolamento, liste `pg_policies` antes de concluir que está protegido.
+- **Remover policy legada exige varredura, não filtro por expressão.** Policies do template do Supabase usam `bucket_id = '<bucket>'`, não `true`; filtrar por `qual = 'true'` deixa passar e o acesso continua aberto (aconteceu na `0004`, corrigido na `0005`). Remova por escopo — todas as policies da tabela menos as de dono — e recrie só as suas.
 
 ### 7.5 Regras para agentes
 

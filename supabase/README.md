@@ -12,7 +12,8 @@ vazamento cross-tenant (AUD-01) não foi notado.
 | `migrations/0001_rls_hardening.sql` | Habilita RLS nas 3 tabelas, cria as políticas de dono, remove os GRANTs do `anon` e bloqueia OS apontando para equipamento de outro usuário. | **Aplicado em 2026-10-19.** |
 | `migrations/0002_drop_legacy_policies.sql` | Remove políticas legadas permissivas (`to public using (true)`) que se somavam às de dono, e recria apenas as de dono. | **Aplicado em 2026-10-19.** |
 | `migrations/0003_update_service_order_rpc.sql` | RPC `update_service_order`: atualiza status/prazo e grava o histórico na mesma transação. | **Aplicado em 2026-10-19** (validado manualmente). |
-| `migrations/0004_storage_hardening.sql` | Torna o bucket `equipment-photos` **privado**, define limites de tamanho/MIME e cria as políticas de dono no Storage (removendo permissivas legadas). | **Produção — pendente.** |
+| `migrations/0004_storage_hardening.sql` | Torna o bucket `equipment-photos` **privado**, define limites de tamanho/MIME e cria as políticas de dono no Storage. | **Aplicado em 2026-10-24.** |
+| `migrations/0005_storage_policies_cleanup.sql` | Remove **todas** as políticas de `storage.objects` que não sejam as de dono. Necessária porque o filtro da `0004` só alcançava políticas com expressão `true`, e o template do Supabase usa `bucket_id = '…'`. | **Aplicado em 2026-10-24** (validado em produção). |
 
 ## Como aplicar
 

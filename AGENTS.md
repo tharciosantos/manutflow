@@ -1,6 +1,6 @@
 # AGENTS.md — ManutFlow
 
-> Manual Operacional para Agentes de IA · v3.0 · atualizado em 2026-10-19
+> Manual Operacional para Agentes de IA · v3.1 · atualizado em Out/2026
 
 Este documento é a **fonte única de verdade** para agentes que trabalham no repositório **ManutFlow**.
 
@@ -20,6 +20,9 @@ Este documento é a **fonte única de verdade** para agentes que trabalham no re
 10. [Testes e Validação](#10-testes-e-validação)
 11. [Padrões de Código e UI](#11-padrões-de-código-e-ui)
 12. [Git Flow e Conventional Commits](#12-git-flow-e-conventional-commits)
+13. [Pull Request](#13-pull-request)
+14. [Checklists](#14-checklists)
+15. [Exemplos Completos](#15-exemplos-completos)
 
 ---
 
@@ -279,7 +282,7 @@ Rate limit: 30 req/min por usuário nas mutações de equipamentos e ordens; 10 
 Nenhum commit é criado sem passar, nesta ordem:
 
 1. **Implementar** na working tree, sem commit.
-2. **Automatizado**: `npm test && npx tsc --noEmit && npm run lint` — todos verdes.
+2. **Automatizado**: `npm run build && npm run lint && npm test && npx tsc --noEmit` — todos verdes (exit code 0).
 3. **Schema**: se a mudança depende de migration, o SQL precisa estar aplicado no
    Supabase pelo responsável. Não se commita código que chama função inexistente.
 4. **Roteiro manual**: o agente entrega um checklist numerado (passo, ação,
@@ -298,7 +301,7 @@ desde o passo 2.
   - API routes: auth, perfil, equipamentos, ordens, upload, dashboard e rate limit;
   - componentes: dashboard, toolbar, listas, tema.
 - Não há coverage configurado; não há teste de integração contra Postgres (a RLS não é coberta por teste automatizado).
-- Antes de qualquer commit: `npm test && npx tsc --noEmit && npm run lint`.
+- Antes de qualquer commit/PR: `npm run build && npm run lint && npm test && npx tsc --noEmit`.
 
 ---
 
@@ -315,9 +318,224 @@ desde o passo 2.
 
 ## 12. Git Flow e Conventional Commits
 
-- Branches temáticas: `feat/`, `fix/`, `refactor/`, `docs/`.
+- Branches temáticas: `feat/`, `fix/`, `refactor/`, `docs/`, `chore/`, `test/`.
 - Commits atômicos no padrão: `tipo(escopo): descrição concisa`.
 - Commit apenas depois do gate da seção 10.1 (validação manual do responsável).
 - Push e abertura de PR são feitos pelo responsável, nunca pelo agente.
 - Pull Request obrigatório com CI verde antes do merge na `main`.
 - CI (`.github/workflows/ci.yml`): `npm run lint` → `npm run test` → `npm run build`, em Node 22.
+
+---
+
+## 13. Pull Request
+
+### 13.1 Título
+
+```
+tipo(escopo): descrição concisa no presente do indicativo (≤ 72 caracteres)
+```
+
+Exemplo: `fix(security): torna bucket de fotos privado com proxy autenticado`
+
+### 13.2 Regras de Redação e Densidade Técnica (Gold Standard)
+
+Para garantir máxima clareza para revisores humanos e indexadores de código:
+- **Sem emojis nos cabeçalhos ou listas:** Use Markdown puro (`### Features`, `### Fixes`, `### Docs`, `- [x] Feature`). É proibido usar emojis como `✨`, `🐛`, `📝` no corpo ou título do PR.
+- **Resumo de alta densidade (1 a 3 frases):** Descreva o que foi entregue citando nominalmente os módulos, componentes, páginas, rotas ou métricas impactadas (ex: `/equipamentos`, `/ordens`, `/api/photos/[...path]`, `DashboardOverview`). Evite frases genéricas.
+- **Verbos de ação na 3ª pessoa do singular:** Inicie os itens do Changelog com verbos no presente do indicativo: *Adiciona*, *Atualiza*, *Corrige*, *Remove*, *Sincroniza*, *Concentra*, *Extrai*.
+- **Como Testar reprodutível:** Comece sempre com o comando de execução (`1. Rode npm run dev.`) e indique as rotas exatas (ex: `/equipamentos`, `/ordens/[id]`, `/perfil`, etc.) ou interações exatas para validar a entrega.
+- **Tipo de Mudança vertical e limpo:** Liste uma opção por linha, sem emojis, marcando com `[x]` apenas os tipos aplicáveis ao PR.
+- **Validação real antes de marcar o Checklist:** O agente DEVE executar cada comando do checklist no terminal e confirmar saída limpa (exit code 0) antes de marcar `[x]`.
+
+### 13.3 Changelog
+
+Agrupe apenas pelas categorias presentes no PR, em texto limpo:
+
+```markdown
+### Fixes
+
+- Torna o bucket equipment-photos privado via migration 0004
+- Adiciona rota de proxy autenticado em /api/photos/[...path]
+
+### Tests
+
+- Adiciona testes de ownership para upload e leitura de fotos
+```
+
+### 13.4 Template Oficial
+
+```markdown
+## Resumo
+
+<!-- 1 a 3 frases diretas explicando o que mudou, quais componentes/rotas foram afetados e o impacto. -->
+
+## Tipo de Mudança
+
+- [ ] Feature
+- [ ] Fix
+- [ ] Refactor
+- [ ] Docs
+- [ ] Test
+- [ ] Chore
+
+## Changelog
+
+### Features
+
+- <!-- Verbo no presente + entrega objetiva -->
+
+## Como Testar
+
+1. Rode `npm run dev`.
+2. Abra `<!-- rota ou página (ex: /equipamentos ou /ordens) -->` e confira `<!-- comportamento esperado -->`.
+
+## Checklist
+
+- [ ] Build passa (`npm run build`)
+- [ ] Lint passa (`npm run lint`)
+- [ ] Testes passam (`npm test`)
+- [ ] TypeScript sem erros (`npx tsc --noEmit`)
+- [ ] Apenas arquivos do escopo alterados
+```
+
+### 13.5 Exemplo Real de Referência (Gold Standard)
+
+Título: `fix(security): torna bucket de fotos privado com proxy autenticado`
+
+```markdown
+## Resumo
+
+Fecha o acesso público ao bucket `equipment-photos` no Supabase Storage via migrations `0004` e `0005`, adiciona o proxy autenticado `GET /api/photos/[...path]` com validação de titularidade por pasta do usuário e atualiza `EquipmentPhoto` e `/equipamentos` para consumir a nova rota privada.
+
+## Tipo de Mudança
+
+- [x] Fix
+- [x] Test
+- [x] Docs
+
+## Changelog
+
+### Fixes
+
+- Torna o bucket `equipment-photos` privado e remove policies legadas permissivas
+- Adiciona proxy autenticado em `/api/photos/[...path]` com verificação de ownership
+- Atualiza `POST /api/upload` e `EquipmentPhoto` para usar caminhos internos privados
+
+### Tests
+
+- Adiciona cobertura de testes para proxy de fotos, upload e isolamento de titularidade
+
+### Docs
+
+- Atualiza runbook em `supabase/README.md` e documentação em `AGENTS.md`
+
+## Como Testar
+
+1. Rode `npm run dev`.
+2. Acesse `/login`, entre na conta de demonstração e abra `/equipamentos`.
+3. Cadastre ou edite um ativo enviando uma foto e confira a renderização via `/api/photos/...`.
+4. Abra a URL da imagem em aba anônima (sem sessão) e confirme o retorno `401`.
+
+## Checklist
+
+- [x] Build passa (`npm run build`)
+- [x] Lint passa (`npm run lint`)
+- [x] Testes passam (`npm test`)
+- [x] TypeScript sem erros (`npx tsc --noEmit`)
+- [x] Apenas arquivos do escopo alterados
+```
+
+---
+
+## 14. Checklists
+
+### 14.1 Antes do Commit
+
+- [ ] Gate da seção 10.1 concluído e validado pelo responsável?
+- [ ] Mudança atômica (uma única responsabilidade)?
+- [ ] Queries filtram `.eq('user_id', user.id)` e respeitam RLS?
+- [ ] Sem `console.log`, `debugger` ou segredos em componentes client?
+- [ ] Mensagem de commit segue Conventional Commits?
+
+### 14.2 Antes do Push
+
+- [ ] `npm run build` passou?
+- [ ] `npm run lint` passou?
+- [ ] `npm test` passou?
+- [ ] `npx tsc --noEmit` passou?
+- [ ] `git diff` contém apenas os arquivos esperados?
+
+### 14.3 Antes do PR
+
+- [ ] Checklist 14.2 completo (todos os comandos executados no terminal com exit code 0)
+- [ ] Título no formato `tipo(escopo): descrição` (sem emojis)?
+- [ ] Resumo de alta densidade (1 a 3 frases) citando módulos/rotas afetados?
+- [ ] Tipo de Mudança listado verticalmente sem emojis?
+- [ ] Changelog preenchido sem emojis e com verbos na 3ª pessoa do presente?
+- [ ] Passos para teste claros e reprodutíveis (iniciando com `1. Rode npm run dev.`)?
+
+---
+
+## 15. Exemplos Completos
+
+### 15.1 Filtrar Ordens de Serviço por Prazo
+
+**Tarefa:** Adicionar filtro `next_7_days` na listagem de ordens de serviço
+
+**Branch:** `feat/filtro-prazo-proximos-7-dias`
+
+**Commits:**
+
+```
+feat(ordens): adiciona filtro de prazo para próximos 7 dias na listagem
+test(ordens): cobre filtro next_7_days em deadlines e route handler
+```
+
+**Arquivos:** `src/features/service-orders/deadlines.ts` + `src/app/api/service-orders/route.ts` + `src/features/service-orders/__tests__/deadlines.test.ts`
+
+**PR:**
+
+```markdown
+## Resumo
+
+Adiciona o filtro de prazo `next_7_days` na toolbar de `/ordens` e no endpoint `GET /api/service-orders`, listando ordens abertas ou em andamento com vencimento entre amanhã e +7 dias no fuso `America/Sao_Paulo`.
+
+## Tipo de Mudança
+
+- [x] Feature
+- [x] Test
+
+## Changelog
+
+### Features
+
+- Adiciona opção "Próximos 7 dias" no seletor de prazo de `/ordens`
+- Atualiza `GET /api/service-orders` para filtrar intervalo de datas futuras
+
+### Tests
+
+- Adiciona testes unitários para `next_7_days` em `deadlines.test.ts`
+
+## Como Testar
+
+1. Rode `npm run dev`.
+2. Acesse `/ordens` e selecione o filtro de prazo "Próximos 7 dias" na toolbar.
+3. Confira se apenas ordens não fechadas com vencimento nos próximos 7 dias são exibidas.
+
+## Checklist
+
+- [x] Build passa (`npm run build`)
+- [x] Lint passa (`npm run lint`)
+- [x] Testes passam (`npm test`)
+- [x] TypeScript sem erros (`npx tsc --noEmit`)
+- [x] Apenas arquivos do escopo alterados
+```
+
+---
+
+> **Versão 3.1** · Fonte única de verdade para agentes de IA · Mantido por Tharcio Santos
+>
+> | Versão | Data     | Mudanças                                                                                                                                      |
+> | ------ | -------- | --------------------------------------------------------------------------------------------------------------------------------------------- |
+> | 3.0    | Out/2026 | Consolida arquitetura CMMS, RLS/Storage privado, proxy autenticado de fotos e suíte de 207 testes                                             |
+> | 3.1    | Out/2026 | Refina padrão de Pull Request com template limpo sem emojis, inclusão de verificação de formatação/tipos no checklist e exemplo Gold Standard |

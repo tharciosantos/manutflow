@@ -1,4 +1,4 @@
-﻿export type FetchWithRetryOptions = RequestInit & {
+export type FetchWithRetryOptions = RequestInit & {
   retries?: number;
   delayMs?: number;
   backoffFactor?: number;

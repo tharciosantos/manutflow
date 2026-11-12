@@ -55,7 +55,8 @@ manutflow/
 ├── src/
 │   ├── __tests__/             # Setup global do Vitest
 │   ├── app/
-│   │   ├── api/               # 18 route handlers REST (dynamic: force-dynamic)
+│   │   ├── api/               # 19 route handlers REST (dynamic: force-dynamic)
+│   │   │   ├── cron/keep-alive/   # Heartbeat diário no banco (protegido por CRON_SECRET)
 │   │   │   ├── dashboard-summary/ # KPIs, SLAs, gráfico e ordens recentes
 │   │   │   ├── demo-login/    # Cria a sessão da demo (público, 5 req/min por IP)
 │   │   │   ├── equipments/    # Listagem/criação + [id] (GET, PATCH, DELETE)
@@ -94,7 +95,7 @@ manutflow/
 │   ├── types/                 # equipment.ts, equipment-details.ts, service-order.ts, profile.ts
 │   └── proxy.ts               # Proxy do Next.js 16: renova sessão e protege rotas
 ├── supabase/
-│   ├── migrations/            # 0000 a 0005 (baseline, RLS, RPC e Storage)
+│   ├── migrations/            # 0000 a 0006 (baseline, RLS, RPC, Storage e keep-alive)
 │   └── README.md              # Runbook: aplicar, verificar, rollback
 └── public/
     └── previews/              # 2 capturas usadas no README
@@ -135,11 +136,13 @@ NEXT_PUBLIC_SUPABASE_ANON_KEY=sua-chave-publica-anon
 SUPABASE_SERVICE_ROLE_KEY=sua-service-role-key # apenas server-side
 DEMO_EMAIL=demo@manutflow.com                  # conta do botão de demonstração
 DEMO_PASSWORD=sua-senha-demo                   # apenas server-side
+CRON_SECRET=seu-segredo-cron                   # apenas server-side (Vercel Cron)
 ```
 
 - `NEXT_PUBLIC_*` vai para o bundle do browser — nunca coloque segredo ali.
-- `SUPABASE_SERVICE_ROLE_KEY` **ignora RLS**. Usada somente em `src/app/api/upload/route.ts` e em `src/lib/equipment-photo-storage.ts`. Não pode chegar ao client, a logs ou ao repositório.
+- `SUPABASE_SERVICE_ROLE_KEY` **ignora RLS**. Usada somente em `src/app/api/upload/route.ts`, `src/app/api/cron/keep-alive/route.ts` e em `src/lib/equipment-photo-storage.ts`. Não pode chegar ao client, a logs ou ao repositório.
 - `DEMO_PASSWORD` alimenta `POST /api/demo-login`. **Nunca** referencie essas variáveis em componente client nem caia em senha padrão no código: sem a env a rota responde `503`.
+- `CRON_SECRET` protege `GET /api/cron/keep-alive` (`Authorization: Bearer <CRON_SECRET>`): sem a env a rota responde `503`.
 
 ---
 
@@ -170,6 +173,7 @@ O schema é versionado em `supabase/migrations/`. **Toda mudança de schema deve
 | `0003_update_service_order_rpc.sql` | RPC `update_service_order`: UPDATE + histórico na mesma transação |
 | `0004_storage_hardening.sql` | Bucket privado, limites de tamanho/MIME e políticas de dono no Storage |
 | `0005_storage_policies_cleanup.sql` | Remove policies legadas de `storage.objects` por varredura (a `0004` não bastou) |
+| `0006_keep_alive.sql` | Cria tabela técnica `keep_alive` (1 linha) sem acesso `anon`/`authenticated` |
 
 Runbook (aplicar, verificar, rollback): [`supabase/README.md`](supabase/README.md).
 
@@ -179,7 +183,8 @@ Runbook (aplicar, verificar, rollback): [`supabase/README.md`](supabase/README.m
 2. **`equipments`**: `id` (uuid PK), `name`, `patrimony_code` (único por `user_id`), `location`, `status` (`active` | `inactive` | `maintenance`), `photo_url`, `user_id` (FK `auth.users`), `created_at`, `updated_at`.
 3. **`service_orders`**: `id` (uuid PK), `title`, `description`, `status` (`open` | `in_progress` | `closed`), `priority` (`low` | `medium` | `high` | `critical`), `due_date` (`date`, nullable), `equipment_id` (FK `equipments`), `user_id` (FK `auth.users`), `created_at`. **Não possui `updated_at`.**
 4. **`service_order_history`**: `id` (uuid PK), `service_order_id` (FK `service_orders`), `user_id`, `event_type`, `previous_status`, `new_status`, `description`, `created_at`. Append-only.
-5. **Storage**: bucket `equipment-photos` **privado** desde a migration `0004`. Arquivos em `<user_id>/<timestamp-random>.<ext>`. O banco guarda `/api/photos/<path>`, e a imagem só é servida por `GET /api/photos/[...path]`, que exige sessão e confere a titularidade. Não existe mais URL pública do Storage.
+5. **`keep_alive`**: tabela técnica de 1 linha (`id` smallint PK = 1, `last_ping_at` timestamptz). RLS ativa sem acesso para `anon`/`authenticated`; manipulada exclusivamente via `service_role` por `GET /api/cron/keep-alive`.
+6. **Storage**: bucket `equipment-photos` **privado** desde a migration `0004`. Arquivos em `<user_id>/<timestamp-random>.<ext>`. O banco guarda `/api/photos/<path>`, e a imagem só é servida por `GET /api/photos/[...path]`, que exige sessão e confere a titularidade. Não existe mais URL pública do Storage.
 
 ### 7.3 Constraints e triggers
 
@@ -247,6 +252,7 @@ Runbook (aplicar, verificar, rollback): [`supabase/README.md`](supabase/README.m
 | `GET/PATCH /api/profile` | `{ profile }` |
 | `POST /api/upload` | `{ url, path }` |
 | `POST /api/demo-login` | `{ ok: true }` |
+| `GET /api/cron/keep-alive` | `{ ok: true, timestamp }` |
 | `GET /api/photos/[...path]` | binário, com `Content-Type`, `Content-Length` e `Cache-Control: private` |
 | `DELETE` (equipments, service-orders, upload) | `{ message }` |
 | Erros | `{ error: "mensagem" }` |
@@ -260,6 +266,7 @@ Paginação: `page` ≥ 1, `limit` entre 1 e 50 (padrão 10), `totalPages = ceil
 | Método | Rota | Observação |
 |---|---|---|
 | `GET` | `/api/health` | Resposta estática; não verifica o banco |
+| `GET` | `/api/cron/keep-alive` | Heartbeat diário no Supabase (`public.keep_alive`), protegido por `CRON_SECRET` |
 | `GET` | `/api/dashboard-summary` | 16 consultas em `Promise.all`; falha tudo se uma falhar |
 | `GET` `POST` | `/api/equipments` | Busca em `name`, `patrimony_code`, `location`; filtro por status |
 | `GET` `PATCH` `DELETE` | `/api/equipments/[id]` | Exclusão bloqueada se houver ordem vinculada |

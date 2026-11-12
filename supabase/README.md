@@ -14,6 +14,7 @@ vazamento cross-tenant (AUD-01) não foi notado.
 | `migrations/0003_update_service_order_rpc.sql` | RPC `update_service_order`: atualiza status/prazo e grava o histórico na mesma transação. | **Aplicado em 2026-10-19** (validado manualmente). |
 | `migrations/0004_storage_hardening.sql` | Torna o bucket `equipment-photos` **privado**, define limites de tamanho/MIME e cria as políticas de dono no Storage. | **Aplicado em 2026-10-24.** |
 | `migrations/0005_storage_policies_cleanup.sql` | Remove **todas** as políticas de `storage.objects` que não sejam as de dono. Necessária porque o filtro da `0004` só alcançava políticas com expressão `true`, e o template do Supabase usa `bucket_id = '…'`. | **Aplicado em 2026-10-24** (validado em produção). |
+| `migrations/0006_keep_alive.sql` | Cria a tabela técnica `public.keep_alive` (1 linha) com RLS ativa, sem acesso para `anon`/`authenticated` e acesso restrito a `service_role`. | **Aplicado em 2026-11-12** (validado manualmente). |
 
 ## Como aplicar
 
@@ -84,6 +85,24 @@ select policyname, cmd, roles from pg_policies
 | A mesma chamada com JWT de outro usuário | vazio — não enxerga pasta alheia |
 | Abrir uma URL `storage/v1/object/public/equipment-photos/...` | `400`/`404` — bucket privado |
 | Upload de foto pela UI e abrir a imagem | `GET /api/photos/...` responde `200` com `Cache-Control: private` |
+
+**Para a `0006`** — tabela técnica isolada para o cron keep-alive:
+
+```sql
+select relname, relrowsecurity
+  from pg_class
+ where relname = 'keep_alive';
+-- esperado: 1 linha com relrowsecurity = true
+
+select id, last_ping_at from public.keep_alive;
+-- esperado: 1 linha (id = 1)
+```
+
+| Teste | Esperado |
+|---|---|
+| `GET /rest/v1/keep_alive?select=*` com a chave `anon` | `401/403` (sem GRANT) |
+| `GET /api/cron/keep-alive` sem `Authorization: Bearer <CRON_SECRET>` | `401` |
+| `GET /api/cron/keep-alive` com `Authorization: Bearer <CRON_SECRET>` | `200` e atualiza `last_ping_at` |
 
 ## Rollback
 

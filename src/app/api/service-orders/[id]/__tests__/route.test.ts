@@ -138,6 +138,8 @@ describe('Service Orders Details API', () => {
             expect(orderQuery.eq).toHaveBeenCalledWith('id', ORDER_ID);
             expect(orderQuery.eq).toHaveBeenCalledWith('user_id', 'user-1');
             expect(supabase.from).toHaveBeenNthCalledWith(2, 'service_order_history');
+            expect(historyQuery.eq).toHaveBeenCalledWith('service_order_id', ORDER_ID);
+            expect(historyQuery.eq).toHaveBeenCalledWith('user_id', 'user-1');
             expect(historyQuery.order).toHaveBeenCalledWith('created_at', { ascending: false });
         });
 
@@ -256,13 +258,35 @@ describe('Service Orders Details API', () => {
             const body = await response.json();
 
             expect(response.status).toBe(200);
-            expect(body).toEqual(updatedOrder);
+            expect(body).toEqual({ serviceOrder: updatedOrder });
             expect(supabase.rpc).toHaveBeenCalledWith('update_service_order', {
                 p_order_id: ORDER_ID,
                 p_status: 'closed',
                 p_due_date: null,
                 p_set_due_date: false,
             });
+        });
+
+        it('responde no envelope { serviceOrder } mesmo quando a RPC traz outros campos', async () => {
+            const updatedOrder = {
+                id: ORDER_ID,
+                title: 'Troca de rolamento',
+                status: 'in_progress',
+                priority: 'high',
+                due_date: '2026-07-30',
+                previous_status: 'open',
+            };
+            const supabase = createSupabaseMock();
+            supabase.rpc.mockResolvedValue({ data: updatedOrder, error: null });
+            authenticateWith(supabase);
+
+            const response = await PATCH(request('PATCH', { status: 'in_progress' }), routeContext());
+            const body = await response.json();
+
+            expect(response.status).toBe(200);
+            // Contrato de escrita: chave de topo única, nada solto no corpo.
+            expect(Object.keys(body)).toEqual(['serviceOrder']);
+            expect(body.serviceOrder).toEqual(updatedOrder);
         });
 
         it('atualiza o prazo sem tocar no status', async () => {

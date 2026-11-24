@@ -105,6 +105,8 @@ describe('Service Orders API', () => {
       const body = await response.json();
 
       expect(response.status).toBe(200);
+      // Contrato de listagem: exatamente as quatro chaves da AGENTS.md §8.3.
+      expect(Object.keys(body).sort()).toEqual(['page', 'serviceOrders', 'total', 'totalPages']);
       expect(body.serviceOrders).toHaveLength(1);
       expect(body.serviceOrders[0].title).toBe('Manutenção preventiva');
       expect(body.serviceOrders[0].equipment.name).toBe('Notebook Dell');
@@ -240,6 +242,8 @@ describe('Service Orders API', () => {
       const body = await response.json();
 
       expect(response.status).toBe(201);
+      // Contrato de criação: a ordem vem embrulhada em { serviceOrder }.
+      expect(Object.keys(body)).toEqual(['serviceOrder']);
       expect(body.serviceOrder.title).toBe('Manutenção corretiva');
       expect(body.serviceOrder.status).toBe('open');
       expect(mockSupabase.insert).toHaveBeenCalledWith(expect.objectContaining({

@@ -80,6 +80,9 @@ export async function GET(_request: Request, { params }: RouteParams) {
         created_at
     `)
         .eq('service_order_id', id)
+        // A ordem já foi validada como do usuário acima, mas o histórico repete o
+        // filtro de dono: a RLS é a segunda camada, não a única (AGENTS.md §7.5).
+        .eq('user_id', user.id)
         .order('created_at', { ascending: false });
 
     if (historyError) {
@@ -184,7 +187,9 @@ export async function PATCH(request: Request, { params }: RouteParams) {
         );
     }
 
-    return NextResponse.json(data);
+    // Contrato uniforme: a RPC devolve o jsonb cru da linha, mas toda rota de
+    // escrita responde dentro de um envelope ({ serviceOrder }).
+    return NextResponse.json({ serviceOrder: data });
 }
 
 export async function DELETE(_request: Request, { params }: RouteParams) {

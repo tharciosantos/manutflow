@@ -248,7 +248,7 @@ Runbook (aplicar, verificar, rollback): [`supabase/README.md`](supabase/README.m
 | `GET /api/service-orders` | `{ serviceOrders, total, page, totalPages }` |
 | `POST /api/service-orders` | `{ serviceOrder }` |
 | `GET /api/service-orders/[id]` | `{ serviceOrder: { ...campos, history } }` |
-| `PATCH /api/service-orders/[id]` | objeto cru (pendência: padronizar como `{ serviceOrder }`) |
+| `PATCH /api/service-orders/[id]` | `{ serviceOrder }` (a linha devolvida pela RPC, embrulhada) |
 | `GET/PATCH /api/profile` | `{ profile }` |
 | `POST /api/upload` | `{ url, path }` |
 | `POST /api/demo-login` | `{ ok: true }` |
@@ -258,6 +258,11 @@ Runbook (aplicar, verificar, rollback): [`supabase/README.md`](supabase/README.m
 | Erros | `{ error: "mensagem" }` |
 
 Paginação: `page` ≥ 1, `limit` entre 1 e 50 (padrão 10), `totalPages = ceil(total / limit)`.
+
+> **Toda mudança de campo numa resposta exige o passo manual em §10.1.** O §10.1 pede
+> "passo, ação, resultado esperado" referente ao que mudou; para mudança de contrato, esse
+> passo é uma verificação via `curl` contra `npm run dev` — e ela entra também no "Como Testar"
+> do PR, junto dos passos de navegador.
 
 ---
 

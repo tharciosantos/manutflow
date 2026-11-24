@@ -170,7 +170,8 @@ manutflow/
 │   │   ├── validation.ts          # Validação de UUID
 │   │   ├── rate-limit.ts          # Rate limiting em memória
 │   │   ├── logger.ts              # Logger estruturado em JSON
-│   │   ├── equipment-photo-storage.ts  # Ownership e remoção de fotos
+│   │   ├── equipment-photo-path.ts     # Regras puras de caminho e ownership
+│   │   ├── equipment-photo-storage.ts  # Remoção de fotos no bucket (service_role)
 │   │   ├── fetch-with-retry.ts    # Retry para chamadas do client
 │   │   ├── safe-redirect.ts       # Proteção contra Open Redirect
 │   │   └── supabase/              # Clientes Supabase (Browser, Server, Middleware)

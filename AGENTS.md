@@ -88,7 +88,8 @@ manutflow/
 │   │   ├── validation.ts      # isUuid() e sanitização de termo de busca
 │   │   ├── rate-limit.ts      # Rate limit em memória (por processo)
 │   │   ├── logger.ts          # Logger JSON (info | warn | error)
-│   │   ├── equipment-photo-storage.ts # Ownership e remoção no bucket
+│   │   ├── equipment-photo-path.ts    # Regras puras de caminho/ownership (sem credencial)
+│   │   ├── equipment-photo-storage.ts # Remoção no bucket (service_role, só escrita)
 │   │   ├── fetch-with-retry.ts# Retry com backoff para chamadas do client
 │   │   ├── safe-redirect.ts   # Proteção contra open redirect
 │   │   └── supabase/          # client.ts (browser), server.ts (RSC/route), middleware.ts
@@ -140,7 +141,7 @@ CRON_SECRET=seu-segredo-cron                   # apenas server-side (Vercel Cron
 ```
 
 - `NEXT_PUBLIC_*` vai para o bundle do browser — nunca coloque segredo ali.
-- `SUPABASE_SERVICE_ROLE_KEY` **ignora RLS**. Usada somente em `src/app/api/upload/route.ts`, `src/app/api/cron/keep-alive/route.ts` e em `src/lib/equipment-photo-storage.ts`. Não pode chegar ao client, a logs ou ao repositório.
+- `SUPABASE_SERVICE_ROLE_KEY` **ignora RLS**. Usada somente em `src/app/api/upload/route.ts`, `src/app/api/cron/keep-alive/route.ts` e em `src/lib/equipment-photo-storage.ts`. Não pode chegar ao client, a logs ou ao repositório. O módulo que a lê foi isolado das regras puras de caminho (`equipment-photo-path.ts`), para que leituras não o importem por acidente — não há guard `server-only` no projeto, e ele **não** deve ser usado como proteção (ver `PR-*.md`/REV3-02 no relatório de auditoria).
 - `DEMO_PASSWORD` alimenta `POST /api/demo-login`. **Nunca** referencie essas variáveis em componente client nem caia em senha padrão no código: sem a env a rota responde `503`.
 - `CRON_SECRET` protege `GET /api/cron/keep-alive` (`Authorization: Bearer <CRON_SECRET>`): sem a env a rota responde `503`.
 

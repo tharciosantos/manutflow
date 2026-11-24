@@ -12,13 +12,17 @@ vi.mock('@/lib/logger', () => ({
     logger: vi.fn(),
 }));
 
-vi.mock('@/lib/equipment-photo-storage', () => ({
+vi.mock('@/lib/equipment-photo-path', () => ({
     isOwnedEquipmentPhotoUrl: vi.fn(),
+}));
+
+vi.mock('@/lib/equipment-photo-storage', () => ({
     removeEquipmentPhotoByUrl: vi.fn(),
 }));
 
 import { getUser } from '@/lib/auth';
-import { isOwnedEquipmentPhotoUrl, removeEquipmentPhotoByUrl } from '@/lib/equipment-photo-storage';
+import { isOwnedEquipmentPhotoUrl } from '@/lib/equipment-photo-path';
+import { removeEquipmentPhotoByUrl } from '@/lib/equipment-photo-storage';
 import { checkRateLimit } from '@/lib/rate-limit';
 import { DELETE, GET, PATCH } from '../route';
 

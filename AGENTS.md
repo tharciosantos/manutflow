@@ -371,39 +371,37 @@ Agrupe apenas pelas categorias presentes no PR, em texto limpo:
 
 ### 13.4 Template Oficial
 
-```markdown
-## Resumo
+O template vive **somente** em
+[`.github/PULL_REQUEST_TEMPLATE.md`](.github/PULL_REQUEST_TEMPLATE.md) — o GitHub preenche o
+corpo de cada PR novo com ele. Esse arquivo é a **fonte única**: não há cópia do template no
+`AGENTS.md`, para não divergir. Para consultar o template, abra o arquivo.
 
-<!-- 1 a 3 frases diretas explicando o que mudou, quais componentes/rotas foram afetados e o impacto. -->
+**O agente entrega o PR completo, não o template em branco.** O corpo que vai para o
+responsável já tem as caixas marcadas e o texto redigido — ele **revisa e faz o merge**; não
+é ele que preenche.
 
-## Tipo de Mudança
+Regras do agente ao redigir o corpo de um PR:
 
-- [ ] Feature
-- [ ] Fix
-- [ ] Refactor
-- [ ] Docs
-- [ ] Test
-- [ ] Chore
+1. **Parta do template** e **preencha tudo**: nenhuma caixa `- [ ]` permanece na entrega.
+   - **Tipo de Mudança:** todas as linhas, marcando `[x]` só nos tipos do PR.
+   - **Changelog:** só as categorias presentes, cada item com verbo no presente do indicativo.
+   - **Como Testar:** passos numerados, reprodutíveis, começando em `npm run dev`.
+   - **Resumo:** 1 a 3 frases citando as rotas/componentes afetados.
+2. **Checklist — marque `[x]` apenas o que foi executado de fato.** Se um comando não rodou
+   (ex.: build bloqueado por outro motivo), deixe `[ ]` e explique o motivo no resumo. Marcar
+   sem executar é proibido.
+3. **Apague as seções que não se aplicam** — não deixe `### Fixes` vazio num PR só de `Chore`
+   nem um "Não se aplica" solto. Item de checklist inaplicável também sai, não fica vazio.
+4. **Deixe o corpo pronto em um arquivo** `PR-<escopo>.md` **fora do repositório** (um nível
+   acima da raiz) e passe com `gh pr create --body-file <caminho>`, para o texto não se perder
+   em heredoc/quebra de linha. Esse arquivo **não é versionado**: nunca vai para o commit, o
+   push ou a branch.
+5. **Só o responsável** abre o PR, roda `gh` e faz o merge. O agente entrega o arquivo pronto,
+   a URL e o título sugerido — nunca abre, nunca mergeia, nunca habilita auto-merge.
 
-## Changelog
-
-### Features
-
-- <!-- Verbo no presente + entrega objetiva -->
-
-## Como Testar
-
-1. Rode `npm run dev`.
-2. Abra `<!-- rota ou página (ex: /equipamentos ou /ordens) -->` e confira `<!-- comportamento esperado -->`.
-
-## Checklist
-
-- [ ] Build passa (`npm run build`)
-- [ ] Lint passa (`npm run lint`)
-- [ ] Testes passam (`npm test`)
-- [ ] TypeScript sem erros (`npx tsc --noEmit`)
-- [ ] Apenas arquivos do escopo alterados
-```
+> **Front matter de commit fora do corpo do PR.** O título do PR é o da seção 13.1; o corpo
+> começa em `## Resumo`. Nunca cole a mensagem de commit, `Co-Authored-By` ou qualquer
+> cabeçalho antes do `## Resumo` — o GitHub não aceita esse texto no corpo e a revisão se perde.
 
 ### 13.5 Exemplo Real de Referência (Gold Standard)
 

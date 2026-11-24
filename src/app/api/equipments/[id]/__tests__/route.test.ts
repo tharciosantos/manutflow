@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it, vi, type Mock } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi, type Mock } from 'vitest';
 
 vi.mock('@/lib/auth', () => ({
     getUser: vi.fn(),
@@ -12,9 +12,14 @@ vi.mock('@/lib/logger', () => ({
     logger: vi.fn(),
 }));
 
-vi.mock('@/lib/equipment-photo-path', () => ({
-    isOwnedEquipmentPhotoUrl: vi.fn(),
-}));
+vi.mock('@/lib/equipment-photo-path', async (importOriginal) => {
+    const actual = await importOriginal<typeof import('@/lib/equipment-photo-path')>();
+
+    return {
+        ...actual,
+        isOwnedEquipmentPhotoUrl: vi.fn(),
+    };
+});
 
 vi.mock('@/lib/equipment-photo-storage', () => ({
     removeEquipmentPhotoByUrl: vi.fn(),
@@ -22,6 +27,7 @@ vi.mock('@/lib/equipment-photo-storage', () => ({
 
 import { getUser } from '@/lib/auth';
 import { isOwnedEquipmentPhotoUrl } from '@/lib/equipment-photo-path';
+import { logger } from '@/lib/logger';
 import { removeEquipmentPhotoByUrl } from '@/lib/equipment-photo-storage';
 import { checkRateLimit } from '@/lib/rate-limit';
 import { DELETE, GET, PATCH } from '../route';
@@ -105,6 +111,12 @@ describe('Equipments Details API', () => {
         vi.mocked(checkRateLimit).mockReturnValue({ allowed: true, remaining: 29 });
         vi.mocked(isOwnedEquipmentPhotoUrl).mockReturnValue(true);
         vi.mocked(removeEquipmentPhotoByUrl).mockResolvedValue({ ok: true });
+        // `orphanedPath` é derivado da URL legada, que depende deste env.
+        vi.stubEnv('NEXT_PUBLIC_SUPABASE_URL', 'https://project.supabase.co');
+    });
+
+    afterEach(() => {
+        vi.unstubAllEnvs();
     });
 
     describe('GET', () => {
@@ -345,6 +357,34 @@ describe('Equipments Details API', () => {
             expect(removeEquipmentPhotoByUrl).toHaveBeenCalledWith(oldPhotoUrl, 'user-1');
         });
 
+        it('mantém o PATCH quando a remoção da foto antiga falha e registra o órfão', async () => {
+            const oldPhotoUrl = 'https://project.supabase.co/storage/v1/object/public/equipment-photos/user-1/old.jpg';
+            const newPhotoUrl = 'https://project.supabase.co/storage/v1/object/public/equipment-photos/user-1/new.jpg';
+            authenticateWith(createSupabaseMock(
+                createQuery({ data: { ...existingEquipment, photo_url: oldPhotoUrl } }),
+                createQuery({ data: { ...existingEquipment, photo_url: newPhotoUrl } }),
+            ));
+            vi.mocked(removeEquipmentPhotoByUrl).mockResolvedValue({
+                ok: false,
+                reason: 'storage_error',
+                message: 'Storage error',
+            });
+
+            const response = await PATCH(
+                request('PATCH', { photo_url: newPhotoUrl }),
+                routeContext(),
+            );
+
+            expect(response.status).toBe(200);
+            expect(logger).toHaveBeenCalledWith('error', 'equipment.photo_orphaned', {
+                userId: 'user-1',
+                equipmentId: EQUIPMENT_ID,
+                reason: 'storage_error',
+                error: 'Storage error',
+                orphanedPath: 'user-1/old.jpg',
+            });
+        });
+
         it('rejeita URL de foto que não pertence ao usuário', async () => {
             authenticateWith(createSupabaseMock(createQuery({ data: existingEquipment })));
             vi.mocked(isOwnedEquipmentPhotoUrl).mockReturnValue(false);
@@ -453,6 +493,33 @@ describe('Equipments Details API', () => {
             expect(deleteQuery.eq).toHaveBeenCalledWith('id', EQUIPMENT_ID);
             expect(deleteQuery.eq).toHaveBeenCalledWith('user_id', 'user-1');
             expect(removeEquipmentPhotoByUrl).toHaveBeenCalledWith(photoUrl, 'user-1');
+        });
+
+        it('mantém a exclusão quando a remoção da foto falha e registra o órfão', async () => {
+            const photoUrl = 'https://project.supabase.co/storage/v1/object/public/equipment-photos/user-1/photo.jpg';
+            authenticateWith(createSupabaseMock(
+                createQuery({ data: [] }),
+                createQuery({ data: { id: EQUIPMENT_ID, photo_url: photoUrl } }),
+            ));
+            vi.mocked(removeEquipmentPhotoByUrl).mockResolvedValue({
+                ok: false,
+                reason: 'storage_error',
+                message: 'Storage error',
+            });
+
+            const response = await DELETE(request('DELETE'), routeContext());
+
+            expect(response.status).toBe(200);
+            await expect(response.json()).resolves.toEqual({
+                message: 'Equipamento excluído com sucesso.',
+            });
+            expect(logger).toHaveBeenCalledWith('error', 'equipment.photo_orphaned', {
+                userId: 'user-1',
+                equipmentId: EQUIPMENT_ID,
+                reason: 'storage_error',
+                error: 'Storage error',
+                orphanedPath: 'user-1/photo.jpg',
+            });
         });
 
         it('retorna 500 quando a exclusão falha', async () => {

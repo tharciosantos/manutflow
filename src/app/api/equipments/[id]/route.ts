@@ -1,7 +1,7 @@
 import { getUser } from "@/lib/auth";
 import { checkRateLimit } from "@/lib/rate-limit";
 import { logger } from "@/lib/logger";
-import { isOwnedEquipmentPhotoUrl } from '@/lib/equipment-photo-path';
+import { getOwnedEquipmentPhotoPath, isOwnedEquipmentPhotoUrl } from '@/lib/equipment-photo-path';
 import { removeEquipmentPhotoByUrl } from '@/lib/equipment-photo-storage';
 import { isUuid } from '@/lib/validation';
 
@@ -282,6 +282,10 @@ export async function PATCH(request: Request, { params }: RouteParams) {
     );
   }
 
+  // REV3-03: a remoção acontece DEPOIS do UPDATE, porque o registro de origem já
+  // trocou de foto e a URL antiga não é mais referenciada por ninguém. Falha
+  // nesta etapa não desfaz o PATCH (a alteração pedida foi aplicada), mas o
+  // objeto fica órfão no bucket — por isso o log carrega `orphanedPath`.
   if (
     body.photo_url !== undefined
     && existing.photo_url
@@ -290,11 +294,12 @@ export async function PATCH(request: Request, { params }: RouteParams) {
     const removalResult = await removeEquipmentPhotoByUrl(existing.photo_url, user.id);
 
     if (removalResult && !removalResult.ok) {
-      logger('error', 'equipment.photo_cleanup_error', {
+      logger('error', 'equipment.photo_orphaned', {
         userId: user.id,
         equipmentId: id,
         reason: removalResult.reason,
         error: removalResult.message,
+        orphanedPath: getOwnedEquipmentPhotoPath(existing.photo_url, user.id),
       });
     }
   }
@@ -395,15 +400,21 @@ export async function DELETE(_request: Request, { params }: RouteParams) {
         );
     }
 
+    // REV3-03: `photo_url` vem do `.select()` do próprio DELETE, dentro da mesma
+    // instrução — o caminho está disponível mesmo depois de a linha sumir. Se a
+    // remoção no bucket falhar, o objeto fica órfão: o log carrega `orphanedPath`
+    // para permitir a limpeza manual, e a resposta segue 200 porque a exclusão do
+    // equipamento, que é a operação pedida, foi concluída.
     if (deletedEquipment.photo_url) {
         const removalResult = await removeEquipmentPhotoByUrl(deletedEquipment.photo_url, user.id);
 
         if (removalResult && !removalResult.ok) {
-            logger('error', 'equipment.photo_cleanup_error', {
+            logger('error', 'equipment.photo_orphaned', {
                 userId: user.id,
                 equipmentId: id,
                 reason: removalResult.reason,
                 error: removalResult.message,
+                orphanedPath: getOwnedEquipmentPhotoPath(deletedEquipment.photo_url, user.id),
             });
         }
     }

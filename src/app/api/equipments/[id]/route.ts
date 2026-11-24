@@ -1,7 +1,8 @@
 import { getUser } from "@/lib/auth";
 import { checkRateLimit } from "@/lib/rate-limit";
 import { logger } from "@/lib/logger";
-import { isOwnedEquipmentPhotoUrl, removeEquipmentPhotoByUrl } from '@/lib/equipment-photo-storage';
+import { isOwnedEquipmentPhotoUrl } from '@/lib/equipment-photo-path';
+import { removeEquipmentPhotoByUrl } from '@/lib/equipment-photo-storage';
 import { isUuid } from '@/lib/validation';
 
 export const dynamic = "force-dynamic";

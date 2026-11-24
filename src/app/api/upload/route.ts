@@ -3,11 +3,8 @@ import { getUser } from "@/lib/auth";
 import { checkRateLimit } from "@/lib/rate-limit";
 import { logger } from "@/lib/logger";
 import { createClient } from "@supabase/supabase-js";
-import {
-    EQUIPMENT_PHOTOS_BUCKET,
-    removeEquipmentPhotoByPath,
-    toEquipmentPhotoUrl,
-} from '@/lib/equipment-photo-storage';
+import { EQUIPMENT_PHOTOS_BUCKET, toEquipmentPhotoUrl } from '@/lib/equipment-photo-path';
+import { removeEquipmentPhotoByPath } from '@/lib/equipment-photo-storage';
 
 export const dynamic = "force-dynamic";
 

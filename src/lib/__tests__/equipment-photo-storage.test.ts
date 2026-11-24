@@ -9,12 +9,10 @@ vi.mock('@supabase/supabase-js', () => ({
     })),
 }));
 
+import { EQUIPMENT_PHOTOS_BUCKET } from '@/lib/equipment-photo-path';
 import {
-    EQUIPMENT_PHOTOS_BUCKET,
-    getEquipmentPhotoPath,
-    isOwnedEquipmentPhotoPath,
     removeEquipmentPhotoByPath,
-    toEquipmentPhotoUrl,
+    removeEquipmentPhotoByUrl,
 } from '@/lib/equipment-photo-storage';
 
 describe('Equipment photo storage', () => {
@@ -40,77 +38,6 @@ describe('Equipment photo storage', () => {
         } else {
             process.env.SUPABASE_SERVICE_ROLE_KEY = originalServiceRoleKey;
         }
-    });
-
-    it.each([
-        'user-1/photo.jpg',
-        'user-1/1712345678-a1b2c3.png',
-        'user-1/equipment_image.webp',
-    ])('aceita um caminho de imagem pertencente ao usuário: %s', (path) => {
-        expect(isOwnedEquipmentPhotoPath(path, 'user-1')).toBe(true);
-    });
-
-    it.each([
-        'user-2/photo.jpg',
-        'user-1/folder/photo.jpg',
-        'user-1/../photo.jpg',
-        '/user-1/photo.jpg',
-        'user-1/photo.svg',
-        'user-1/photo',
-    ])('rejeita um caminho não pertencente ou inválido: %s', (path) => {
-        expect(isOwnedEquipmentPhotoPath(path, 'user-1')).toBe(false);
-    });
-
-    it('extrai o caminho de uma URL pública válida', () => {
-        const path = getEquipmentPhotoPath(
-            'https://project.supabase.co/storage/v1/object/public/equipment-photos/user-1/photo.jpg',
-            'user-1',
-            'https://project.supabase.co',
-        );
-
-        expect(path).toBe('user-1/photo.jpg');
-    });
-
-    it.each([
-        'https://other.supabase.co/storage/v1/object/public/equipment-photos/user-1/photo.jpg',
-        'https://project.supabase.co/storage/v1/object/public/equipment-photos/user-2/photo.jpg',
-        'https://project.supabase.co/storage/v1/object/public/other-bucket/user-1/photo.jpg',
-        'not-a-url',
-    ])('não extrai caminhos de uma URL externa ou inválida: %s', (url) => {
-        expect(getEquipmentPhotoPath(url, 'user-1', 'https://project.supabase.co')).toBeNull();
-    });
-
-    describe('URL interna do proxy (AUD-15)', () => {
-        it('monta a URL do proxy a partir do caminho', () => {
-            expect(toEquipmentPhotoUrl('user-1/1712345678-a1b2c3.jpg'))
-                .toBe('/api/photos/user-1/1712345678-a1b2c3.jpg');
-        });
-
-        it('codifica cada segmento do caminho', () => {
-            expect(toEquipmentPhotoUrl('user-1/foto com espaço.jpg'))
-                .toBe('/api/photos/user-1/foto%20com%20espa%C3%A7o.jpg');
-        });
-
-        it('extrai o caminho de uma URL do proxy', () => {
-            expect(getEquipmentPhotoPath('/api/photos/user-1/photo.jpg', 'user-1', ''))
-                .toBe('user-1/photo.jpg');
-        });
-
-        it('rejeita nome de arquivo com caractere fora da lista permitida', () => {
-            // A lista é [A-Za-z0-9._-]; espaço decodificado não passa.
-            expect(getEquipmentPhotoPath('/api/photos/user-1/foto%20a.jpg', 'user-1', ''))
-                .toBeNull();
-        });
-
-        it.each([
-            '/api/photos/user-2/photo.jpg',
-            '/api/photos/user-1/../photo.jpg',
-            '/api/photos/user-1/photo.svg',
-            '/api/photos/user-1',
-            '/api/photos/user-1/%E0%A4%A',
-        ])('rejeita URL do proxy de outro usuário ou malformada: %s', (url) => {
-            expect(getEquipmentPhotoPath(url, 'user-1', '')).toBeNull();
-        });
     });
 
     it('remove uma foto válida do bucket', async () => {
@@ -145,6 +72,22 @@ describe('Equipment photo storage', () => {
             ok: false,
             reason: 'storage_error',
             message: 'Storage error',
+        });
+    });
+
+    describe('removeEquipmentPhotoByUrl', () => {
+        it('devolve null sem tocar o Storage quando a URL não é do usuário', async () => {
+            const result = await removeEquipmentPhotoByUrl('/api/photos/user-2/photo.jpg', 'user-1');
+
+            expect(result).toBeNull();
+            expect(fromMock).not.toHaveBeenCalled();
+        });
+
+        it('remove a foto a partir da URL interna do proxy', async () => {
+            const result = await removeEquipmentPhotoByUrl('/api/photos/user-1/photo.jpg', 'user-1');
+
+            expect(result).toEqual({ ok: true });
+            expect(removeMock).toHaveBeenCalledWith(['user-1/photo.jpg']);
         });
     });
 });

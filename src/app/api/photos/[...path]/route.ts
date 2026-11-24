@@ -4,7 +4,7 @@ import { logger } from '@/lib/logger';
 import {
     EQUIPMENT_PHOTOS_BUCKET,
     isOwnedEquipmentPhotoPath,
-} from '@/lib/equipment-photo-storage';
+} from '@/lib/equipment-photo-path';
 
 export const dynamic = 'force-dynamic';
 

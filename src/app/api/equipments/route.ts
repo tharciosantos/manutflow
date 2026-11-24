@@ -1,7 +1,7 @@
 import { getUser } from "@/lib/auth";
 import { checkRateLimit } from "@/lib/rate-limit";
 import { logger } from "@/lib/logger";
-import { isOwnedEquipmentPhotoUrl } from "@/lib/equipment-photo-storage";
+import { isOwnedEquipmentPhotoUrl } from "@/lib/equipment-photo-path";
 import { toPostgrestSearchTerm } from "@/lib/validation";
 
 export const dynamic = "force-dynamic";

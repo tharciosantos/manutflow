@@ -23,11 +23,14 @@ vi.mock('@/lib/logger', () => ({
     logger: vi.fn(),
 }));
 
-vi.mock('@/lib/equipment-photo-storage', () => ({
+vi.mock('@/lib/equipment-photo-path', () => ({
     EQUIPMENT_PHOTOS_BUCKET: 'equipment-photos',
-    removeEquipmentPhotoByPath: vi.fn(),
     // AUD-15: o upload devolve a URL interna do proxy, não a URL pública do bucket.
     toEquipmentPhotoUrl: vi.fn((path: string) => `/api/photos/${path}`),
+}));
+
+vi.mock('@/lib/equipment-photo-storage', () => ({
+    removeEquipmentPhotoByPath: vi.fn(),
 }));
 
 import { getUser } from '@/lib/auth';

@@ -15,7 +15,7 @@ vazamento cross-tenant (AUD-01) não foi notado.
 | `migrations/0004_storage_hardening.sql` | Torna o bucket `equipment-photos` **privado**, define limites de tamanho/MIME e cria as políticas de dono no Storage. | **Aplicado em 2026-10-24.** |
 | `migrations/0005_storage_policies_cleanup.sql` | Remove **todas** as políticas de `storage.objects` que não sejam as de dono. Necessária porque o filtro da `0004` só alcançava políticas com expressão `true`, e o template do Supabase usa `bucket_id = '…'`. | **Aplicado em 2026-10-24** (validado em produção). |
 | `migrations/0006_keep_alive.sql` | Cria a tabela técnica `public.keep_alive` (1 linha) com RLS ativa, sem acesso para `anon`/`authenticated` e acesso restrito a `service_role`. | **Aplicado em 2026-11-12** (validado manualmente). |
-| `migrations/0007_history_on_create.sql` | Trigger `service_orders_log_created` grava o evento `created` em `service_order_history` na mesma transação do INSERT da ordem, e faz backfill das ordens existentes. | **Pendente de aplicação.** |
+| `migrations/0007_history_on_create.sql` | Trigger `service_orders_log_created` grava o evento `created` em `service_order_history` na mesma transação do INSERT da ordem, e faz backfill das ordens existentes. | **Aplicado em 2026-11-24** (auditado: 9 ordens, 9 eventos `created`, 0 duplicata, 0 sem registro). |
 
 ## Como aplicar
 

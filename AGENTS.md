@@ -43,7 +43,7 @@ O **ManutFlow** é um sistema CMMS (Computerized Maintenance Management System) 
 | **Banco / Auth / Storage** | Supabase SSR (`@supabase/ssr`, `@supabase/supabase-js`) | PostgreSQL + Bucket `equipment-photos` |
 | **Ícones** | Lucide React | ^1.31.x |
 | **Gráficos** | Recharts | ^3.9.x (BarChart semestral) |
-| **Testes** | Vitest + Testing Library | 19 arquivos / 207 testes / jsdom |
+| **Testes** | Vitest + Testing Library | 22 arquivos / 225 testes / jsdom |
 | **Linter** | ESLint (flat config) + eslint-config-next | 9.x / 16.4.x |
 
 ---
@@ -113,7 +113,7 @@ manutflow/
 npm run dev              # Next.js em http://localhost:3000
 
 # Validação e Testes
-npm test                 # Executa os 207 testes (Vitest, single run)
+npm test                 # Executa os 225 testes (Vitest, single run)
 npm run test:watch       # Modo watch interativo
 npx tsc --noEmit         # Verificação estrita de tipagem
 npm run lint             # ESLint (flat config)
@@ -175,6 +175,7 @@ O schema é versionado em `supabase/migrations/`. **Toda mudança de schema deve
 | `0004_storage_hardening.sql` | Bucket privado, limites de tamanho/MIME e políticas de dono no Storage |
 | `0005_storage_policies_cleanup.sql` | Remove policies legadas de `storage.objects` por varredura (a `0004` não bastou) |
 | `0006_keep_alive.sql` | Cria tabela técnica `keep_alive` (1 linha) sem acesso `anon`/`authenticated` |
+| `0007_history_on_create.sql` | Trigger `service_orders_log_created`: evento `created` no histórico na transação do INSERT + backfill das ordens existentes |
 
 Runbook (aplicar, verificar, rollback): [`supabase/README.md`](supabase/README.md).
 
@@ -201,6 +202,7 @@ Runbook (aplicar, verificar, rollback): [`supabase/README.md`](supabase/README.m
 
 - `equipments`, `service_orders` e `service_order_history` têm RLS habilitada com políticas de dono (`user_id = auth.uid()`).
 - `service_order_history` não tem política de `UPDATE`/`DELETE`: é append-only por consequência.
+- O evento `created` é gravado por trigger (`service_orders_log_created`, migration `0007`), na mesma transação do INSERT da ordem. Nenhuma rota insere este evento — quem criar um caminho de inserção novo não precisa repetir a lógica.
 - O papel `anon` não tem GRANT nas tabelas de dados; qualquer leitura sem JWT retorna `42501`.
 - **Políticas de RLS se combinam com `OR`.** Uma política permissiva antiga anula qualquer política restritiva nova. Ao auditar isolamento, liste `pg_policies` antes de concluir que está protegido.
 - **Remover policy legada exige varredura, não filtro por expressão.** Policies do template do Supabase usam `bucket_id = '<bucket>'`, não `true`; filtrar por `qual = 'true'` deixa passar e o acesso continua aberto (aconteceu na `0004`, corrigido na `0005`). Remova por escopo — todas as policies da tabela menos as de dono — e recrie só as suas.
@@ -309,7 +311,7 @@ desde o passo 2.
 
 ### 10.2 Suíte automatizada
 
-- **19 arquivos / 207 testes**, todos passando, cobrindo:
+- **22 arquivos / 225 testes**, todos passando, cobrindo:
   - domínio: prazos, badges de SLA, config de status, redirect seguro, validação de UUID, retry;
   - API routes: auth, perfil, equipamentos, ordens, upload, dashboard e rate limit;
   - componentes: dashboard, toolbar, listas, tema.
@@ -550,3 +552,4 @@ Adiciona o filtro de prazo `next_7_days` na toolbar de `/ordens` e no endpoint `
 > | ------ | -------- | --------------------------------------------------------------------------------------------------------------------------------------------- |
 > | 3.0    | Out/2026 | Consolida arquitetura CMMS, RLS/Storage privado, proxy autenticado de fotos e suíte de 207 testes                                             |
 > | 3.1    | Out/2026 | Refina padrão de Pull Request com template limpo sem emojis, inclusão de verificação de formatação/tipos no checklist e exemplo Gold Standard |
+> | 3.2    | Nov/2026 | Evento `created` no histórico via trigger (migration `0007`), divisão do módulo de fotos, contrato `{ serviceOrder }` no PATCH e contagem atualizada de testes |

@@ -15,6 +15,7 @@ vazamento cross-tenant (AUD-01) não foi notado.
 | `migrations/0004_storage_hardening.sql` | Torna o bucket `equipment-photos` **privado**, define limites de tamanho/MIME e cria as políticas de dono no Storage. | **Aplicado em 2026-10-24.** |
 | `migrations/0005_storage_policies_cleanup.sql` | Remove **todas** as políticas de `storage.objects` que não sejam as de dono. Necessária porque o filtro da `0004` só alcançava políticas com expressão `true`, e o template do Supabase usa `bucket_id = '…'`. | **Aplicado em 2026-10-24** (validado em produção). |
 | `migrations/0006_keep_alive.sql` | Cria a tabela técnica `public.keep_alive` (1 linha) com RLS ativa, sem acesso para `anon`/`authenticated` e acesso restrito a `service_role`. | **Aplicado em 2026-11-12** (validado manualmente). |
+| `migrations/0007_history_on_create.sql` | Trigger `service_orders_log_created` grava o evento `created` em `service_order_history` na mesma transação do INSERT da ordem, e faz backfill das ordens existentes. | **Pendente de aplicação.** |
 
 ## Como aplicar
 
@@ -103,6 +104,33 @@ select id, last_ping_at from public.keep_alive;
 | `GET /rest/v1/keep_alive?select=*` com a chave `anon` | `401/403` (sem GRANT) |
 | `GET /api/cron/keep-alive` sem `Authorization: Bearer <CRON_SECRET>` | `401` |
 | `GET /api/cron/keep-alive` com `Authorization: Bearer <CRON_SECRET>` | `200` e atualiza `last_ping_at` |
+
+**Para a `0007`** — evento `created` no histórico de ordens:
+
+```sql
+select tgname, tgenabled
+  from pg_trigger
+ where tgrelid = 'public.service_orders'::regclass
+   and tgname = 'service_orders_log_created';
+-- esperado: 1 linha com tgenabled = 'O'
+
+select count(*) filter (where h.cnt = 1) as com_um,
+       count(*) filter (where h.cnt > 1) as com_duplicata,
+       count(*) filter (where h.cnt = 0) as sem_registro
+  from (
+    select so.id,
+           (select count(*) from public.service_order_history x
+             where x.service_order_id = so.id and x.event_type = 'created') as cnt
+      from public.service_orders so
+  ) h;
+-- esperado: com_duplicata = 0 e sem_registro = 0
+```
+
+| Teste | Esperado |
+|---|---|
+| Criar uma ordem pela UI em `/ordens` e abrir a ficha | Histórico começa com o evento `created` |
+| `select event_type, new_status, created_at from public.service_order_history where service_order_id = '<id>' order by created_at` | Primeira linha `created`, com `created_at` igual ao da ordem |
+| `select proacl from pg_proc where proname = 'log_service_order_created'` | Sem `EXECUTE` para `authenticated` nem `anon` |
 
 ## Rollback
 

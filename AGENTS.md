@@ -553,3 +553,13 @@ Adiciona o filtro de prazo `next_7_days` na toolbar de `/ordens` e no endpoint `
 > | 3.0    | Out/2026 | Consolida arquitetura CMMS, RLS/Storage privado, proxy autenticado de fotos e suíte de 207 testes                                             |
 > | 3.1    | Out/2026 | Refina padrão de Pull Request com template limpo sem emojis, inclusão de verificação de formatação/tipos no checklist e exemplo Gold Standard |
 > | 3.2    | Nov/2026 | Evento `created` no histórico via trigger (migration `0007`), divisão do módulo de fotos, contrato `{ serviceOrder }` no PATCH e contagem atualizada de testes |
+
+<!-- BEGIN:nextjs-agent-rules -->
+
+## This is NOT the Next.js you know
+
+This version has breaking changes — APIs, conventions, and file structure may all differ from your training data. Read the relevant guide in `node_modules/next/dist/docs/` (resolved from this file's directory; in monorepos the `next` package may not be visible from the repo root) before writing any code. Heed deprecation notices.
+
+This block is written and re-added by `next dev` — verify at `node_modules/next/dist/server/lib/generate-agent-files.js`. Removing it from a diff only re-creates the uncommitted change; committing it with your work keeps the tree clean.
+
+<!-- END:nextjs-agent-rules -->

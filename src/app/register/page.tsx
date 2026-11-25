@@ -77,7 +77,7 @@ export default function RegisterPage() {
                             onChange={e => setFullName(e.target.value)}
                             placeholder="Seu nome"
                             autoComplete="name"
-                            className="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-lg text-slate-900 placeholder-slate-400 focus:outline-none focus:border-teal-500 focus:bg-white text-xs sm:text-sm transition-colors dark:bg-slate-950 dark:border-slate-700 dark:text-slate-100 dark:placeholder-slate-500"
+                            className="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-lg text-slate-900 placeholder-slate-400 focus:outline-none focus:border-teal-500 focus:bg-white dark:focus:bg-slate-900 text-xs sm:text-sm transition-colors dark:bg-slate-950 dark:border-slate-700 dark:text-slate-100 dark:placeholder-slate-500"
                         />
                     </div>
 
@@ -94,7 +94,7 @@ export default function RegisterPage() {
                             required
                             placeholder="seu@email.com"
                             autoComplete="email"
-                            className="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-lg text-slate-900 placeholder-slate-400 focus:outline-none focus:border-teal-500 focus:bg-white text-xs sm:text-sm transition-colors dark:bg-slate-950 dark:border-slate-700 dark:text-slate-100 dark:placeholder-slate-500"
+                            className="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-lg text-slate-900 placeholder-slate-400 focus:outline-none focus:border-teal-500 focus:bg-white dark:focus:bg-slate-900 text-xs sm:text-sm transition-colors dark:bg-slate-950 dark:border-slate-700 dark:text-slate-100 dark:placeholder-slate-500"
                         />
                     </div>
 
@@ -113,7 +113,7 @@ export default function RegisterPage() {
                                 minLength={6}
                                 placeholder="Mínimo 6 caracteres"
                                 autoComplete="new-password"
-                                className="w-full pl-3 pr-16 py-2 bg-slate-50 border border-slate-300 rounded-lg text-slate-900 placeholder-slate-400 focus:outline-none focus:border-teal-500 focus:bg-white text-xs sm:text-sm transition-colors dark:bg-slate-950 dark:border-slate-700 dark:text-slate-100 dark:placeholder-slate-500"
+                                className="w-full pl-3 pr-16 py-2 bg-slate-50 border border-slate-300 rounded-lg text-slate-900 placeholder-slate-400 focus:outline-none focus:border-teal-500 focus:bg-white dark:focus:bg-slate-900 text-xs sm:text-sm transition-colors dark:bg-slate-950 dark:border-slate-700 dark:text-slate-100 dark:placeholder-slate-500"
                             />
                             <button
                                 type="button"

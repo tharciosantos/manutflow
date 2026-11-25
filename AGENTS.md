@@ -43,7 +43,7 @@ O **ManutFlow** é um sistema CMMS (Computerized Maintenance Management System) 
 | **Banco / Auth / Storage** | Supabase SSR (`@supabase/ssr`, `@supabase/supabase-js`) | PostgreSQL + Bucket `equipment-photos` |
 | **Ícones** | Lucide React | ^1.31.x |
 | **Gráficos** | Recharts | ^3.9.x (BarChart semestral) |
-| **Testes** | Vitest + Testing Library | 24 arquivos / 245 testes / jsdom |
+| **Testes** | Vitest + Testing Library | 25 arquivos / 259 testes / jsdom |
 | **Linter** | ESLint (flat config) + eslint-config-next | 9.x / 16.4.x |
 
 ---
@@ -113,7 +113,7 @@ manutflow/
 npm run dev              # Next.js em http://localhost:3000
 
 # Validação e Testes
-npm test                 # Executa os 245 testes (Vitest, single run)
+npm test                 # Executa os 259 testes (Vitest, single run)
 npm run test:watch       # Modo watch interativo
 npx tsc --noEmit         # Verificação estrita de tipagem
 npm run lint             # ESLint (flat config)
@@ -311,7 +311,7 @@ desde o passo 2.
 
 ### 10.2 Suíte automatizada
 
-- **24 arquivos / 245 testes**, todos passando, cobrindo:
+- **25 arquivos / 259 testes**, todos passando, cobrindo:
   - domínio: prazos, badges de SLA, config de status, redirect seguro, validação de UUID, retry;
   - API routes: auth, perfil, equipamentos, ordens, upload, dashboard e rate limit;
   - componentes: dashboard, toolbar, listas, tema.
@@ -326,7 +326,7 @@ desde o passo 2.
 - **Toolbar simétrico**: grid de 4 colunas (`Status`, `Prioridade`, `Prazo`, `Ordenar`).
 - **Tema**: claro e escuro via `next-themes` (`attribute="class"`), padrão escuro, `enableSystem`.
 - **Paleta**: modo escuro em `slate-950` / `slate-900/60` / bordas `slate-800`; modo claro em `slate-50` / branco. Acentos semânticos: `teal-500` (ação), `amber` (atenção), `red` (crítico), `sky` (programado), `emerald` (concluído).
-- **Modal**: `<dialog>` nativo (`showModal`), fechamento por ESC e clique no backdrop. Modal com `children` não exibe rodapé de confirmação.
+- **Modal**: `<dialog>` nativo (`showModal`), fechamento por ESC e clique no backdrop, ambos desabilitados com `isLoading`. Botão X sempre presente (some com `hideClose`); ao abrir, o foco vai para o primeiro campo. Modal com `children` não exibe rodapé de confirmação — o "Cancelar" é do formulário (`onEditCancel` no form de equipamento, `onCancel` no de ordem).
 - **Acessibilidade**: labels em todos os campos, `aria-label` em seletores iconográficos, `aria-live` nos feedbacks dos formulários.
 
 ---

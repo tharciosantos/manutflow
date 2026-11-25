@@ -12,14 +12,14 @@ O ManutFlow foi desenvolvido para equipes operacionais e gestores de manutençã
 - **Hero Institucional**: Apresentação clara da proposta de valor, acesso rápido ao login e registro.
 - **Simulador Interativo de Manutenção (Live Interactive Flow)**: Demonstração em tempo real das 3 etapas de uma ordem de manutenção (*Aberta, Em Andamento, Concluída*) com ficha técnica, patrimônio do ativo e auditoria de status, sem necessidade de autenticação prévia.
 - **Capacidades Operacionais**: Cards técnicos detalhando controle de inventário, conformidade de prazos e rastreabilidade.
-- **Renderização Condicional**: Landing Page para visitantes; Dashboard Operacional para usuários autenticados, na mesma rota `/`.
+- **Renderização Condicional no Servidor**: a rota `/` é um server component que decide no servidor entre a Landing Page e o Dashboard Operacional. O HTML inicial do visitante já é a página completa, não um estado de carregamento, o que também torna a landing indexável por crawlers.
 
 ### Dashboard Operacional
 - **Indicadores**: Total de equipamentos, ordens abertas e concluídas.
 - **Controle de Prazos (SLAs)**: Ordens atrasadas, vencendo hoje e nos próximos 7 dias.
 - **Atalhos Inteligentes**: Filtros de prazo acionados com 1 clique diretamente dos cards de métricas.
 - **Ordens Urgentes**: Destaque das 3 ordens com prazo mais crítico.
-- **Gráfico Mensal (Recharts)**: Volume de ordens dos últimos 6 meses.
+- **Gráfico Mensal (Recharts)**: Volume de ordens dos últimos 6 meses, carregado sob demanda — a biblioteca de gráficos não entra no bundle de quem visita a landing.
 - **Ordens Recentes**: Últimas ordens criadas, com ativo e data.
 - **Taxa de Conclusão**: Percentual de ordens fechadas sobre o total.
 - **Auto-refresh**: Recarga dos dados ao retornar o foco para a aba (`visibilitychange`).
@@ -79,7 +79,7 @@ O ManutFlow foi desenvolvido para equipes operacionais e gestores de manutençã
 | **Storage** | Supabase Storage | Fotos de equipamentos com controle de permissão |
 | **Gráficos** | Recharts | Gráfico de barras do volume mensal de ordens |
 | **Ícones** | Lucide React | Ícones funcionais |
-| **Testes** | Vitest + Testing Library | 267 testes automatizados em 26 arquivos |
+| **Testes** | Vitest + Testing Library | 273 testes automatizados em 28 arquivos |
 | **Qualidade** | ESLint 9 (Flat Config) | Padronização e análise estática de código |
 
 ---
@@ -267,7 +267,7 @@ npm run lint          # ESLint
 npm run build         # build de produção
 ```
 
-**Suíte de testes:** 267 testes automatizados em 26 arquivos, cobrindo rotas de API, autenticação, cálculos de SLA, rate limiting, storage e componentes de interface.
+**Suíte de testes:** 273 testes automatizados em 28 arquivos, cobrindo rotas de API, autenticação, cálculos de SLA, rate limiting, storage e componentes de interface.
 
 ---
 

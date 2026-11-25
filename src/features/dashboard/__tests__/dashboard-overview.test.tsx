@@ -5,16 +5,12 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { getDateOnlyInTimeZone } from '@/features/service-orders/service-order-deadline';
 import { DashboardOverview } from '../dashboard-overview';
 
-vi.mock('recharts', () => ({
-    BarChart: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
-    Bar: () => null,
-    XAxis: () => null,
-    YAxis: () => null,
-    CartesianGrid: () => null,
-    Tooltip: () => null,
-    ResponsiveContainer: ({ children }: { children: React.ReactNode }) => (
-        <div>{children}</div>
-    ),
+// AUD-08: o gráfico virou chunk carregado por `next/dynamic`; o Recharts não
+// é mais importado por este arquivo. O gráfico tem teste próprio em
+// dashboard-monthly-chart.test.tsx (e o mock de `recharts` aqui não casaria
+// mais com nada).
+vi.mock('next/dynamic', () => ({
+    default: () => () => <div data-testid="monthly-chart" />,
 }));
 
 const summary = {

@@ -1,11 +1,36 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect, vi, beforeEach, afterEach, type Mock } from 'vitest';
 
 vi.mock('@/lib/auth', () => ({
   getUser: vi.fn(),
 }));
 
+vi.mock('@/lib/logger', () => ({
+  logger: vi.fn(),
+}));
+
 import { getUser } from '@/lib/auth';
+import { logger } from '@/lib/logger';
 import { GET } from '../route';
+
+// Mesma ordem de declaração das 16 consultas em Promise.all no route handler.
+const QUERY_NAMES = [
+  'equipments',
+  'serviceOrders',
+  'openOrders',
+  'inProgressOrders',
+  'closedOrders',
+  'lowPriorityOrders',
+  'mediumPriorityOrders',
+  'highPriorityOrders',
+  'criticalPriorityOrders',
+  'recentOrders',
+  'recentEquipments',
+  'ordersByMonth',
+  'overdueOrders',
+  'dueTodayOrders',
+  'dueNextSevenDaysOrders',
+  'urgentOrders',
+];
 
 /**
  * Cria um mock de Supabase que suporta:
@@ -47,9 +72,28 @@ function createMockSupabase(callResults?: unknown[]) {
   };
 }
 
+/** 16 resultados vazios, com o resultado de `index` substituído. */
+function resultsWith(index: number, result: unknown) {
+  const results: unknown[] = Array(16).fill({ data: [], count: 0, error: null });
+  results[index] = result;
+  return results;
+}
+
+function mockAuthenticatedUser(callResults: unknown[]) {
+  (getUser as Mock).mockResolvedValue({
+    user: { id: 'user-1' },
+    supabase: createMockSupabase(callResults),
+    error: null,
+  });
+}
+
 describe('Dashboard Summary API', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+  });
+
+  afterEach(() => {
+    vi.restoreAllMocks();
   });
 
   it('deve retornar totais zerados quando não há dados', async () => {
@@ -170,5 +214,71 @@ describe('Dashboard Summary API', () => {
 
     const body = await response.json();
     expect(body.error).toBeDefined();
+  });
+
+  describe('AUD-29: log estruturado em vez de console.error', () => {
+    it('registra a falha via logger, só com os nomes das queries que falharam', async () => {
+      const results = resultsWith(4, { data: [], count: 0, error: { message: 'DB error' } });
+      mockAuthenticatedUser(results);
+
+      const response = await GET();
+
+      expect(response.status).toBe(500);
+      expect(logger).toHaveBeenCalledTimes(1);
+      expect(logger).toHaveBeenCalledWith('error', 'api.error', {
+        route: 'dashboard-summary',
+        method: 'GET',
+        failedQueries: ['closedOrders'],
+      });
+    });
+
+    it('lista todas as queries que falharam juntas', async () => {
+      const results = Array(16).fill({ data: [], count: 0, error: null });
+      results[0] = { data: [], count: 0, error: { message: 'equipments offline' } };
+      results[15] = { data: [], count: 0, error: { message: 'urgent offline' } };
+      mockAuthenticatedUser(results);
+
+      await GET();
+
+      expect(logger).toHaveBeenCalledWith(
+        'error',
+        'api.error',
+        expect.objectContaining({ failedQueries: ['equipments', 'urgentOrders'] }),
+      );
+      // A ordem segue a das consultas no handler, não a de chegada do erro.
+      expect(QUERY_NAMES[0]).toBe('equipments');
+      expect(QUERY_NAMES[15]).toBe('urgentOrders');
+    });
+
+    it('não escreve direto no console', async () => {
+      const errorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+      mockAuthenticatedUser(resultsWith(9, { data: [], count: 0, error: { message: 'DB error' } }));
+
+      await GET();
+
+      expect(errorSpy).not.toHaveBeenCalled();
+    });
+
+    it('não falha nem loga quando a query responde 200 sem dados', async () => {
+      mockAuthenticatedUser(resultsWith(10, { data: [], count: 0, error: null }));
+
+      const response = await GET();
+
+      expect(response.status).toBe(200);
+      expect(logger).not.toHaveBeenCalled();
+    });
+
+    it('erro sem mensagem não derruba o dashboard com 500 silencioso', async () => {
+      const errorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+      mockAuthenticatedUser(resultsWith(2, { data: [], count: 3, error: {} }));
+
+      const response = await GET();
+      const body = await response.json();
+
+      expect(response.status).toBe(200);
+      expect(body.openServiceOrders).toBe(3);
+      expect(logger).not.toHaveBeenCalled();
+      expect(errorSpy).not.toHaveBeenCalled();
+    });
   });
 });

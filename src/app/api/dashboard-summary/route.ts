@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { getUser } from "@/lib/auth";
+import { logger } from "@/lib/logger";
 import {
     addDaysToDateOnly,
     getDateOnlyInTimeZone,
@@ -155,23 +156,33 @@ export async function GET() {
             .limit(5),
     ]);
 
-    const hasError =
-        equipmentsResult.error ||
-        serviceOrdersResult.error ||
-        openOrdersResult.error ||
-        inProgressOrdersResult.error ||
-        closedOrdersResult.error ||
-        lowPriorityOrdersResult.error ||
-        mediumPriorityOrdersResult.error ||
-        highPriorityOrdersResult.error ||
-        criticalPriorityOrdersResult.error ||
-        recentOrdersResult.error ||
-        recentEquipmentsResult.error ||
-        ordersByMonthResult.error ||
-        overdueOrdersResult.error ||
-        dueTodayOrdersResult.error ||
-        dueNextSevenDaysOrdersResult.error ||
-        urgentOrdersResult.error;
+    // AUD-29: erro sem mensagem (ex.: abort) antes virava objeto truthy e
+    // derrubava o dashboard com 500 silencioso. Agora conta como falha só
+    // quando há mensagem, e o logger registra o que de fato falhou.
+    const queryErrors = (
+        [
+            ['equipments', equipmentsResult],
+            ['serviceOrders', serviceOrdersResult],
+            ['openOrders', openOrdersResult],
+            ['inProgressOrders', inProgressOrdersResult],
+            ['closedOrders', closedOrdersResult],
+            ['lowPriorityOrders', lowPriorityOrdersResult],
+            ['mediumPriorityOrders', mediumPriorityOrdersResult],
+            ['highPriorityOrders', highPriorityOrdersResult],
+            ['criticalPriorityOrders', criticalPriorityOrdersResult],
+            ['recentOrders', recentOrdersResult],
+            ['recentEquipments', recentEquipmentsResult],
+            ['ordersByMonth', ordersByMonthResult],
+            ['overdueOrders', overdueOrdersResult],
+            ['dueTodayOrders', dueTodayOrdersResult],
+            ['dueNextSevenDaysOrders', dueNextSevenDaysOrdersResult],
+            ['urgentOrders', urgentOrdersResult],
+        ] as const
+    ).flatMap(([name, result]) =>
+        result.error?.message ? [name] : [],
+    );
+
+    const hasError = queryErrors.length > 0;
 
     // Processar ordens por mês (últimos 6 meses)
     const monthNames = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'];
@@ -223,23 +234,10 @@ export async function GET() {
     };
 
     if (hasError) {
-        console.error('Erro ao buscar resumo do dashboard:', {
-            equipmentsError: equipmentsResult.error,
-            serviceOrdersError: serviceOrdersResult.error,
-            openOrdersError: openOrdersResult.error,
-            inProgressOrdersError: inProgressOrdersResult.error,
-            closedOrdersError: closedOrdersResult.error,
-            lowPriorityOrdersError: lowPriorityOrdersResult.error,
-            mediumPriorityOrdersError: mediumPriorityOrdersResult.error,
-            highPriorityOrdersError: highPriorityOrdersResult.error,
-            criticalPriorityOrdersError: criticalPriorityOrdersResult.error,
-            recentOrdersError: recentOrdersResult.error,
-            recentEquipmentsError: recentEquipmentsResult.error,
-            ordersByMonthError: ordersByMonthResult.error,
-            overdueOrdersError: overdueOrdersResult.error,
-            dueTodayOrdersError: dueTodayOrdersResult.error,
-            dueNextSevenDaysOrdersError: dueNextSevenDaysOrdersResult.error,
-            urgentOrdersError: urgentOrdersResult.error,
+        logger('error', 'api.error', {
+            route: 'dashboard-summary',
+            method: 'GET',
+            failedQueries: queryErrors,
         });
 
         return NextResponse.json(

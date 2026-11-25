@@ -13,6 +13,9 @@ export const dynamic = "force-dynamic";
 
 const allowedOrderStatuses = ['open', 'in_progress', 'closed'];
 const allowedDeadlineFilters = ['overdue', 'today', 'next_7_days', 'without_due_date'];
+// AUD-30: declarado junto das outras listas de validação. Ficava depois de GET e
+// antes de POST, no meio do módulo — funcionava, mas sugeria erro de TDZ.
+const allowedPriorities = ['low', 'medium', 'high', 'critical'];
 
 export async function GET(request: Request) {
     const { user, supabase, error: authError } = await getUser();
@@ -119,8 +122,6 @@ export async function GET(request: Request) {
     });
 }
 
-
-const allowedPriorities = ['low', 'medium', 'high', 'critical'];
 
 export async function POST(request: Request) {
     const { user, supabase, error: authError } = await getUser();

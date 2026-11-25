@@ -51,6 +51,8 @@ O ManutFlow foi desenvolvido para equipes operacionais e gestores de manutençã
 - **Validação Server-Side**: tipo, tamanho e enum em todas as rotas, além de verificação de propriedade dos arquivos no Storage.
 - **Rate Limiting**: proteção contra abusos em mutações e uploads (10–30 requisições/min por usuário). Implementado em memória — em ambiente serverless o limite é por instância.
 - **Logging Estruturado**: logger em formato JSON para auditoria técnica.
+- **Headers de Segurança** (AUD-13): CSP, `X-Content-Type-Options`, `X-Frame-Options: DENY`, `Referrer-Policy`, `Permissions-Policy` e HSTS (só em produção), definidos em `next.config.ts` e aplicados a todas as rotas.
+- **Indexação**: `/robots.txt` e `/sitemap.xml` públicos (só a landing é indexável), com metadata OpenGraph/Twitter e imagem OG gerada em build (`/opengraph-image`). Domínio base configurável por `NEXT_PUBLIC_SITE_URL`.
 
 ---
 
@@ -239,6 +241,7 @@ SUPABASE_SERVICE_ROLE_KEY=sua-service-role-key  # apenas no servidor: upload e r
 DEMO_EMAIL=demo@manutflow.com                   # conta usada pelo botão de demonstração
 DEMO_PASSWORD=sua-senha-demo                    # apenas server-side; sem ela a rota responde 503
 CRON_SECRET=seu-segredo-cron                    # apenas server-side; sem ela /api/cron/keep-alive responde 503
+NEXT_PUBLIC_SITE_URL=https://manutflow.vercel.app  # opcional: base de canonical/OG/robots (padrão do app)
 ```
 
 ### Banco de dados em um projeto novo

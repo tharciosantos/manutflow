@@ -77,7 +77,7 @@ O ManutFlow foi desenvolvido para equipes operacionais e gestores de manutençã
 | **Storage** | Supabase Storage | Fotos de equipamentos com controle de permissão |
 | **Gráficos** | Recharts | Gráfico de barras do volume mensal de ordens |
 | **Ícones** | Lucide React | Ícones funcionais |
-| **Testes** | Vitest + Testing Library | 225 testes automatizados em 22 arquivos |
+| **Testes** | Vitest + Testing Library | 235 testes automatizados em 23 arquivos |
 | **Qualidade** | ESLint 9 (Flat Config) | Padronização e análise estática de código |
 
 ---
@@ -238,6 +238,7 @@ NEXT_PUBLIC_SUPABASE_ANON_KEY=sua-chave-anonima
 SUPABASE_SERVICE_ROLE_KEY=sua-service-role-key  # apenas no servidor: upload e remoção de fotos
 DEMO_EMAIL=demo@manutflow.com                   # conta usada pelo botão de demonstração
 DEMO_PASSWORD=sua-senha-demo                    # apenas server-side; sem ela a rota responde 503
+CRON_SECRET=seu-segredo-cron                    # apenas server-side; sem ela /api/cron/keep-alive responde 503
 ```
 
 ### Banco de dados em um projeto novo
@@ -261,7 +262,7 @@ npm run lint          # ESLint
 npm run build         # build de produção
 ```
 
-**Suíte de testes:** 225 testes automatizados em 22 arquivos, cobrindo rotas de API, autenticação, cálculos de SLA, rate limiting, storage e componentes de interface.
+**Suíte de testes:** 235 testes automatizados em 23 arquivos, cobrindo rotas de API, autenticação, cálculos de SLA, rate limiting, storage e componentes de interface.
 
 ---
 

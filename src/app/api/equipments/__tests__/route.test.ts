@@ -90,6 +90,8 @@ describe('Equipments API', () => {
       const body = await response.json();
 
       expect(response.status).toBe(200);
+      // Contrato de listagem: exatamente as quatro chaves da AGENTS.md §8.3.
+      expect(Object.keys(body).sort()).toEqual(['equipments', 'page', 'total', 'totalPages']);
       expect(body.equipments).toHaveLength(2);
       expect(body.equipments[0].name).toBe('Notebook Dell');
       expect(body.total).toBe(2);
@@ -176,6 +178,8 @@ describe('Equipments API', () => {
       const body = await response.json();
 
       expect(response.status).toBe(201);
+      // Contrato de criação: o ativo vem embrulhado em { equipment }.
+      expect(Object.keys(body)).toEqual(['equipment']);
       expect(body.equipment.name).toBe('Notebook Dell');
     });
 

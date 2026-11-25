@@ -43,7 +43,7 @@ O **ManutFlow** é um sistema CMMS (Computerized Maintenance Management System) 
 | **Banco / Auth / Storage** | Supabase SSR (`@supabase/ssr`, `@supabase/supabase-js`) | PostgreSQL + Bucket `equipment-photos` |
 | **Ícones** | Lucide React | ^1.31.x |
 | **Gráficos** | Recharts | ^3.9.x (BarChart semestral) |
-| **Testes** | Vitest + Testing Library | 24 arquivos / 240 testes / jsdom |
+| **Testes** | Vitest + Testing Library | 24 arquivos / 245 testes / jsdom |
 | **Linter** | ESLint (flat config) + eslint-config-next | 9.x / 16.4.x |
 
 ---
@@ -113,7 +113,7 @@ manutflow/
 npm run dev              # Next.js em http://localhost:3000
 
 # Validação e Testes
-npm test                 # Executa os 240 testes (Vitest, single run)
+npm test                 # Executa os 245 testes (Vitest, single run)
 npm run test:watch       # Modo watch interativo
 npx tsc --noEmit         # Verificação estrita de tipagem
 npm run lint             # ESLint (flat config)
@@ -311,7 +311,7 @@ desde o passo 2.
 
 ### 10.2 Suíte automatizada
 
-- **24 arquivos / 240 testes**, todos passando, cobrindo:
+- **24 arquivos / 245 testes**, todos passando, cobrindo:
   - domínio: prazos, badges de SLA, config de status, redirect seguro, validação de UUID, retry;
   - API routes: auth, perfil, equipamentos, ordens, upload, dashboard e rate limit;
   - componentes: dashboard, toolbar, listas, tema.

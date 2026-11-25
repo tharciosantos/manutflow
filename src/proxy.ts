@@ -14,7 +14,17 @@ export async function proxy(request: NextRequest) {
     // /api/demo-login é pública de propósito: é ela que cria a sessão da demo,
     // antes de existir qualquer usuário autenticado. Sem isso o proxy
     // redirecionaria o POST para /login e o botão da landing nunca funcionaria.
-    const publicRoutes = ["/login", "/register", "/auth/callback", "/api/demo-login"];
+    // /robots.txt, /sitemap.xml e /opengraph-image são públicos pela natureza do
+    // arquivo (AUD-13): crawlers e scrapers de link não têm sessão.
+    const publicRoutes = [
+        "/login",
+        "/register",
+        "/auth/callback",
+        "/api/demo-login",
+        "/robots.txt",
+        "/sitemap.xml",
+        "/opengraph-image",
+    ];
     const isPublicRoute = pathname === "/" || publicRoutes.some((route) => pathname.startsWith(route));
 
     // ==========================================

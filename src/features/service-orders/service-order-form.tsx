@@ -1,7 +1,7 @@
 'use client';
 
-import { useEffect, useState, type FormEvent } from 'react';
-import type { Equipment } from '@/types/equipment';
+import { useState, type FormEvent } from 'react';
+import { EquipmentPicker } from './equipment-picker';
 
 type ServiceOrderFormProps = {
     onCreated: () => Promise<void>;
@@ -17,7 +17,6 @@ const priorities = [
 ];
 
 export function ServiceOrderForm({ onCreated, onCancel }: ServiceOrderFormProps) {
-    const [equipments, setEquipments] = useState<Equipment[]>([]);
     const [title, setTitle] = useState('');
     const [description, setDescription] = useState('');
     const [equipmentId, setEquipmentId] = useState('');
@@ -26,26 +25,6 @@ export function ServiceOrderForm({ onCreated, onCancel }: ServiceOrderFormProps)
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [errorMessage, setErrorMessage] = useState('');
     const [successMessage, setSuccessMessage] = useState('');
-
-    useEffect(() => {
-        async function loadEquipments() {
-            try {
-                const response = await fetch('/api/equipments?limit=999');
-
-                if (!response.ok) {
-                    throw new Error('Erro ao carregar equipamentos.');
-                }
-
-                const data = await response.json();
-
-                setEquipments(data.equipments);
-            } catch {
-                setErrorMessage('Não foi possível carregar os equipamentos.');
-            }
-        }
-
-        void loadEquipments();
-    }, []);
 
     async function handleSubmit(event: FormEvent<HTMLFormElement>) {
         event.preventDefault();
@@ -148,32 +127,17 @@ export function ServiceOrderForm({ onCreated, onCancel }: ServiceOrderFormProps)
                     />
                 </div>
 
-                <div className="grid gap-3 sm:gap-4 sm:grid-cols-2 lg:grid-cols-3">
-                    <div>
-                        <label
-                            htmlFor="equipment"
-                            className="mb-1.5 block text-sm font-medium text-slate-700 dark:text-slate-300"
-                        >
-                            Equipamento
-                        </label>
+                {/* AUD-09: o picker ocupa a linha inteira. Nome e patrimônio do
+                    ativo não cabem numa coluna estreita ao lado de prioridade e prazo. */}
+                <div>
+                    <EquipmentPicker
+                        value={equipmentId}
+                        onChange={setEquipmentId}
+                        disabled={isSubmitting}
+                    />
+                </div>
 
-                        <select
-                            id="equipment"
-                            value={equipmentId}
-                            onChange={(event) => setEquipmentId(event.target.value)}
-                            required
-                            className="w-full rounded-xl border border-slate-300 bg-slate-50 px-3 py-2.5 text-sm text-slate-900 outline-none transition focus:border-teal-500 cursor-pointer dark:border-slate-700 dark:bg-slate-950 dark:text-slate-100"
-                        >
-                            <option value="">Selecione um equipamento</option>
-
-                            {equipments.map((equipment) => (
-                                <option key={equipment.id} value={equipment.id}>
-                                    {equipment.name} - {equipment.patrimony_code}
-                                </option>
-                            ))}
-                        </select>
-                    </div>
-
+                <div className="grid gap-3 sm:gap-4 sm:grid-cols-2">
                     <div>
                         <label
                             htmlFor="priority"

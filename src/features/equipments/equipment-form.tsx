@@ -233,7 +233,11 @@ export function EquipmentForm({ onEquipmentCreated, editingEquipment, onEditCanc
         </p>
       </div>
 
-      <div className="mt-5 grid gap-4 sm:mt-6 sm:grid-cols-2">
+      {/* Nome ocupa a largura toda: é o campo que mais sofre em coluna
+          estreita. Patrimônio e Localização dividem a segunda linha; Status
+          fica ao lado do bloco de foto. Dois níveis de grid: `grid-cols-1`
+          no pai colapsaria o `sm:grid-cols-2` do filho. */}
+      <div className="mt-5 grid gap-4 sm:mt-6">
         <div>
           <label
             htmlFor="name"
@@ -257,6 +261,7 @@ export function EquipmentForm({ onEquipmentCreated, editingEquipment, onEditCanc
           />
         </div>
 
+        <div className="grid gap-4 sm:grid-cols-2">
         <div>
           <label
             htmlFor="patrimonyCode"
@@ -303,7 +308,7 @@ export function EquipmentForm({ onEquipmentCreated, editingEquipment, onEditCanc
           />
         </div>
 
-        <div>
+        <div className="sm:row-span-2">
           <label
             htmlFor="status"
             className="mb-2 block text-sm font-medium text-slate-700 dark:text-slate-300"
@@ -324,7 +329,9 @@ export function EquipmentForm({ onEquipmentCreated, editingEquipment, onEditCanc
             <option value="maintenance">Em manutenção</option>
           </select>
         </div>
+        </div>
 
+        <div className="grid gap-4 sm:grid-cols-2">
         {/* Upload de foto */}
         <div className="sm:col-span-2">
           <label className="mb-2 block text-sm font-medium text-slate-700 dark:text-slate-300">
@@ -336,7 +343,7 @@ export function EquipmentForm({ onEquipmentCreated, editingEquipment, onEditCanc
               <EquipmentPhoto
                 src={previewUrl}
                 alt={`Prévia da foto de ${name || "equipamento"}`}
-                className="h-32 w-32 rounded-xl border border-slate-300 object-cover dark:border-slate-700"
+                className="h-40 w-full rounded-xl border border-slate-300 object-cover dark:border-slate-700"
               />
               <button
                 type="button"
@@ -368,6 +375,7 @@ export function EquipmentForm({ onEquipmentCreated, editingEquipment, onEditCanc
               />
             </label>
           )}
+        </div>
         </div>
       </div>
 

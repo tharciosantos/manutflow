@@ -171,7 +171,12 @@ export function Modal({
               {styles.icon}
             </div>
           )}
-          <div className={`min-w-0 flex-1 ${hideClose ? "" : "pr-8"}`}>
+          {/* O `pr-8` existe para o título não passar por baixo do X. Mas o
+              `children` (formulários) compartilha este wrapper e herdava o
+              recuo só à direita, jogando o form inteiro para a esquerda. Num
+              modal com children o X fica no topo, acima da primeira linha do
+              form, então o recuo não é necessário e o conteúdo fica simétrico. */}
+          <div className={`min-w-0 flex-1 ${hideClose || children ? "" : "pr-8"}`}>
             <h2 id={titleId} className="text-lg font-semibold text-slate-900 dark:text-white">{title}</h2>
             {description && (
               <p className="mt-2 text-sm text-slate-600 dark:text-slate-400">{description}</p>

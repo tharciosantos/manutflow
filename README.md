@@ -79,7 +79,7 @@ O ManutFlow foi desenvolvido para equipes operacionais e gestores de manutençã
 | **Storage** | Supabase Storage | Fotos de equipamentos com controle de permissão |
 | **Gráficos** | Recharts | Gráfico de barras do volume mensal de ordens |
 | **Ícones** | Lucide React | Ícones funcionais |
-| **Testes** | Vitest + Testing Library | 259 testes automatizados em 25 arquivos |
+| **Testes** | Vitest + Testing Library | 267 testes automatizados em 26 arquivos |
 | **Qualidade** | ESLint 9 (Flat Config) | Padronização e análise estática de código |
 
 ---
@@ -244,6 +244,8 @@ CRON_SECRET=seu-segredo-cron                    # apenas server-side; sem ela /a
 NEXT_PUBLIC_SITE_URL=https://manutflow.vercel.app  # opcional: base de canonical/OG/robots (padrão do app)
 ```
 
+`NEXT_PUBLIC_SUPABASE_URL` e `NEXT_PUBLIC_SUPABASE_ANON_KEY` são obrigatórias: `getSupabaseEnv()` (`src/lib/supabase/env.ts`) lança erro nomeando a variável que faltou quando ela está ausente, vazia ou ainda com o valor de exemplo do `.env.example`, e o proxy responde `503` com log estruturado.
+
 ### Banco de dados em um projeto novo
 
 ```bash
@@ -265,7 +267,7 @@ npm run lint          # ESLint
 npm run build         # build de produção
 ```
 
-**Suíte de testes:** 259 testes automatizados em 25 arquivos, cobrindo rotas de API, autenticação, cálculos de SLA, rate limiting, storage e componentes de interface.
+**Suíte de testes:** 267 testes automatizados em 26 arquivos, cobrindo rotas de API, autenticação, cálculos de SLA, rate limiting, storage e componentes de interface.
 
 ---
 

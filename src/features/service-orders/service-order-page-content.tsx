@@ -249,7 +249,10 @@ export function ServiceOrderPageContent({ isFormModalOpen, setIsFormModalOpen }:
                 onClose={() => setIsFormModalOpen(false)}
                 title="Nova Ordem de Serviço"
             >
-                <ServiceOrderForm onCreated={handleFormCreated} />
+                <ServiceOrderForm
+                    onCreated={handleFormCreated}
+                    onCancel={() => setIsFormModalOpen(false)}
+                />
             </Modal>
         </div>
     );

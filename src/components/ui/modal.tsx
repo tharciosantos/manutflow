@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useId } from "react";
+import { useEffect, useId, useRef } from "react";
 
 type ModalProps = {
   isOpen: boolean;
@@ -13,7 +13,20 @@ type ModalProps = {
   cancelLabel?: string;
   isLoading?: boolean;
   variant?: "danger" | "warning" | "info";
+  /** AUD-25: esconde o botão de fechar quando a própria tela dona do modal já expõe um "Cancelar". */
+  hideClose?: boolean;
+  /** AUD-25: id do título, para quem quiser elementos do children via aria-labelledby. */
+  titleId?: string;
 };
+
+// Campos primeiro; botões só citam o rodapé ([data-modal-actions]), nunca o X.
+const FOCUSABLE = [
+  'input:not([type="hidden"]):not([disabled])',
+  'select:not([disabled])',
+  'textarea:not([disabled])',
+  '[data-modal-actions] button:not([disabled])',
+  '[href]',
+].join(', ');
 
 export function Modal({
   isOpen,
@@ -26,32 +39,76 @@ export function Modal({
   cancelLabel = "Cancelar",
   isLoading = false,
   variant = "danger",
+  hideClose = false,
+  titleId: titleIdProp,
 }: ModalProps) {
   const dialogRef = useRef<HTMLDialogElement>(null);
-  const titleId = useId();
+  const contentRef = useRef<HTMLDivElement>(null);
+  const generatedTitleId = useId();
+  const titleId = titleIdProp ?? `modal-title-${generatedTitleId}`;
+
+  // Elemento que abriu o diálogo, para devolver o foco ao fechar.
+  const openerRef = useRef<HTMLElement | null>(null);
 
   useEffect(() => {
     const dialog = dialogRef.current;
-    if (!dialog) return;
 
-    if (isOpen) {
+    if (!isOpen) {
+      dialog?.close();
+      return;
+    }
+
+    if (dialog && !dialog.open) {
+      openerRef.current = document.activeElement as HTMLElement | null;
       dialog.showModal();
-    } else {
-      dialog.close();
+      // Foco no primeiro campo. O foco automático do <dialog> iria para o
+      // botão de fechar, fora do formulário e logo antes do submit.
+      const dialogFirst = dialog.querySelector<HTMLElement>(FOCUSABLE);
+      const contentFirst = contentRef.current?.querySelector<HTMLElement>(FOCUSABLE);
+      (dialogFirst ?? contentFirst ?? dialog).focus();
     }
   }, [isOpen]);
 
   function handleBackdropClick(event: React.MouseEvent<HTMLDialogElement>) {
-    if (event.target === dialogRef.current) {
+    if (event.target === dialogRef.current && !isLoading) {
       onClose();
     }
   }
 
-  function handleKeyDown(event: React.KeyboardEvent) {
-    if (event.key === "Escape" && !isLoading) {
-      onClose();
+  // O `cancel` nativo fecha o <dialog> direto pelo DOM, sem passar pelo
+  // estado: o modal sairia da tela com `isOpen` ainda true e a próxima
+  // abertura não chamaria showModal. Por isso o ESC é tratado aqui e segue o
+  // mesmo caminho do backdrop, que deixa o dono do estado fechar.
+  useEffect(() => {
+    const dialog = dialogRef.current;
+    if (!dialog) return;
+
+    function handleCancel(event: Event) {
+      event.preventDefault();
+      if (!isLoading && !hideClose) onClose();
     }
-  }
+
+    dialog.addEventListener("cancel", handleCancel);
+    return () => dialog.removeEventListener("cancel", handleCancel);
+  }, [isLoading, hideClose, onClose]);
+
+  // AUD-25: o `close` nativo (ESC) também dispara depois de um onClose que
+  // leva `isOpen` a false; nesse caso o foco já voltou ao elemento que abriu
+  // o modal e não se mexe nele.
+  useEffect(() => {
+    const dialog = dialogRef.current;
+    if (!dialog) return;
+
+    function handleClose() {
+      if (isOpen) return;
+      if (document.activeElement === document.body) {
+        openerRef.current?.focus();
+      }
+    }
+
+    dialog.addEventListener("close", handleClose);
+    return () => dialog.removeEventListener("close", handleClose);
+  }, [isOpen]);
 
   const variantStyles = {
     danger: {
@@ -89,18 +146,32 @@ export function Modal({
     <dialog
       ref={dialogRef}
       onClick={handleBackdropClick}
-      onKeyDown={handleKeyDown}
       aria-labelledby={titleId}
-      className="fixed inset-0 m-auto h-fit w-full max-w-md rounded-2xl border border-slate-200 bg-white p-0 shadow-2xl backdrop:bg-black/60 backdrop:backdrop-blur-sm dark:border-slate-800 dark:bg-slate-900"
+      tabIndex={-1}
+      className="fixed inset-0 m-auto h-fit max-h-[90vh] w-full max-w-md overflow-y-auto rounded-2xl border border-slate-200 bg-white p-0 shadow-2xl backdrop:bg-black/60 backdrop:backdrop-blur-sm dark:border-slate-800 dark:bg-slate-900"
     >
-      <div className="p-6">
+      <div ref={contentRef} className="p-6">
+        {!hideClose && (
+          <button
+            type="button"
+            onClick={onClose}
+            disabled={isLoading}
+            aria-label="Fechar"
+            className="absolute right-4 top-4 cursor-pointer rounded-lg p-1.5 text-slate-400 transition hover:bg-slate-100 hover:text-slate-700 disabled:cursor-not-allowed disabled:opacity-60 dark:text-slate-500 dark:hover:bg-slate-800 dark:hover:text-slate-200"
+          >
+            <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5} aria-hidden="true">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+        )}
+
         <div className="flex items-start gap-4">
           {!children && (
             <div className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-full ${variant === 'danger' ? 'bg-red-500/10' : variant === 'warning' ? 'bg-amber-500/10' : 'bg-teal-500/10'}`}>
               {styles.icon}
             </div>
           )}
-          <div className="min-w-0 flex-1">
+          <div className={`min-w-0 flex-1 ${hideClose ? "" : "pr-8"}`}>
             <h2 id={titleId} className="text-lg font-semibold text-slate-900 dark:text-white">{title}</h2>
             {description && (
               <p className="mt-2 text-sm text-slate-600 dark:text-slate-400">{description}</p>
@@ -111,7 +182,10 @@ export function Modal({
       </div>
 
       {!children && (
-        <div className="flex flex-row items-center justify-center gap-3 border-t border-slate-200 bg-slate-50 px-6 py-4 dark:border-slate-800 dark:bg-slate-950/50">
+        <div
+          data-modal-actions
+          className="flex flex-row items-center justify-center gap-3 border-t border-slate-200 bg-slate-50 px-6 py-4 dark:border-slate-800 dark:bg-slate-950/50"
+        >
           <button
             type="button"
             onClick={onClose}

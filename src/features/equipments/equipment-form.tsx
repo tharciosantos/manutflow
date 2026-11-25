@@ -195,7 +195,7 @@ export function EquipmentForm({ onEquipmentCreated, editingEquipment, onEditCanc
   }
 
   function handleCancel() {
-    if (!isEditing) return;
+    if (!isEditing && !inModal) return;
     setName("");
     setPatrimonyCode("");
     setLocation("");
@@ -386,7 +386,7 @@ export function EquipmentForm({ onEquipmentCreated, editingEquipment, onEditCanc
       </div>
 
       <div className="mt-5 flex items-center justify-end gap-3">
-        {isEditing && (
+        {(isEditing || inModal) && (
           <button
             type="button"
             onClick={handleCancel}

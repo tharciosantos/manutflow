@@ -5,6 +5,12 @@ import {
     addDaysToDateOnly,
     getDateOnlyInTimeZone,
 } from '@/features/service-orders/service-order-deadline';
+import {
+    countOrdersByMonth,
+    getMonthShortName,
+    getMonthlyBuckets,
+    getMonthlyWindowStart,
+} from '@/lib/orders-by-month';
 
 export const dynamic = "force-dynamic";
 
@@ -15,6 +21,9 @@ export async function GET() {
 
     const today = getDateOnlyInTimeZone();
     const nextSevenDays = addDaysToDateOnly(today, 7);
+    // AUD-10: a janela do gráfico começa no dia 1º do mês mais antigo, não
+    // 180 dias atrás — a janela móvel truncava o mês do corte.
+    const monthlyWindowStart = getMonthlyWindowStart();
 
     const [
         equipmentsResult,
@@ -109,12 +118,13 @@ export async function GET() {
             .order('created_at', { ascending: false })
             .limit(5),
 
-        // Ordens agrupadas por mês (últimos 6 meses)
+        // Ordens agrupadas por mês (os 6 meses do gráfico, desde o dia 1º do
+        // primeiro deles). O limite de data entra como meia-noite de Brasília.
         supabase
             .from('service_orders')
             .select('created_at')
             .eq("user_id", user.id)
-            .gte('created_at', new Date(Date.now() - 180 * 24 * 60 * 60 * 1000).toISOString())
+            .gte('created_at', `${monthlyWindowStart}T00:00:00-03:00`)
             .order('created_at', { ascending: true }),
 
         supabase
@@ -184,30 +194,15 @@ export async function GET() {
 
     const hasError = queryErrors.length > 0;
 
-    // Processar ordens por mês (últimos 6 meses)
-    const monthNames = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'];
-    const monthlyData: { month: string; count: number }[] = [];
-    const now = new Date();
-    for (let i = 5; i >= 0; i--) {
-        const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
-        monthlyData.push({
-            month: monthNames[d.getMonth()],
-            count: 0,
-        });
-    }
-
-    if (ordersByMonthResult.data) {
-        for (const order of ordersByMonthResult.data as { created_at: string }[]) {
-            const date = new Date(order.created_at);
-            for (const entry of monthlyData) {
-                const entryMonth = monthNames.indexOf(entry.month);
-                if (entryMonth === date.getMonth()) {
-                    entry.count++;
-                    break;
-                }
-            }
-        }
-    }
+    // AUD-10: agrupa por chave `YYYY-MM` no fuso do domínio. Antes o mês do
+    // servidor (UTC no deploy) decidia o balde, não o de Brasília.
+    const monthlyData = countOrdersByMonth(
+        (ordersByMonthResult.data ?? []) as { created_at: string }[],
+        getMonthlyBuckets(),
+    ).map((bucket) => ({
+        month: getMonthShortName(bucket.monthKey),
+        count: bucket.count,
+    }));
 
     const total = serviceOrdersResult.count ?? 0;
     const closed = closedOrdersResult.count ?? 0;

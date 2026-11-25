@@ -79,7 +79,7 @@ O ManutFlow foi desenvolvido para equipes operacionais e gestores de manutençã
 | **Storage** | Supabase Storage | Fotos de equipamentos com controle de permissão |
 | **Gráficos** | Recharts | Gráfico de barras do volume mensal de ordens |
 | **Ícones** | Lucide React | Ícones funcionais |
-| **Testes** | Vitest + Testing Library | 280 testes automatizados em 29 arquivos |
+| **Testes** | Vitest + Testing Library | 294 testes automatizados em 30 arquivos |
 | **Qualidade** | ESLint 9 (Flat Config) | Padronização e análise estática de código |
 
 ---
@@ -267,7 +267,7 @@ npm run lint          # ESLint
 npm run build         # build de produção
 ```
 
-**Suíte de testes:** 280 testes automatizados em 29 arquivos, cobrindo rotas de API, autenticação, cálculos de SLA, rate limiting, storage e componentes de interface.
+**Suíte de testes:** 294 testes automatizados em 30 arquivos, cobrindo rotas de API, autenticação, cálculos de SLA, rate limiting, storage e componentes de interface.
 
 ---
 

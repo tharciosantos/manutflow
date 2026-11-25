@@ -150,6 +150,8 @@ describe('Upload API DELETE', () => {
         const body = await response.json() as { url: string; path: string };
 
         expect(response.status).toBe(200);
+        // Contrato do upload: exatamente { url, path }.
+        expect(Object.keys(body).sort()).toEqual(['path', 'url']);
         expect(body.url).toBe(`/api/photos/${body.path}`);
         expect(body.url).not.toContain('storage/v1/object/public');
     });

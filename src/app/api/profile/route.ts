@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { getUser } from "@/lib/auth";
+import { logger } from "@/lib/logger";
 
 export const dynamic = "force-dynamic";
 
@@ -14,7 +15,7 @@ export async function GET() {
         .maybeSingle();
 
     if (error) {
-        console.error('Erro ao buscar perfil:', error);
+        logger('error', 'api.error', { route: 'profile', method: 'GET', error: error.message });
         return NextResponse.json(
             { error: 'Erro ao carregar perfil.' },
             { status: 500 },
@@ -91,7 +92,7 @@ export async function PATCH(request: Request) {
         .single();
 
     if (error) {
-        console.error('Erro ao atualizar perfil:', error);
+        logger('error', 'api.error', { route: 'profile', method: 'PATCH', error: error.message });
         return NextResponse.json(
             { error: 'Erro ao atualizar perfil.' },
             { status: 500 },

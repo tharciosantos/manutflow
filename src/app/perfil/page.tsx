@@ -149,7 +149,7 @@ export default function PerfilPage() {
                                 value={fullName}
                                 onChange={(e) => setFullName(e.target.value)}
                                 placeholder="Seu nome"
-                                className="w-full rounded-lg border border-slate-300 bg-slate-50 px-3 py-2 text-xs sm:text-sm text-slate-900 outline-none transition focus:border-teal-500 focus:bg-white dark:border-slate-700 dark:bg-slate-950 dark:text-slate-100"
+                                className="w-full rounded-lg border border-slate-300 bg-slate-50 px-3 py-2 text-xs sm:text-sm text-slate-900 outline-none transition focus:border-teal-500 focus:bg-white dark:focus:bg-slate-900 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-100"
                             />
                         </div>
 
@@ -164,7 +164,7 @@ export default function PerfilPage() {
                                 value={role}
                                 onChange={(e) => setRole(e.target.value)}
                                 placeholder="Ex: Gestor de Manutenção"
-                                className="w-full rounded-lg border border-slate-300 bg-slate-50 px-3 py-2 text-xs sm:text-sm text-slate-900 outline-none transition focus:border-teal-500 focus:bg-white dark:border-slate-700 dark:bg-slate-950 dark:text-slate-100"
+                                className="w-full rounded-lg border border-slate-300 bg-slate-50 px-3 py-2 text-xs sm:text-sm text-slate-900 outline-none transition focus:border-teal-500 focus:bg-white dark:focus:bg-slate-900 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-100"
                             />
                         </div>
 
@@ -179,7 +179,7 @@ export default function PerfilPage() {
                                 value={phone}
                                 onChange={(e) => setPhone(e.target.value)}
                                 placeholder="Ex: (11) 99999-8888"
-                                className="w-full rounded-lg border border-slate-300 bg-slate-50 px-3 py-2 text-xs sm:text-sm text-slate-900 outline-none transition focus:border-teal-500 focus:bg-white dark:border-slate-700 dark:bg-slate-950 dark:text-slate-100"
+                                className="w-full rounded-lg border border-slate-300 bg-slate-50 px-3 py-2 text-xs sm:text-sm text-slate-900 outline-none transition focus:border-teal-500 focus:bg-white dark:focus:bg-slate-900 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-100"
                             />
                         </div>
 

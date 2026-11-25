@@ -142,7 +142,7 @@ export function ServiceOrderForm({ onCreated }: ServiceOrderFormProps) {
                         onChange={(event) => setTitle(event.target.value)}
                         placeholder="Ex: Troca de correia"
                         required
-                        className="w-full rounded-xl border border-slate-300 bg-slate-50 px-3 py-2.5 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-teal-500 focus:bg-white dark:border-slate-700 dark:bg-slate-950 dark:text-slate-100 dark:placeholder:text-slate-600"
+                        className="w-full rounded-xl border border-slate-300 bg-slate-50 px-3 py-2.5 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-teal-500 focus:bg-white dark:focus:bg-slate-900 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-100 dark:placeholder:text-slate-600"
                     />
                 </div>
 
@@ -226,7 +226,7 @@ export function ServiceOrderForm({ onCreated }: ServiceOrderFormProps) {
                         onChange={(event) => setDescription(event.target.value)}
                         placeholder="Descreva o problema ou serviço necessário."
                         rows={4}
-                        className="w-full resize-none rounded-xl border border-slate-300 bg-slate-50 px-3 py-2.5 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-teal-500 focus:bg-white dark:border-slate-700 dark:bg-slate-950 dark:text-slate-100 dark:placeholder:text-slate-600"
+                        className="w-full resize-none rounded-xl border border-slate-300 bg-slate-50 px-3 py-2.5 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-teal-500 focus:bg-white dark:focus:bg-slate-900 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-100 dark:placeholder:text-slate-600"
                     />
                 </div>
             </div>

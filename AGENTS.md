@@ -43,7 +43,7 @@ O **ManutFlow** é um sistema CMMS (Computerized Maintenance Management System) 
 | **Banco / Auth / Storage** | Supabase SSR (`@supabase/ssr`, `@supabase/supabase-js`) | PostgreSQL + Bucket `equipment-photos` |
 | **Ícones** | Lucide React | ^1.31.x |
 | **Gráficos** | Recharts | ^3.9.x (BarChart semestral) |
-| **Testes** | Vitest + Testing Library | 25 arquivos / 259 testes / jsdom |
+| **Testes** | Vitest + Testing Library | 26 arquivos / 267 testes / jsdom |
 | **Linter** | ESLint (flat config) + eslint-config-next | 9.x / 16.4.x |
 
 ---
@@ -92,11 +92,11 @@ manutflow/
 │   │   ├── equipment-photo-storage.ts # Remoção no bucket (service_role, só escrita)
 │   │   ├── fetch-with-retry.ts# Retry com backoff para chamadas do client
 │   │   ├── safe-redirect.ts   # Proteção contra open redirect
-│   │   └── supabase/          # client.ts (browser), server.ts (RSC/route), middleware.ts
+│   │   └── supabase/          # env.ts (credenciais), client.ts (browser), server.ts (RSC/route), middleware.ts
 │   ├── types/                 # equipment.ts, equipment-details.ts, service-order.ts, profile.ts
 │   └── proxy.ts               # Proxy do Next.js 16: renova sessão e protege rotas
 ├── supabase/
-│   ├── migrations/            # 0000 a 0006 (baseline, RLS, RPC, Storage e keep-alive)
+│   ├── migrations/            # 0000 a 0007 (baseline, RLS, RPC, Storage, keep-alive e histórico no create)
 │   └── README.md              # Runbook: aplicar, verificar, rollback
 └── public/
     └── previews/              # 2 capturas usadas no README
@@ -113,7 +113,7 @@ manutflow/
 npm run dev              # Next.js em http://localhost:3000
 
 # Validação e Testes
-npm test                 # Executa os 259 testes (Vitest, single run)
+npm test                 # Executa os 267 testes (Vitest, single run)
 npm run test:watch       # Modo watch interativo
 npx tsc --noEmit         # Verificação estrita de tipagem
 npm run lint             # ESLint (flat config)
@@ -153,8 +153,9 @@ CRON_SECRET=seu-segredo-cron                   # apenas server-side (Vercel Cron
   - `src/lib/supabase/client.ts` → `createBrowserClient` (browser).
   - `src/lib/supabase/server.ts` → `createServerClient` com cookies assíncronos (`cookies()`).
   - `src/lib/supabase/middleware.ts` → `updateSession()`, consumido por `src/proxy.ts`.
+- **Credenciais públicas num só lugar**: os três clients leem `NEXT_PUBLIC_SUPABASE_URL` e `NEXT_PUBLIC_SUPABASE_ANON_KEY` por `getSupabaseEnv()` de `src/lib/supabase/env.ts`. Variável ausente, vazia ou ainda com o valor de exemplo do `.env.example` lança erro nomeando a que faltou — nunca use `process.env.X!` no código. O `proxy.ts` captura esse erro e responde `503` com `logger('error', 'proxy.supabase_unavailable', ...)`.
 - **Extração de usuário**: toda API route usa `getUser()` de `@/lib/auth`, que valida o JWT no servidor e devolve `401` quando não há sessão.
-- **Proteção de rotas** (`src/proxy.ts`): `/` é pública; `/login`, `/register`, `/auth/callback` e `/api/demo-login` são públicas; o resto exige sessão e redireciona para `/login?redirect=...`.
+- **Proteção de rotas** (`src/proxy.ts`): `/` é pública; `/login`, `/register`, `/auth/callback`, `/api/demo-login`, `/robots.txt`, `/sitemap.xml` e `/opengraph-image` são públicas; o resto exige sessão e redireciona para `/login?redirect=...`.
 - **Conta de demonstração**: `demo@manutflow.com` (Gestor de Manutenção). A senha vive em `DEMO_PASSWORD` e é usada no servidor por `POST /api/demo-login`, que cria a sessão e grava os cookies. Nenhuma credencial de demo pode existir em componente client — o bundle é público.
 - **Perfis**: criados automaticamente por trigger (`handle_new_user`) no signup.
 
@@ -311,7 +312,7 @@ desde o passo 2.
 
 ### 10.2 Suíte automatizada
 
-- **25 arquivos / 259 testes**, todos passando, cobrindo:
+- **26 arquivos / 267 testes**, todos passando, cobrindo:
   - domínio: prazos, badges de SLA, config de status, redirect seguro, validação de UUID, retry;
   - API routes: auth, perfil, equipamentos, ordens, upload, dashboard e rate limit;
   - componentes: dashboard, toolbar, listas, tema.

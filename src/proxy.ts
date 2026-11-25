@@ -1,10 +1,26 @@
 import { updateSession } from "@/lib/supabase/middleware";
+import { logger } from "@/lib/logger";
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 
 // Next.js 16+ usa a convenção "proxy" em vez de "middleware"
 export async function proxy(request: NextRequest) {
-    const { supabaseResponse, user } = await updateSession(request);
+    let supabaseResponse: NextResponse;
+    let user: Awaited<ReturnType<typeof updateSession>>["user"];
+
+    try {
+        ({ supabaseResponse, user } = await updateSession(request));
+    } catch (error) {
+        // AUD-31: sem env o proxy roda em toda request; sem este tratamento um
+        // .env incompleto virava erro genérico em cada navegação.
+        logger('error', 'proxy.supabase_unavailable', {
+            error: error instanceof Error ? error.message : 'erro desconhecido',
+        });
+        return NextResponse.json(
+            { error: "Serviço de autenticação indisponível." },
+            { status: 503 },
+        );
+    }
 
     const { pathname } = request.nextUrl;
 

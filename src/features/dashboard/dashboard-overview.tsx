@@ -9,17 +9,21 @@ import type {
     ServiceOrderPriority,
     ServiceOrderStatus,
 } from '@/types/service-order';
-import {
-    BarChart,
-    Bar,
-    XAxis,
-    YAxis,
-    CartesianGrid,
-    Tooltip,
-    ResponsiveContainer,
-} from 'recharts';
+import dynamic from 'next/dynamic';
 import { ArrowUpRight, RefreshCw, AlertCircle } from 'lucide-react';
 import { fetchWithRetry } from '@/lib/fetch-with-retry';
+
+// AUD-08: o Recharts só é baixado por quem vê o gráfico (usuário autenticado),
+// não por todo visitante da landing. O `ssr: false` é seguro aqui: o dashboard
+// só renderiza depois do login, já no client.
+const DashboardMonthlyChart = dynamic(() => import('./dashboard-monthly-chart'), {
+    ssr: false,
+    loading: () => (
+        <div className="h-full flex items-center justify-center text-xs font-mono text-slate-500 dark:text-slate-400">
+            Carregando gráfico...
+        </div>
+    ),
+});
 
 type RecentOrder = {
     id: string;
@@ -298,24 +302,7 @@ export function DashboardOverview() {
 
                         <div className="h-36 sm:h-40">
                             {s.ordersByMonth.some((m) => m.count > 0) ? (
-                                <ResponsiveContainer width="100%" height="100%">
-                                    <BarChart data={s.ordersByMonth} margin={{ top: 5, right: 5, left: -25, bottom: 0 }}>
-                                        <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="rgba(148, 163, 184, 0.15)" />
-                                        <XAxis dataKey="month" tick={{ fill: '#94a3b8', fontSize: 10, fontFamily: 'monospace' }} axisLine={false} tickLine={false} />
-                                        <YAxis allowDecimals={false} tick={{ fill: '#94a3b8', fontSize: 10, fontFamily: 'monospace' }} axisLine={false} tickLine={false} width={30} />
-                                        <Tooltip
-                                            contentStyle={{
-                                                backgroundColor: 'rgba(15, 23, 42, 0.95)',
-                                                borderColor: '#334155',
-                                                borderRadius: '0.5rem',
-                                                fontSize: '0.75rem',
-                                                color: '#f8fafc',
-                                            }}
-                                            formatter={(value) => [`${value ?? 0} ordens`, 'Total']}
-                                        />
-                                        <Bar dataKey="count" fill="#14b8a6" radius={[4, 4, 0, 0]} maxBarSize={32} />
-                                    </BarChart>
-                                </ResponsiveContainer>
+                                <DashboardMonthlyChart data={s.ordersByMonth} />
                             ) : (
                                 <div className="h-full flex items-center justify-center text-xs text-slate-500 dark:text-slate-400 font-mono">
                                     Nenhuma ordem registrada no período.

@@ -1,5 +1,4 @@
-"use client";
-
+// AUD-07: sem estado nem evento — renderiza no servidor junto com a landing.
 interface FeatureCardProps {
     title: string;
     description: string;

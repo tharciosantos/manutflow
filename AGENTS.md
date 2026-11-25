@@ -43,7 +43,7 @@ O **ManutFlow** é um sistema CMMS (Computerized Maintenance Management System) 
 | **Banco / Auth / Storage** | Supabase SSR (`@supabase/ssr`, `@supabase/supabase-js`) | PostgreSQL + Bucket `equipment-photos` |
 | **Ícones** | Lucide React | ^1.31.x |
 | **Gráficos** | Recharts | ^3.9.x (BarChart semestral) |
-| **Testes** | Vitest + Testing Library | 26 arquivos / 267 testes / jsdom |
+| **Testes** | Vitest + Testing Library | 28 arquivos / 273 testes / jsdom |
 | **Linter** | ESLint (flat config) + eslint-config-next | 9.x / 16.4.x |
 
 ---
@@ -70,17 +70,17 @@ manutflow/
 │   │   ├── ordens/            # Listagem de ordens com Toolbar e [id] para detalhes/histórico
 │   │   ├── login/ & register/ # Autenticação com credenciais Demo
 │   │   ├── perfil/            # Gestão de dados cadastrais do usuário
-│   │   ├── page.tsx           # Landing (deslogado) ou Dashboard (logado) — client component
+│   │   ├── page.tsx           # Landing (deslogado) ou Dashboard (logado) — server component
 │   │   ├── layout.tsx         # RootLayout + ThemeProvider
 │   │   └── globals.css        # Tailwind v4, variáveis de tema e animações
 │   ├── components/
-│   │   ├── landing/           # DemoMaintenanceFlow, LandingHeader, FeatureCard
+│   │   ├── landing/           # LandingPage (server), DemoMaintenanceFlow, LandingHeader, FeatureCard
 │   │   ├── layout/            # AppShell, AppHeader (desktop/mobile)
 │   │   ├── ui/                # Modal (<dialog>), StatusCard, Pagination, Toolbar, Breadcrumbs,
 │   │   │                      # ThemeSwitcher, EquipmentPhoto
 │   │   └── theme-provider.tsx
 │   ├── features/              # Módulos de domínio
-│   │   ├── dashboard/         # DashboardOverview, KPIs, gráfico Recharts, SLA Badges
+│   │   ├── dashboard/         # DashboardOverview, KPIs, SLA Badges, gráfico Recharts (chunk lazy)
 │   │   ├── equipments/        # EquipmentList/Form/Search, StatusConfig, PageContent
 │   │   └── service-orders/    # ServiceOrderList/Form, deadlines, badges, filtros, PageContent
 │   ├── lib/
@@ -113,7 +113,7 @@ manutflow/
 npm run dev              # Next.js em http://localhost:3000
 
 # Validação e Testes
-npm test                 # Executa os 267 testes (Vitest, single run)
+npm test                 # Executa os 273 testes (Vitest, single run)
 npm run test:watch       # Modo watch interativo
 npx tsc --noEmit         # Verificação estrita de tipagem
 npm run lint             # ESLint (flat config)
@@ -312,7 +312,7 @@ desde o passo 2.
 
 ### 10.2 Suíte automatizada
 
-- **26 arquivos / 267 testes**, todos passando, cobrindo:
+- **28 arquivos / 273 testes**, todos passando, cobrindo:
   - domínio: prazos, badges de SLA, config de status, redirect seguro, validação de UUID, retry;
   - API routes: auth, perfil, equipamentos, ordens, upload, dashboard e rate limit;
   - componentes: dashboard, toolbar, listas, tema.
